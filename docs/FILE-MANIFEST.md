@@ -8,7 +8,9 @@
 | `app/globals.css` | Complete design and responsive rules |
 | `components/site-shell.tsx` | Header, footer, mobile navigation, language switch |
 | `components/preview-forms.tsx` | Safe newsletter and contact demonstrations |
-| `components/admin-preview.tsx` | Non-persistent admin workflow prototype |
+| `components/admin-gateway.tsx` | Server-side administrator authentication and authorization |
+| `components/admin-console.tsx` | Secure bilingual content-management interface |
+| `components/admin-auth.tsx` | Administrator sign-in and sign-out controls |
 | `components/content-directory.tsx` | Functional filters, public listings, and empty states |
 | `components/language-switch.tsx` | Remembers the visitor's chosen language |
 | `lib/site-content.ts` | Central bilingual content and placeholders |
@@ -18,5 +20,6 @@
 | `vercel.json` | Vercel build configuration |
 | `.env.example` | Future service configuration template |
 | `docs/` | Setup, deployment, and personalization instructions |
+| `supabase/schema.sql` | Database tables, audit trail and row-level security policies |
 
 Framework support files and the lockfile should remain in the repository even when you do not edit them directly.

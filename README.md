@@ -7,7 +7,7 @@ A light, bilingual Uzbekâ€“English website foundation for a licensed private Kâ€
 - Uzbek and English public pages
 - About, academics, teachers, news, achievements, admissions, contact, legal, and privacy pages
 - Newsletter and contact demonstrations that do not transmit data
-- An admin workflow prototype without live authentication or a database
+- A Supabase-backed administrator login and bilingual content-management system, safely disabled until configured
 - Responsive, accessible navigation and forms
 - Uzbek-default entry with a remembered English preference
 - Functional public filters and publication-gated detail-page templates
@@ -22,3 +22,4 @@ Run `npm test` for the Sites build and route checks. Run `npm run build:vercel` 
 Before publishing, complete `docs/PERSONALIZATION-CHECKLIST.md`. Keep the temporary search-engine block until the legal identity and public content are approved.
 
 Setup instructions are in `docs/GITHUB-DESKTOP.md` and `docs/DEPLOYMENT.md`.
+The separate school database and administrator setup is documented in `docs/SUPABASE-SETUP.md`.

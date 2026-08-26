@@ -46,5 +46,23 @@ test("does not expose unpublished detail pages", async () => {
   for (const pathname of ["/uz/teachers/not-published", "/en/news/not-published", "/uz/achievements/not-published"]) {
     const response = await render(pathname);
     assert.equal(response.status, 404);
+    const html = await response.text();
+    if (pathname.startsWith("/en/")) {
+      assert.match(html, /Return to homepage/);
+      assert.doesNotMatch(html, /Bosh sahifaga qaytish/);
+    } else {
+      assert.match(html, /Bosh sahifaga qaytish/);
+      assert.doesNotMatch(html, /Return to homepage/);
+    }
+  }
+});
+
+test("shows a truthful localized CMS setup state without credentials", async () => {
+  for (const [pathname, expected] of [["/uz/admin", "Xavfsiz CMS ulanishga tayyor"], ["/en/admin", "Secure CMS ready to connect"]]) {
+    const response = await render(pathname);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, new RegExp(expected));
+    assert.doesNotMatch(html, /3 samples|3 namuna/);
   }
 });

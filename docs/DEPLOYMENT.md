@@ -8,7 +8,7 @@
 4. After deployment, test `/uz`, `/en`, the language switch, mobile menu, forms, and admin demonstration.
 5. Add the final domain only after the school approves its legal name and public launch.
 
-The contact form, newsletter, and admin screen are demonstrations. They need a database, authentication, and email service before they can store or send anything.
+The contact form and newsletter remain demonstrations. The administrator CMS becomes active only after the separate school Supabase project is configured according to `SUPABASE-SETUP.md`.
 
 Website DNS and Google Workspace email DNS are separate. Use the exact DNS records displayed by each provider.
 
