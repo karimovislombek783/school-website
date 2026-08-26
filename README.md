@@ -9,6 +9,9 @@ A light, bilingual Uzbekâ€“English website foundation for a licensed private Kâ€
 - Newsletter and contact demonstrations that do not transmit data
 - An admin workflow prototype without live authentication or a database
 - Responsive, accessible navigation and forms
+- Uzbek-default entry with a remembered English preference
+- Functional public filters and publication-gated detail-page templates
+- Honest empty states: drafts and missing records never appear publicly
 
 ## Run locally
 

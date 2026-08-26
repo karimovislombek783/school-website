@@ -9,6 +9,8 @@
 | `components/site-shell.tsx` | Header, footer, mobile navigation, language switch |
 | `components/preview-forms.tsx` | Safe newsletter and contact demonstrations |
 | `components/admin-preview.tsx` | Non-persistent admin workflow prototype |
+| `components/content-directory.tsx` | Functional filters, public listings, and empty states |
+| `components/language-switch.tsx` | Remembers the visitor's chosen language |
 | `lib/site-content.ts` | Central bilingual content and placeholders |
 | `public/favicon.svg` | Temporary school mark |
 | `public/robots.txt` | Temporary search-indexing block |

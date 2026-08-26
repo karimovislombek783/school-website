@@ -40,15 +40,18 @@ function AdminOverview({ lang }: { lang: Lang }) {
 }
 
 function AdminEditor({ lang, tab }: { lang: Lang; tab: string }) {
+  const [publicationStatus, setPublicationStatus] = useState<"draft" | "published">("draft");
   const title = tab === "teachers" ? (lang === "uz" ? "O‘qituvchi ma’lumoti" : "Teacher information") : tab === "news" ? (lang === "uz" ? "Yangilik qoralamasi" : "News draft") : tab === "achievements" ? (lang === "uz" ? "Yutuq ma’lumoti" : "Achievement information") : (lang === "uz" ? "Asosiy maktab ma’lumoti" : "Core school information");
   return (
     <div className="editor-card">
-      <div className="editor-card-title"><FileText size={20} /><h3>{title}</h3><span className="status-pill">Draft</span></div>
+      <div className="editor-card-title"><FileText size={20} /><h3>{title}</h3><span className={`status-pill ${publicationStatus === "published" ? "published" : ""}`}>{publicationStatus === "draft" ? (lang === "uz" ? "Qoralama" : "Draft") : (lang === "uz" ? "Nashr etiladi" : "Published")}</span></div>
       <div className="editor-grid">
         <label>{lang === "uz" ? "Sarlavha / ism (o‘zbekcha)" : "Title / name (Uzbek)"}<input placeholder="[Tasdiqlangan ma’lumot]" /></label>
         <label>{lang === "uz" ? "Sarlavha / ism (inglizcha)" : "Title / name (English)"}<input placeholder="[Verified information]" /></label>
         <label className="full-field">{lang === "uz" ? "Tavsif (o‘zbekcha)" : "Description (Uzbek)"}<textarea rows={5} /></label>
         <label className="full-field">{lang === "uz" ? "Tavsif (inglizcha)" : "Description (English)"}<textarea rows={5} /></label>
+        <label>{lang === "uz" ? "Ko‘rinish holati" : "Visibility status"}<select value={publicationStatus} onChange={(event) => setPublicationStatus(event.target.value as "draft" | "published")}><option value="draft">{lang === "uz" ? "Qoralama — ommaga ko‘rinmaydi" : "Draft — hidden from the public"}</option><option value="published">{lang === "uz" ? "Nashr etilgan — ommaga ko‘rinadi" : "Published — visible publicly"}</option></select></label>
+        <p className="publication-note">{lang === "uz" ? "Faqat tasdiqlangan va “Nashr etilgan” holatidagi yozuvlar ommaviy saytda paydo bo‘ladi." : "Only approved records explicitly marked Published appear on the public website."}</p>
       </div>
     </div>
   );

@@ -1,27 +1,55 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-  ArrowRight, Award, BookOpen, Building2, CalendarDays, CheckCircle2,
+  ArrowRight, BookOpen, Building2, CheckCircle2,
   GraduationCap, HeartHandshake, Mail, MapPin, Phone,
   Scale, ShieldCheck, Sparkles, Target, Users,
 } from "lucide-react";
 import { AdminPreview } from "@/components/admin-preview";
+import { AchievementDirectory, NewsDirectory, TeacherDirectory } from "@/components/content-directory";
 import { ContactForm, NewsletterForm } from "@/components/preview-forms";
 import { SiteFooter, SiteHeader } from "@/components/site-shell";
-import { copy, isLang, Lang, pillars, sampleNews, sampleTeachers, siteIdentity } from "@/lib/site-content";
+import { copy, isLang, Lang, pillars, publishedAchievements, publishedNews, publishedTeachers, siteIdentity } from "@/lib/site-content";
 
 const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "admin"];
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string; slug?: string[] }> }): Promise<Metadata> {
+  const { lang: rawLang, slug } = await params;
+  if (!isLang(rawLang)) return {};
+  const lang = rawLang as Lang;
+  const page = slug?.[0] ?? "home";
+  const detail = slug?.[1];
+  if (detail && page === "teachers") {
+    const item = publishedTeachers.find((record) => record.slug === detail);
+    if (item) return { title: item.name[lang], description: item.biography[lang] };
+  }
+  if (detail && page === "news") {
+    const item = publishedNews.find((record) => record.slug === detail);
+    if (item) return { title: item.title[lang], description: item.excerpt[lang] };
+  }
+  if (detail && page === "achievements") {
+    const item = publishedAchievements.find((record) => record.slug === detail);
+    if (item) return { title: item.title[lang], description: item.summary[lang] };
+  }
+  if (page === "home") return { title: copy[lang].home.title, description: copy[lang].home.intro };
+  if (page === "admin") return { title: lang === "uz" ? "Boshqaruv namunasi" : "Admin preview", robots: { index: false, follow: false } };
+  const pageCopy = copy[lang].pages[page as keyof typeof copy[typeof lang]["pages"]];
+  return pageCopy ? { title: pageCopy.title, description: pageCopy.intro } : {};
+}
 
 export default async function SchoolPage({ params }: { params: Promise<{ lang: string; slug?: string[] }> }) {
   const { lang: rawLang, slug } = await params;
   if (!isLang(rawLang)) notFound();
   const lang = rawLang as Lang;
   const page = slug?.[0] ?? "home";
-  if (!validPages.includes(page) || (slug && slug.length > 1)) notFound();
+  if (!validPages.includes(page) || (slug && slug.length > 2)) notFound();
+  const detailSlug = slug?.[1];
+  if (detailSlug && !["teachers", "news", "achievements"].includes(page)) notFound();
   return (
     <div className="site-page">
-      <SiteHeader lang={lang} current={page} />
-      {page === "home" ? <HomePage lang={lang} /> : page === "admin" ? <AdminPage lang={lang} /> : <InnerPage lang={lang} page={page} />}
+      <SiteHeader lang={lang} current={slug?.join("/") ?? page} />
+      {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} /> : page === "home" ? <HomePage lang={lang} /> : page === "admin" ? <AdminPage lang={lang} /> : <InnerPage lang={lang} page={page} />}
       <SiteFooter lang={lang} />
     </div>
   );
@@ -119,21 +147,18 @@ function AcademicsContent({ lang }: { lang: Lang }) {
 }
 
 function TeachersContent({ lang }: { lang: Lang }) {
-  const t = copy[lang];
-  return <section className="content-section page-content"><div className="directory-toolbar"><span>{lang === "uz" ? "Bo‘lim bo‘yicha filtrlash" : "Filter by department"}</span><button className="filter-chip active">{lang === "uz" ? "Barchasi" : "All"}</button><button className="filter-chip">STEM</button><button className="filter-chip">{lang === "uz" ? "Tillar" : "Languages"}</button></div><div className="teacher-grid">{sampleTeachers.map((teacher, i) => <article className="teacher-card" key={i}><div className="teacher-avatar">{teacher.initials}</div><span>{lang === "uz" ? teacher.subjectUz : teacher.subjectEn}</span><h2>{t.sections.verifiedLater}</h2><p>{lang === "uz" ? teacher.roleUz : teacher.roleEn}</p><small>{lang === "uz" ? "Biografiya va malaka keyin qo‘shiladi" : "Biography and qualifications will be added later"}</small></article>)}</div></section>;
+  return <section className="content-section page-content"><TeacherDirectory lang={lang} items={publishedTeachers} /></section>;
 }
 
 function NewsGrid({ lang, limit }: { lang: Lang; limit?: number }) {
-  const items = sampleNews[lang].slice(0, limit);
-  return <div className="news-grid">{items.map((item, index) => <article className="news-card" key={item.title}><div className={`news-art news-art-${index + 1}`}><NewspaperIcon index={index} /></div><div className="news-body"><div className="news-meta"><span>{item.category}</span><time>{item.date}</time></div><h3>{item.title}</h3><p>{item.excerpt}</p><span className="text-link">{copy[lang].sections.learnMore}<ArrowRight size={16} /></span></div></article>)}</div>;
+  return <NewsDirectory lang={lang} items={publishedNews} limit={limit} />;
 }
 
-function NewspaperIcon({ index }: { index: number }) { const Icon = [CalendarDays, Award, Mail][index] ?? CalendarDays; return <Icon size={38} />; }
-function NewsContent({ lang }: { lang: Lang }) { return <section className="content-section page-content"><div className="directory-toolbar"><button className="filter-chip active">{lang === "uz" ? "Barcha yangiliklar" : "All news"}</button><button className="filter-chip">{lang === "uz" ? "Yutuqlar" : "Achievements"}</button><button className="filter-chip">{lang === "uz" ? "E’lonlar" : "Announcements"}</button></div><NewsGrid lang={lang} /></section>; }
+function NewsContent({ lang }: { lang: Lang }) { return <section className="content-section page-content"><NewsGrid lang={lang} /></section>; }
 
 function AchievementsContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
-  return <section className="content-section page-content"><div className="empty-feature"><Award size={40} /><div><p className="eyebrow">{isUz ? "Tasdiqlangan yutuqlar" : "Verified achievements"}</p><h2>{isUz ? "Haqiqiy natijalar uchun tayyor arxiv" : "A structured archive for real results"}</h2><p>{isUz ? "Yutuq nomi, oluvchi, tashkilotchi, sana, manba va ruxsat etilgan sertifikat tasviri admin panel orqali joylashtiriladi." : "The title, recipient, organiser, date, source and permitted certificate image will be managed through the admin system."}</p></div></div><div className="process-grid"><article><strong>01</strong><h3>{isUz ? "Tekshirish" : "Verify"}</h3><p>{isUz ? "Natija va manba tasdiqlanadi." : "Confirm the result and source."}</p></article><article><strong>02</strong><h3>{isUz ? "Ruxsat" : "Permission"}</h3><p>{isUz ? "Shaxsiy ma’lumot va rasmga ruxsat olinadi." : "Obtain permission for personal data and imagery."}</p></article><article><strong>03</strong><h3>{isUz ? "Nashr" : "Publish"}</h3><p>{isUz ? "Ikki tilda ochiq va aniq e’lon qilinadi." : "Publish clearly in both languages."}</p></article></div></section>;
+  return <section className="content-section page-content"><AchievementDirectory lang={lang} items={publishedAchievements} /><div className="process-grid"><article><strong>01</strong><h3>{isUz ? "Tekshirish" : "Verify"}</h3><p>{isUz ? "Natija va manba tasdiqlanadi." : "Confirm the result and source."}</p></article><article><strong>02</strong><h3>{isUz ? "Ruxsat" : "Permission"}</h3><p>{isUz ? "Shaxsiy ma’lumot va rasmga ruxsat olinadi." : "Obtain permission for personal data and imagery."}</p></article><article><strong>03</strong><h3>{isUz ? "Nashr" : "Publish"}</h3><p>{isUz ? "Ikki tilda ochiq va aniq e’lon qilinadi." : "Publish clearly in both languages."}</p></article></div></section>;
 }
 
 function AdmissionsContent({ lang }: { lang: Lang }) {
@@ -157,6 +182,25 @@ function PrivacyContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
   const items = isUz ? [["Formalar", "Aloqa va obuna ma’lumotlari faqat ko‘rsatilgan maqsad uchun ishlatiladi."], ["Fotosuratlar", "O‘quvchilar va xodimlar suratlari faqat tegishli ruxsat bilan e’lon qilinadi."], ["Tanlov", "Obunani istalgan vaqtda bekor qilish va ma’lumotni tuzatishni so‘rash mumkin."], ["Xavfsizlik", "Administrator huquqlari vazifaga qarab cheklanadi va muhim harakatlar qayd etiladi."]] : [["Forms", "Contact and subscription data is used only for the stated purpose."], ["Photography", "Images of students and staff are published only with appropriate permission."], ["Choice", "Subscribers can unsubscribe and people may request correction of their information."], ["Security", "Administrative access is limited by role and important actions are recorded."]];
   return <section className="content-section page-content"><div className="info-grid">{items.map(([title, body], i) => { const Icon = [Mail, Users, CheckCircle2, ShieldCheck][i]; return <article key={title}><Icon /><h2>{title}</h2><p>{body}</p></article>; })}</div></section>;
+}
+
+function DetailPage({ lang, page, slug }: { lang: Lang; page: string; slug: string }) {
+  if (page === "teachers") {
+    const teacher = publishedTeachers.find((item) => item.slug === slug);
+    if (!teacher) notFound();
+    return <main><section className="page-hero compact"><p className="eyebrow">{teacher.role[lang]}</p><h1>{teacher.name[lang]}</h1><p>{teacher.biography[lang]}</p></section><section className="content-section page-content"><div className="profile-detail"><div className="teacher-avatar large">{teacher.initials}</div><div><h2>{lang === "uz" ? "Malaka va tajriba" : "Qualifications and experience"}</h2>{teacher.qualifications[lang].length ? <ul className="detail-list">{teacher.qualifications[lang].map((item) => <li key={item}>{item}</li>)}</ul> : <p>{copy[lang].sections.verifiedLater}</p>}</div></div><Link className="text-link back-link" href={`/${lang}/teachers`}>← {lang === "uz" ? "Jamoaga qaytish" : "Back to the team"}</Link></section></main>;
+  }
+  if (page === "news") {
+    const item = publishedNews.find((record) => record.slug === slug);
+    if (!item) notFound();
+    return <main><article className="article-detail"><p className="eyebrow">{item.date}</p><h1>{item.title[lang]}</h1><p className="article-lead">{item.excerpt[lang]}</p>{item.body[lang].map((paragraph) => <p key={paragraph}>{paragraph}</p>)}<Link className="text-link back-link" href={`/${lang}/news`}>← {lang === "uz" ? "Yangiliklarga qaytish" : "Back to news"}</Link></article></main>;
+  }
+  if (page === "achievements") {
+    const item = publishedAchievements.find((record) => record.slug === slug);
+    if (!item) notFound();
+    return <main><article className="article-detail"><p className="eyebrow">{item.date}</p><h1>{item.title[lang]}</h1><p className="article-lead">{item.recipient[lang]}</p><p>{item.summary[lang]}</p><div className="legal-warning"><ShieldCheck /><div><h2>{lang === "uz" ? "Tasdiqlash manbasi" : "Verification source"}</h2><p>{item.source}</p></div></div><Link className="text-link back-link" href={`/${lang}/achievements`}>← {lang === "uz" ? "Yutuqlarga qaytish" : "Back to achievements"}</Link></article></main>;
+  }
+  notFound();
 }
 
 function AdminPage({ lang }: { lang: Lang }) {

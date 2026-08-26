@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Globe2, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { copy, Lang, siteIdentity } from "@/lib/site-content";
+import { LanguageSwitch } from "@/components/language-switch";
 
 const navRoutes = ["about", "academics", "teachers", "news", "achievements", "admissions", "contact"] as const;
 
@@ -30,15 +31,13 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
           </Link>
           <nav className="desktop-nav" aria-label="Primary navigation">
             {navRoutes.map((route) => (
-              <Link key={route} className={current === route ? "active" : ""} href={`/${lang}/${route}`}>
+              <Link key={route} className={current.split("/")[0] === route ? "active" : ""} href={`/${lang}/${route}`}>
                 {t.nav[route]}
               </Link>
             ))}
           </nav>
           <div className="header-actions">
-            <Link className="language-link" href={alternatePath}>
-              <Globe2 size={17} aria-hidden="true" /> {t.alternateLanguage}
-            </Link>
+            <LanguageSwitch lang={lang} href={alternatePath} label={t.alternateLanguage} />
             <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle navigation">
               {open ? <X /> : <Menu />}
             </button>
@@ -50,7 +49,7 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
             {navRoutes.map((route) => (
               <Link key={route} href={`/${lang}/${route}`} onClick={() => setOpen(false)}>{t.nav[route]}</Link>
             ))}
-            <Link href={alternatePath} onClick={() => setOpen(false)}>{t.alternateLanguage}</Link>
+            <span onClick={() => setOpen(false)}><LanguageSwitch mobile lang={lang} href={alternatePath} label={t.alternateLanguage} /></span>
           </nav>
         )}
       </header>

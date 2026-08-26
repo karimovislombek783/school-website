@@ -85,24 +85,48 @@ export const pillars = {
   ],
 };
 
-export const sampleTeachers = [
-  { initials: "DR", roleUz: "Direktor", roleEn: "Director", subjectUz: "Rahbariyat", subjectEn: "Leadership" },
-  { initials: "OT", roleUz: "O‘qituvchi", roleEn: "Teacher", subjectUz: "Aniq fanlar", subjectEn: "STEM" },
-  { initials: "OT", roleUz: "O‘qituvchi", roleEn: "Teacher", subjectUz: "Tillar", subjectEn: "Languages" },
-  { initials: "OT", roleUz: "O‘qituvchi", roleEn: "Teacher", subjectUz: "Ijtimoiy fanlar", subjectEn: "Social sciences" },
-];
+export type PublicationStatus = "draft" | "published";
 
-export const sampleNews = {
-  uz: [
-    { date: "[Sana]", category: "Maktab yangiliklari", title: "Yangi o‘quv yiliga tayyorgarlik", excerpt: "Tasdiqlangan yangilik uchun qisqa mazmun shu yerda joylashadi." },
-    { date: "[Sana]", category: "O‘quvchilar yutuqlari", title: "O‘quvchilarimizning yangi natijalari", excerpt: "Musobaqa va tanlov natijalari manbasi bilan e’lon qilinadi." },
-    { date: "[Sana]", category: "E’lon", title: "Maktab tadbiri haqida e’lon", excerpt: "Ota-onalar va o‘quvchilar uchun kerakli ma’lumotlar." },
-  ],
-  en: [
-    { date: "[Date]", category: "School news", title: "Preparing for the new academic year", excerpt: "A short summary of a verified school update will appear here." },
-    { date: "[Date]", category: "Student achievement", title: "Celebrating new student results", excerpt: "Competition results will be published with an appropriate source." },
-    { date: "[Date]", category: "Announcement", title: "Upcoming school event", excerpt: "Useful information for students and families." },
-  ],
+export type TeacherRecord = {
+  slug: string;
+  status: PublicationStatus;
+  department: "leadership" | "stem" | "languages" | "social-sciences";
+  name: Record<Lang, string>;
+  role: Record<Lang, string>;
+  biography: Record<Lang, string>;
+  qualifications: Record<Lang, string[]>;
+  initials: string;
 };
+
+export type NewsRecord = {
+  slug: string;
+  status: PublicationStatus;
+  category: "news" | "announcement";
+  date: string;
+  title: Record<Lang, string>;
+  excerpt: Record<Lang, string>;
+  body: Record<Lang, string[]>;
+};
+
+export type AchievementRecord = {
+  slug: string;
+  status: PublicationStatus;
+  date: string;
+  title: Record<Lang, string>;
+  recipient: Record<Lang, string>;
+  summary: Record<Lang, string>;
+  source: string;
+};
+
+// Public pages read only published records. These arrays remain empty until
+// school-approved information is added; templates therefore never become
+// fake public profiles or posts.
+export const teachers: TeacherRecord[] = [];
+export const news: NewsRecord[] = [];
+export const achievements: AchievementRecord[] = [];
+
+export const publishedTeachers = teachers.filter((item) => item.status === "published");
+export const publishedNews = news.filter((item) => item.status === "published");
+export const publishedAchievements = achievements.filter((item) => item.status === "published");
 
 export function isLang(value: string): value is Lang { return value === "uz" || value === "en"; }

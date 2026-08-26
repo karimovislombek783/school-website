@@ -35,3 +35,16 @@ test("renders both language routes", async () => {
     assert.match(await response.text(), new RegExp(expected, "i"));
   }
 });
+
+test("defaults the root route to Uzbek", async () => {
+  const response = await render("/");
+  assert.ok([307, 308].includes(response.status));
+  assert.equal(new URL(response.headers.get("location"), "http://localhost").pathname, "/uz");
+});
+
+test("does not expose unpublished detail pages", async () => {
+  for (const pathname of ["/uz/teachers/not-published", "/en/news/not-published", "/uz/achievements/not-published"]) {
+    const response = await render(pathname);
+    assert.equal(response.status, 404);
+  }
+});
