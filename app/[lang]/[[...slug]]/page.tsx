@@ -73,20 +73,21 @@ function HomePage({ lang, news }: { lang: Lang; news: PublishedContent["news"] }
           </div>
           <div className="hero-trust"><ShieldCheck size={21} /><span>{lang === "uz" ? "Litsenziya № 531978 • I–XI sinflar" : "Licence № 531978 • Grades 1–11"}</span></div>
         </div>
-        <div className="hero-visual" role="img" aria-label={t.sections.placeholderPhoto}>
-          <div className="photo-placeholder">
-            <Building2 size={46} />
-            <span>{lang === "uz" ? "I–XI sinflar" : "Grades 1–11"}</span>
-            <small>{lang === "uz" ? "Boshlang‘ich • Tayanch o‘rta • O‘rta ta’lim" : "Primary • Basic secondary • Secondary education"}</small>
+        <div className="hero-visual institutional-visual" role="img" aria-label={lang === "uz" ? "Maktabning rasmiy ta’lim profili" : "Official school education profile"}>
+          <div className="credential-card">
+            <div className="credential-heading"><span className="credential-seal">IEG</span><div><small>{lang === "uz" ? "Nodavlat ta’lim muassasasi" : "Non-state educational institution"}</small><strong>IZZATBEK-EDU-GROUP</strong></div></div>
+            <div className="credential-body"><Building2 size={54} /><div><span>{lang === "uz" ? "Hazorasp tumani" : "Hazorasp District"}</span><small>{lang === "uz" ? "Xorazm viloyati" : "Khorezm Region"}</small></div></div>
+            <div className="credential-footer"><div><small>{lang === "uz" ? "Litsenziya" : "Licence"}</small><strong>№ {siteIdentity.license}</strong></div><div><small>{lang === "uz" ? "Amal qilish muddati" : "Validity"}</small><strong>{lang === "uz" ? "Cheksiz" : "Unlimited"}</strong></div></div>
           </div>
-          <div className="hero-note"><span>{t.home.trustLabel}</span><strong>{siteIdentity.license}</strong></div>
+          <div className="grade-band"><div><strong>I–IV</strong><span>{lang === "uz" ? "Boshlang‘ich" : "Primary"}</span></div><div><strong>V–IX</strong><span>{lang === "uz" ? "Tayanch o‘rta" : "Basic secondary"}</span></div><div><strong>X–XI</strong><span>{lang === "uz" ? "O‘rta" : "Secondary"}</span></div></div>
         </div>
       </section>
 
-      <section className="trust-section">
-        <div><p className="eyebrow">{t.home.trustLabel}</p><h2>{t.home.trustTitle}</h2></div>
-        <p>{t.home.trustBody}</p>
-        <Link className="text-link" href={`/${lang}/legal`}>{t.sections.learnMore}<ArrowRight size={17} /></Link>
+      <section className="trust-section facts-ribbon">
+        <div><strong>1–11</strong><span>{lang === "uz" ? "Ta’lim sinflari" : "Grade levels"}</span></div>
+        <div><strong>3</strong><span>{lang === "uz" ? "Ta’lim bosqichi" : "Education stages"}</span></div>
+        <div><strong>2024</strong><span>{lang === "uz" ? "Litsenziya kuchga kirgan" : "Licence effective"}</span></div>
+        <Link className="text-link" href={`/${lang}/legal`}>{lang === "uz" ? "Rasmiy ma’lumot" : "Official information"}<ArrowRight size={17} /></Link>
       </section>
 
       <section className="content-section">
@@ -99,11 +100,14 @@ function HomePage({ lang, news }: { lang: Lang; news: PublishedContent["news"] }
         </div>
       </section>
 
-      <section className="content-section soft-section">
+      {news.length > 0 ? <section className="content-section soft-section">
         <div className="section-heading"><div><p className="eyebrow">{t.nav.news}</p><h2>{t.home.latestTitle}</h2></div><p>{t.home.latestIntro}</p></div>
         <NewsGrid lang={lang} items={news} limit={3} />
         <Link className="text-link section-link" href={`/${lang}/news`}>{t.sections.viewAll}<ArrowRight size={17} /></Link>
-      </section>
+      </section> : <section className="institution-section">
+        <div className="institution-copy"><p className="eyebrow">{lang === "uz" ? "Maktab profili" : "School profile"}</p><h2>{lang === "uz" ? "Rasmiy, aniq va tekshiriladigan ma’lumot" : "Official, clear and verifiable information"}</h2><p>{lang === "uz" ? "Maktab haqidagi ma’lumotlar litsenziya hujjatlari va rahbariyat tomonidan tasdiqlangan manbalar asosida e’lon qilinadi." : "Information about the school is published from licence documents and sources approved by school leadership."}</p><Link className="button button-secondary" href={`/${lang}/legal`}>{lang === "uz" ? "Litsenziya ma’lumotlari" : "Licence information"}<ArrowRight size={18} /></Link></div>
+        <div className="institution-facts"><article><span>01</span><div><strong>{lang === "uz" ? "Boshlang‘ich ta’lim" : "Primary education"}</strong><small>{lang === "uz" ? "I–IV sinflar" : "Grades 1–4"}</small></div></article><article><span>02</span><div><strong>{lang === "uz" ? "Tayanch o‘rta ta’lim" : "Basic secondary education"}</strong><small>{lang === "uz" ? "V–IX sinflar" : "Grades 5–9"}</small></div></article><article><span>03</span><div><strong>{lang === "uz" ? "O‘rta ta’lim" : "Secondary education"}</strong><small>{lang === "uz" ? "X–XI sinflar" : "Grades 10–11"}</small></div></article></div>
+      </section>}
 
       <section className="newsletter-section official-contact-band">
         <div><p className="eyebrow">{lang === "uz" ? "Rasmiy aloqa" : "Official contact"}</p><h2>{lang === "uz" ? "Maktab bilan bog‘laning" : "Contact the school"}</h2><p>{siteIdentity.email}</p></div>

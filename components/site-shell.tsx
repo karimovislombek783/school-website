@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Mail, Menu, ShieldCheck, X } from "lucide-react";
 import { copy, Lang, siteIdentity } from "@/lib/site-content";
 import { LanguageSwitch } from "@/components/language-switch";
 
@@ -17,13 +17,13 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
   return (
     <>
       <div className="preview-strip official-strip">
-        <strong>{t.development}</strong>
-        <span>{t.developmentNote}</span>
+        <span><ShieldCheck size={14} /> {lang === "uz" ? "Litsenziya № 531978" : "Licence № 531978"}</span>
+        <a href={`mailto:${siteIdentity.email}`}><Mail size={14} /> {siteIdentity.email}</a>
       </div>
       <header className="site-header">
         <div className="header-inner">
           <Link href={`/${lang}`} className="site-brand" aria-label={`${siteIdentity.legalName} — ${t.nav.home}`}>
-            <span className="brand-mark">I</span>
+            <span className="brand-mark">IEG</span>
             <span className="brand-copy">
               <strong>{siteIdentity.legalName}</strong>
               <small>{siteIdentity.domain}</small>
@@ -38,6 +38,7 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
           </nav>
           <div className="header-actions">
             <LanguageSwitch lang={lang} href={alternatePath} label={t.alternateLanguage} />
+            <Link className="header-admissions" href={`/${lang}/admissions`}>{t.nav.admissions}</Link>
             <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle navigation">
               {open ? <X /> : <Menu />}
             </button>
@@ -63,7 +64,7 @@ export function SiteFooter({ lang }: { lang: Lang }) {
     <footer className="site-footer">
       <div className="footer-grid">
         <div>
-          <div className="site-brand footer-brand"><span className="brand-mark">I</span><strong>{siteIdentity.legalName}</strong></div>
+          <div className="site-brand footer-brand"><span className="brand-mark">IEG</span><strong>{siteIdentity.legalName}</strong></div>
           <p>{t.footer.description}</p>
         </div>
         <div>

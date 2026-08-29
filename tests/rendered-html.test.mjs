@@ -26,7 +26,7 @@ async function render(pathname) {
 
 test("renders both language routes", async () => {
   for (const [pathname, expected] of [
-    ["/uz", "Maktab hayoti"],
+    ["/uz", "Maktab profili"],
     ["/en/teachers", "Professionals who support every learner"],
   ]) {
     const response = await render(pathname);
