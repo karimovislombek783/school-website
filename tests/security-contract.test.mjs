@@ -36,3 +36,11 @@ test("browser code does not request a service-role secret", () => {
     assert.doesNotMatch(source, /service[_-]?role/i);
   }
 });
+
+test("CMS editor is on-demand and fully language-aware", () => {
+  assert.match(consoleSource, /const \[editorOpen, setEditorOpen\] = useState\(false\)/);
+  assert.match(consoleSource, /editorOpen && <RecordForm/);
+  assert.match(consoleSource, /Qoralama/);
+  assert.match(consoleSource, /Nashr qilingan/);
+  assert.match(gateway, /<LanguageSwitch/);
+});

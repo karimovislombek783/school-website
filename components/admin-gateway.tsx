@@ -1,6 +1,7 @@
 import { AdminConsole, AdminRecord, AuditRecord } from "@/components/admin-console";
 import { AdminLogin, AdminSignOut } from "@/components/admin-auth";
 import { AdminMfa } from "@/components/admin-mfa";
+import { LanguageSwitch } from "@/components/language-switch";
 import { Lang } from "@/lib/site-content";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import { connection } from "next/server";
@@ -14,11 +15,16 @@ export async function AdminGateway({ lang }: { lang: Lang }) {
   const { data: membership } = await client.from("admin_users").select("role,active").eq("user_id", user.id).maybeSingle();
   if (!membership?.active) return <section className="admin-setup"><h2>{lang === "uz" ? "Ruxsat berilmagan" : "Access not authorized"}</h2><p>{lang === "uz" ? "Hisob tasdiqlangan maktab administratorlari ro‘yxatida yo‘q." : "This account is not on the approved school administrator list."}</p><AdminSignOut lang={lang} /></section>;
   const { data: assurance } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (assurance?.currentLevel !== "aal2") return <><div className="admin-session"><span>{user.email} · {membership.role}</span><AdminSignOut lang={lang} /></div><AdminMfa lang={lang} /></>;
+  if (assurance?.currentLevel !== "aal2") return <><AdminSession lang={lang} email={user.email ?? ""} role={membership.role} /><AdminMfa lang={lang} /></>;
   const { data, error } = await client.from("content_items").select("*").order("updated_at", { ascending: false });
   if (error) return <section className="admin-setup"><h2>{lang === "uz" ? "CMS ma’lumotlarini yuklab bo‘lmadi" : "Could not load CMS data"}</h2><p>{lang === "uz" ? "Birozdan keyin qayta urinib ko‘ring yoki tizim egasiga xabar bering." : "Try again shortly or notify the system owner."}</p><AdminSignOut lang={lang} /></section>;
   const { data: audit } = membership.role === "owner" || membership.role === "administrator"
     ? await client.from("audit_log").select("id,actor_id,action,record_id,record_type,occurred_at").order("occurred_at", { ascending: false }).limit(25)
     : { data: [] };
-  return <><div className="admin-session"><span>{user.email} · {membership.role}</span><AdminSignOut lang={lang} /></div><AdminConsole lang={lang} initialRecords={(data ?? []) as AdminRecord[]} initialAudit={(audit ?? []) as AuditRecord[]} role={membership.role} currentUserId={user.id} /></>;
+  return <><AdminSession lang={lang} email={user.email ?? ""} role={membership.role} /><AdminConsole lang={lang} initialRecords={(data ?? []) as AdminRecord[]} initialAudit={(audit ?? []) as AuditRecord[]} role={membership.role} currentUserId={user.id} /></>;
+}
+
+function AdminSession({ lang, email, role }: { lang: Lang; email: string; role: string }) {
+  const labels: Record<string, { uz: string; en: string }> = { owner: { uz: "Tizim egasi", en: "Owner" }, administrator: { uz: "Administrator", en: "Administrator" }, editor: { uz: "Muharrir", en: "Editor" }, writer: { uz: "Muallif", en: "Writer" } };
+  return <div className="admin-session"><span>{email} · {labels[role]?.[lang] ?? role}</span><div className="admin-session-actions"><LanguageSwitch lang={lang} href={`/${lang === "uz" ? "en" : "uz"}/admin`} label={lang === "uz" ? "English" : "O‘zbekcha"} /><AdminSignOut lang={lang} /></div></div>;
 }

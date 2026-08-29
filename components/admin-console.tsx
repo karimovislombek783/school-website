@@ -24,6 +24,7 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
   const [records, setRecords] = useState(initialRecords);
   const [type, setType] = useState<AdminRecord["type"]>("teacher");
   const [editing, setEditing] = useState<AdminRecord | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const visible = useMemo(() => records.filter((item) => item.type === type), [records, type]);
@@ -91,7 +92,7 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
 
     const saved = result.data as AdminRecord;
     setRecords((current) => editing ? current.map((item) => item.id === saved.id ? saved : item) : [saved, ...current]);
-    setEditing(null); formElement.reset(); setBusy(false);
+    setEditing(null); setEditorOpen(false); formElement.reset(); setBusy(false);
     setMessage(lang === "uz" ? "Yozuv xavfsiz saqlandi." : "Record saved securely.");
   }
 
@@ -103,50 +104,90 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
     if (error) setMessage(friendlyError(error, lang));
     else {
       setRecords((current) => current.filter((item) => item.id !== record.id));
-      if (editing?.id === record.id) setEditing(null);
+      if (editing?.id === record.id) { setEditing(null); setEditorOpen(false); }
       setMessage(lang === "uz" ? "Yozuv o‘chirildi." : "Record deleted.");
     }
     setBusy(false);
   }
 
   return <section className="cms-console">
-    <div className="cms-summary">{(["teacher", "news", "achievement"] as const).map((kind) => { const Icon = kind === "teacher" ? Users : kind === "news" ? Newspaper : GraduationCap; const count = counts(kind); return <article key={kind}><Icon /><span>{kind === "teacher" ? (lang === "uz" ? "O‘qituvchilar" : "Teachers") : kind === "news" ? (lang === "uz" ? "Yangiliklar" : "News") : (lang === "uz" ? "Yutuqlar" : "Achievements")}</span><strong>{count.published} {lang === "uz" ? "nashrda" : "published"} · {count.drafts} {lang === "uz" ? "qoralama" : "drafts"}</strong></article>; })}</div>
-    <div className="cms-tabs">{(["teacher", "news", "achievement"] as const).map((kind) => <button key={kind} className={`filter-chip ${type === kind ? "active" : ""}`} onClick={() => { setType(kind); setEditing(null); }}>{kind === "teacher" ? (lang === "uz" ? "O‘qituvchilar" : "Teachers") : kind === "news" ? (lang === "uz" ? "Yangiliklar" : "News") : (lang === "uz" ? "Yutuqlar" : "Achievements")}</button>)}</div>
-    <div className="cms-layout"><div className="cms-list"><div className="cms-list-heading"><h2>{lang === "uz" ? "Yozuvlar" : "Records"}</h2><button className="button button-secondary" onClick={() => setEditing(null)}><Plus size={16} />{lang === "uz" ? "Yangi" : "New"}</button></div>
-      {visible.length ? visible.map((record) => <article key={record.id}><div><span className={`status-pill ${record.status === "published" ? "published" : ""}`}>{record.status}</span><h3>{record.title_uz}</h3><small>/{record.slug}</small></div><div>
-        {canEdit(record) && <button aria-label={lang === "uz" ? "Tahrirlash" : "Edit"} onClick={() => setEditing(record)}><FilePenLine /></button>}
+    <div className="cms-summary">{(["teacher", "news", "achievement"] as const).map((kind) => { const Icon = kind === "teacher" ? Users : kind === "news" ? Newspaper : GraduationCap; const count = counts(kind); return <article key={kind}><Icon /><span>{typeLabel(kind, lang)}</span><strong>{count.published} {lang === "uz" ? "nashrda" : "published"} · {count.drafts} {lang === "uz" ? "qoralama" : "drafts"}</strong></article>; })}</div>
+    <div className="cms-tabs">{(["teacher", "news", "achievement"] as const).map((kind) => <button key={kind} className={`filter-chip ${type === kind ? "active" : ""}`} onClick={() => { setType(kind); setEditing(null); setEditorOpen(false); }}>{kind === "teacher" ? (lang === "uz" ? "O‘qituvchilar" : "Teachers") : kind === "news" ? (lang === "uz" ? "Yangiliklar" : "News") : (lang === "uz" ? "Yutuq va sertifikatlar" : "Achievements & certificates")}</button>)}</div>
+    <div className={`cms-layout ${editorOpen ? "editor-open" : ""}`}><div className="cms-list"><div className="cms-list-heading"><div><p className="cms-kicker">{typeLabel(type, lang)}</p><h2>{lang === "uz" ? "Barcha yozuvlar" : "All records"}</h2></div><button className="button button-primary" onClick={() => { setEditing(null); setEditorOpen(true); }}><Plus size={16} />{newLabel(type, lang)}</button></div>
+      {visible.length ? visible.map((record) => <article key={record.id}><div><span className={`status-pill ${record.status === "published" ? "published" : ""}`}>{record.status === "published" ? (lang === "uz" ? "Nashrda" : "Published") : (lang === "uz" ? "Qoralama" : "Draft")}</span><h3>{record.title_uz}</h3><small>/{record.slug}</small></div><div>
+        {canEdit(record) && <button aria-label={lang === "uz" ? "Tahrirlash" : "Edit"} onClick={() => { setEditing(record); setEditorOpen(true); }}><FilePenLine /></button>}
         {canDelete(record) && <AlertDialog><AlertDialogTrigger asChild><button aria-label={lang === "uz" ? "O‘chirish" : "Delete"}><Trash2 /></button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{lang === "uz" ? "Yozuvni butunlay o‘chirasizmi?" : "Permanently delete this record?"}</AlertDialogTitle><AlertDialogDescription>{lang === "uz" ? "Bu amalni ortga qaytarib bo‘lmaydi. Avval qoralama yoki nashr holatini tekshiring." : "This action cannot be undone. Check the draft or publication state first."}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{lang === "uz" ? "Bekor qilish" : "Cancel"}</AlertDialogCancel><AlertDialogAction variant="destructive" onClick={() => void remove(record)}>{lang === "uz" ? "O‘chirish" : "Delete"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
-      </div></article>) : <p className="cms-empty">{lang === "uz" ? "Hali yozuv yo‘q." : "No records yet."}</p>}</div>
-      <RecordForm key={editing?.id ?? `new-${type}`} lang={lang} type={type} record={editing} role={role} busy={busy} onSubmit={save} />
+      </div></article>) : <div className="cms-empty"><Plus size={26} /><strong>{emptyLabel(type, lang)}</strong><span>{lang === "uz" ? "Birinchi ma’lumotni qo‘shish uchun yuqoridagi tugmani bosing." : "Use the button above when you are ready to add the first record."}</span></div>}</div>
+      {editorOpen && <RecordForm key={editing?.id ?? `new-${type}`} lang={lang} type={type} record={editing} role={role} busy={busy} onSubmit={save} onCancel={() => { setEditing(null); setEditorOpen(false); }} />}
     </div>
     {message && <p className="cms-message" role="status">{message}</p>}
-    <div className="admin-notice"><ShieldCheck /><span>{lang === "uz" ? "Ommaviy saytda faqat “published” holatidagi yozuvlar ko‘rinadi. Yozuvchi faqat o‘z qoralamalarini boshqaradi; nashr va o‘chirish vakolatlari rolga qarab cheklangan." : "Only published records appear publicly. Writers manage only their own drafts; publishing and deletion are restricted by role."}</span></div>
-    {(role === "owner" || role === "administrator") && <section className="audit-panel"><h2>{lang === "uz" ? "So‘nggi faoliyat" : "Recent activity"}</h2>{initialAudit.length ? <div className="audit-list">{initialAudit.map((entry) => <div key={entry.id}><strong>{entry.action}</strong><span>{entry.record_type ?? "record"} · {new Date(entry.occurred_at).toLocaleString(lang === "uz" ? "uz-UZ" : "en-GB")}</span><small>{entry.actor_id ?? "system"}</small></div>)}</div> : <p>{lang === "uz" ? "Hali qayd etilgan o‘zgarish yo‘q." : "No recorded changes yet."}</p>}</section>}
+    <div className="admin-notice"><ShieldCheck /><span>{lang === "uz" ? "Ommaviy saytda faqat “Nashr qilingan” holatidagi yozuvlar ko‘rinadi. Yozuvchi faqat o‘z qoralamalarini boshqaradi; nashr va o‘chirish vakolatlari rolga qarab cheklangan." : "Only published records appear publicly. Writers manage only their own drafts; publishing and deletion are restricted by role."}</span></div>
+    {(role === "owner" || role === "administrator") && <section className="audit-panel"><h2>{lang === "uz" ? "So‘nggi faoliyat" : "Recent activity"}</h2>{initialAudit.length ? <div className="audit-list">{initialAudit.map((entry) => <div key={entry.id}><strong>{auditAction(entry.action, lang)}</strong><span>{auditType(entry.record_type, lang)} · {new Date(entry.occurred_at).toLocaleString(lang === "uz" ? "uz-UZ" : "en-GB")}</span><small>{entry.actor_id ?? (lang === "uz" ? "tizim" : "system")}</small></div>)}</div> : <p>{lang === "uz" ? "Hali qayd etilgan o‘zgarish yo‘q." : "No recorded changes yet."}</p>}</section>}
   </section>;
 }
 
-function RecordForm({ lang, type, record, role, busy, onSubmit }: { lang: Lang; type: AdminRecord["type"]; record: AdminRecord | null; role: StaffRole; busy: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) {
+function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { lang: Lang; type: AdminRecord["type"]; record: AdminRecord | null; role: StaffRole; busy: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onCancel: () => void }) {
   const canPublish = role !== "writer";
   return <form className="cms-form" onSubmit={onSubmit}>
-    <h2>{record ? (lang === "uz" ? "Tahrirlash" : "Edit record") : (lang === "uz" ? "Yangi yozuv" : "New record")}</h2>
+    <div className="cms-form-heading"><div><p className="cms-kicker">{typeLabel(type, lang)}</p><h2>{record ? (lang === "uz" ? "Ma’lumotni tahrirlash" : "Edit record") : newLabel(type, lang)}</h2></div><button type="button" className="cms-close" onClick={onCancel} aria-label={lang === "uz" ? "Yopish" : "Close"}>×</button></div>
     <div className="editor-grid">
-      <label>Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug} /></label>
-      {canPublish ? <label>{lang === "uz" ? "Holat" : "Status"}<select name="status" defaultValue={record?.status ?? "draft"}><option value="draft">Draft</option><option value="published">Published</option></select></label> : <><input type="hidden" name="status" value="draft" /><p className="role-note">{lang === "uz" ? "Yozuvchi yozuvlarni faqat qoralama sifatida saqlaydi." : "Writers can save records only as drafts."}</p></>}
-      <label>{lang === "uz" ? "Sarlavha / ism (o‘zbekcha)" : "Title / name (Uzbek)"}<input name="title_uz" required defaultValue={record?.title_uz} /></label>
-      <label>{lang === "uz" ? "Sarlavha / ism (inglizcha)" : "Title / name (English)"}<input name="title_en" required defaultValue={record?.title_en} /></label>
-      <label className="full-field">{lang === "uz" ? "Qisqa mazmun (o‘zbekcha)" : "Summary (Uzbek)"}<textarea name="summary_uz" required rows={3} defaultValue={record?.summary_uz} /></label>
-      <label className="full-field">{lang === "uz" ? "Qisqa mazmun (inglizcha)" : "Summary (English)"}<textarea name="summary_en" required rows={3} defaultValue={record?.summary_en} /></label>
-      <label className="full-field">{lang === "uz" ? "Asosiy matn (o‘zbekcha)" : "Body (Uzbek)"}<textarea name="body_uz" rows={5} defaultValue={record?.body_uz ?? ""} /></label>
-      <label className="full-field">{lang === "uz" ? "Asosiy matn (inglizcha)" : "Body (English)"}<textarea name="body_en" rows={5} defaultValue={record?.body_en ?? ""} /></label>
-      {type === "teacher" && <><label>{lang === "uz" ? "Lavozim (o‘zbekcha)" : "Role (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label><label>{lang === "uz" ? "Lavozim (inglizcha)" : "Role (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label><label>{lang === "uz" ? "Bo‘lim" : "Department"}<select name="department" defaultValue={record?.department ?? "stem"}><option value="leadership">Leadership</option><option value="stem">STEM</option><option value="languages">Languages</option><option value="social-sciences">Social sciences</option></select></label></>}
+      <label>{lang === "uz" ? "URL nomi (slug)" : "URL slug"}<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug} /></label>
+      {canPublish ? <label>{lang === "uz" ? "Nashr holati" : "Publication status"}<select name="status" defaultValue={record?.status ?? "draft"}><option value="draft">{lang === "uz" ? "Qoralama" : "Draft"}</option><option value="published">{lang === "uz" ? "Nashr qilingan" : "Published"}</option></select></label> : <><input type="hidden" name="status" value="draft" /><p className="role-note">{lang === "uz" ? "Yozuvchi yozuvlarni faqat qoralama sifatida saqlaydi." : "Writers can save records only as drafts."}</p></>}
+      <label>{fieldLabel(type, "title", "uz", lang)}<input name="title_uz" required defaultValue={record?.title_uz} /></label>
+      <label>{fieldLabel(type, "title", "en", lang)}<input name="title_en" required defaultValue={record?.title_en} /></label>
+      <label className="full-field">{fieldLabel(type, "summary", "uz", lang)}<textarea name="summary_uz" required rows={3} defaultValue={record?.summary_uz} /></label>
+      <label className="full-field">{fieldLabel(type, "summary", "en", lang)}<textarea name="summary_en" required rows={3} defaultValue={record?.summary_en} /></label>
+      <label className="full-field">{fieldLabel(type, "body", "uz", lang)}<textarea name="body_uz" rows={5} defaultValue={record?.body_uz ?? ""} /></label>
+      <label className="full-field">{fieldLabel(type, "body", "en", lang)}<textarea name="body_en" rows={5} defaultValue={record?.body_en ?? ""} /></label>
+      {type === "teacher" && <><label>{lang === "uz" ? "Lavozim (o‘zbekcha)" : "Role (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label><label>{lang === "uz" ? "Lavozim (inglizcha)" : "Role (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label><label>{lang === "uz" ? "Bo‘lim" : "Department"}<select name="department" defaultValue={record?.department ?? "stem"}><option value="leadership">{lang === "uz" ? "Rahbariyat" : "Leadership"}</option><option value="stem">STEM</option><option value="languages">{lang === "uz" ? "Tillar" : "Languages"}</option><option value="social-sciences">{lang === "uz" ? "Ijtimoiy fanlar" : "Social sciences"}</option></select></label></>}
       {type !== "teacher" && <label>{lang === "uz" ? "Sana" : "Date"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>}
-      {type === "news" && <label>{lang === "uz" ? "Tur" : "Category"}<select name="category" defaultValue={record?.category ?? "news"}><option value="news">News</option><option value="announcement">Announcement</option></select></label>}
+      {type === "news" && <label>{lang === "uz" ? "Tur" : "Category"}<select name="category" defaultValue={record?.category ?? "news"}><option value="news">{lang === "uz" ? "Yangilik" : "News"}</option><option value="announcement">{lang === "uz" ? "E’lon" : "Announcement"}</option></select></label>}
       {type === "achievement" && <><label>{lang === "uz" ? "Qabul qiluvchi (o‘zbekcha)" : "Recipient (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label><label>{lang === "uz" ? "Qabul qiluvchi (inglizcha)" : "Recipient (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label><label className="full-field">{lang === "uz" ? "Tasdiqlash manbasi (HTTPS)" : "Verification source (HTTPS)"}<input name="source_url" type="url" pattern="https://.*" defaultValue={record?.source_url ?? ""} /></label></>}
       <label className="full-field">{lang === "uz" ? "Tasdiqlangan rasm (JPG, PNG yoki WebP; 5 MB gacha)" : "Approved image (JPG, PNG or WebP; up to 5 MB)"}<input name="image" type="file" accept="image/jpeg,image/png,image/webp" /></label>
       {record?.image_path && <label className="full-field consent cms-remove-image"><input name="remove_image" type="checkbox" />{lang === "uz" ? "Joriy rasmni yozuvdan olib tashlash" : "Remove the current image from this record"}</label>}
-      <button className="button button-primary full-field" type="submit" disabled={busy}>{busy ? (lang === "uz" ? "Saqlanmoqda…" : "Saving…") : (lang === "uz" ? "Saqlash" : "Save record")}</button>
+      <div className="cms-form-actions full-field"><button className="button button-secondary" type="button" onClick={onCancel}>{lang === "uz" ? "Bekor qilish" : "Cancel"}</button><button className="button button-primary" type="submit" disabled={busy}>{busy ? (lang === "uz" ? "Saqlanmoqda…" : "Saving…") : (lang === "uz" ? "Saqlash" : "Save record")}</button></div>
     </div>
   </form>;
+}
+
+function typeLabel(type: AdminRecord["type"], lang: Lang) {
+  if (type === "teacher") return lang === "uz" ? "O‘qituvchilar" : "Teachers";
+  if (type === "news") return lang === "uz" ? "Yangiliklar va e’lonlar" : "News & announcements";
+  return lang === "uz" ? "Yutuq va sertifikatlar" : "Achievements & certificates";
+}
+
+function newLabel(type: AdminRecord["type"], lang: Lang) {
+  if (type === "teacher") return lang === "uz" ? "O‘qituvchi qo‘shish" : "Add teacher";
+  if (type === "news") return lang === "uz" ? "Yangilik yozish" : "Write news";
+  return lang === "uz" ? "Yutuq qo‘shish" : "Add achievement";
+}
+
+function emptyLabel(type: AdminRecord["type"], lang: Lang) {
+  if (type === "teacher") return lang === "uz" ? "Hali o‘qituvchi qo‘shilmagan" : "No teachers added yet";
+  if (type === "news") return lang === "uz" ? "Hali yangilik yozilmagan" : "No news written yet";
+  return lang === "uz" ? "Hali yutuq yoki sertifikat qo‘shilmagan" : "No achievements or certificates yet";
+}
+
+function fieldLabel(type: AdminRecord["type"], field: "title" | "summary" | "body", contentLang: "uz" | "en", uiLang: Lang) {
+  const language = contentLang === "uz" ? (uiLang === "uz" ? "o‘zbekcha" : "Uzbek") : (uiLang === "uz" ? "inglizcha" : "English");
+  const labels = type === "teacher"
+    ? { title: uiLang === "uz" ? "To‘liq ism" : "Full name", summary: uiLang === "uz" ? "Qisqa tarjimai hol" : "Short biography", body: uiLang === "uz" ? "Batafsil tarjimai hol" : "Detailed biography" }
+    : type === "news"
+      ? { title: uiLang === "uz" ? "Sarlavha" : "Headline", summary: uiLang === "uz" ? "Qisqa mazmun" : "Short summary", body: uiLang === "uz" ? "Yangilik matni" : "Article body" }
+      : { title: uiLang === "uz" ? "Yutuq nomi" : "Achievement title", summary: uiLang === "uz" ? "Qisqa tavsif" : "Short description", body: uiLang === "uz" ? "Batafsil ma’lumot" : "Detailed information" };
+  return `${labels[field]} (${language})`;
+}
+
+function auditAction(action: string, lang: Lang) {
+  const labels: Record<string, { uz: string; en: string }> = { insert: { uz: "Qo‘shildi", en: "Created" }, update: { uz: "Yangilandi", en: "Updated" }, delete: { uz: "O‘chirildi", en: "Deleted" } };
+  return labels[action]?.[lang] ?? action;
+}
+
+function auditType(type: string | null, lang: Lang) {
+  if (type === "teacher") return lang === "uz" ? "O‘qituvchi" : "Teacher";
+  if (type === "news") return lang === "uz" ? "Yangilik" : "News";
+  if (type === "achievement") return lang === "uz" ? "Yutuq" : "Achievement";
+  return lang === "uz" ? "Yozuv" : "Record";
 }
 
 function friendlyError(error: { code?: string; message?: string }, lang: Lang) {
