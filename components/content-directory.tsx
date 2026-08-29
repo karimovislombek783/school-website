@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Supabase returns short-lived signed image URLs. */
 "use client";
 
 import Link from "next/link";
@@ -36,7 +37,7 @@ export function TeacherDirectory({ lang, items }: { lang: Lang; items: TeacherRe
         <div className="teacher-grid">
           {visible.map((teacher) => (
             <Link className="teacher-card teacher-link" href={`/${lang}/teachers/${teacher.slug}`} key={teacher.slug}>
-              <div className="teacher-avatar">{teacher.initials}</div>
+              <div className="teacher-avatar">{teacher.imageUrl ? <img src={teacher.imageUrl} alt="" /> : teacher.initials}</div>
               <span>{departmentLabel(teacher.department, lang)}</span>
               <h2>{teacher.name[lang]}</h2>
               <p>{teacher.role[lang]}</p>
@@ -61,7 +62,7 @@ export function NewsDirectory({ lang, items, limit }: { lang: Lang; items: NewsR
       </div>}
       {visible.length ? <div className="news-grid">{visible.map((item) => (
         <article className="news-card" key={item.slug}>
-          <div className="news-art"><Newspaper size={38} /></div>
+          <div className="news-art">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Newspaper size={38} />}</div>
           <div className="news-body"><div className="news-meta"><span>{item.category === "announcement" ? (lang === "uz" ? "E’lon" : "Announcement") : copy[lang].nav.news}</span><time>{item.date}</time></div><h3>{item.title[lang]}</h3><p>{item.excerpt[lang]}</p><Link className="text-link" href={`/${lang}/news/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div>
         </article>
       ))}</div> : <EmptyState lang={lang} kind="news" filtered={items.length > 0} />}
@@ -71,7 +72,7 @@ export function NewsDirectory({ lang, items, limit }: { lang: Lang; items: NewsR
 
 export function AchievementDirectory({ lang, items }: { lang: Lang; items: AchievementRecord[] }) {
   return items.length ? <div className="news-grid">{items.map((item) => (
-    <article className="news-card" key={item.slug}><div className="news-art"><Award size={38} /></div><div className="news-body"><div className="news-meta"><span>{lang === "uz" ? "Tasdiqlangan yutuq" : "Verified achievement"}</span><time>{item.date}</time></div><h3>{item.title[lang]}</h3><p>{item.summary[lang]}</p><Link className="text-link" href={`/${lang}/achievements/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div></article>
+    <article className="news-card" key={item.slug}><div className="news-art">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Award size={38} />}</div><div className="news-body"><div className="news-meta"><span>{lang === "uz" ? "Tasdiqlangan yutuq" : "Verified achievement"}</span><time>{item.date}</time></div><h3>{item.title[lang]}</h3><p>{item.summary[lang]}</p><Link className="text-link" href={`/${lang}/achievements/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div></article>
   ))}</div> : <EmptyState lang={lang} kind="achievements" />;
 }
 

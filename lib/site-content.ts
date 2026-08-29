@@ -96,6 +96,7 @@ export type TeacherRecord = {
   biography: Record<Lang, string>;
   qualifications: Record<Lang, string[]>;
   initials: string;
+  imageUrl?: string;
 };
 
 export type NewsRecord = {
@@ -106,6 +107,7 @@ export type NewsRecord = {
   title: Record<Lang, string>;
   excerpt: Record<Lang, string>;
   body: Record<Lang, string[]>;
+  imageUrl?: string;
 };
 
 export type AchievementRecord = {
@@ -116,6 +118,7 @@ export type AchievementRecord = {
   recipient: Record<Lang, string>;
   summary: Record<Lang, string>;
   source: string;
+  imageUrl?: string;
 };
 
 // Public pages read only published records. These arrays remain empty until

@@ -4,9 +4,10 @@
 
 1. Sign in to Vercel with the GitHub account that owns the repository.
 2. Select **Add New → Project**, import the repository, and leave the framework as Next.js.
-3. The included `vercel.json` runs the standard Next.js build. This demonstration needs no environment variables.
-4. After deployment, test `/uz`, `/en`, the language switch, mobile menu, forms, and admin demonstration.
-5. Add the final domain only after the school approves its legal name and public launch.
+3. The included `vercel.json` runs the standard Next.js build. The public placeholder site needs no environment variables.
+4. To activate the CMS, add only the two public Supabase variables documented in `SUPABASE-SETUP.md`, then redeploy.
+5. After deployment, test `/uz`, `/en`, the language switch, mobile menu, forms, and administrator authentication.
+6. Add the final domain only after the school approves its legal name and public launch.
 
 The contact form and newsletter remain demonstrations. The administrator CMS becomes active only after the separate school Supabase project is configured according to `SUPABASE-SETUP.md`.
 
