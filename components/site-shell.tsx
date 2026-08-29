@@ -16,19 +16,26 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
 
   return (
     <>
-      <div className="preview-strip official-strip">
-        <span><ShieldCheck size={14} /> {lang === "uz" ? "Litsenziya № 531978" : "Licence № 531978"}</span>
-        <div className="utility-links">
-          <a href={`mailto:${siteIdentity.email}`}><Mail size={14} /> {siteIdentity.email}</a>
-          <a href={siteIdentity.mapsUrl} target="_blank" rel="noreferrer"><MapPin size={14} /> {lang === "uz" ? "Manzil" : "Location"}</a>
+      <div className="institutional-masthead">
+        <div className="masthead-inner">
+          <div className="masthead-side masthead-left">
+            <a className="masthead-chip" href={siteIdentity.mapsUrl} target="_blank" rel="noreferrer"><MapPin size={17} /><span>{lang === "uz" ? "Hazorasp tumani" : "Hazorasp District"}</span></a>
+            <a className="masthead-chip" href={`mailto:${siteIdentity.email}`}><Mail size={17} /><span>{siteIdentity.email}</span></a>
+          </div>
+          <Link href={`/${lang}`} className="masthead-emblem" aria-label={`${siteIdentity.legalName} — ${t.nav.home}`}>
+            <span>IEG</span><small>Education</small>
+          </Link>
+          <div className="masthead-side masthead-right">
+            <Link className="masthead-chip" href={`/${lang}/legal`}><ShieldCheck size={17} /><span>{lang === "uz" ? "Litsenziya № 531978" : "Licence № 531978"}</span></Link>
+            <LanguageSwitch lang={lang} href={alternatePath} label={t.alternateLanguage} />
+          </div>
         </div>
       </div>
       <header className="site-header">
         <div className="header-inner">
           <Link href={`/${lang}`} className="site-brand" aria-label={`${siteIdentity.legalName} — ${t.nav.home}`}>
-            <span className="brand-mark">IEG</span>
             <span className="brand-copy">
-              <strong>{siteIdentity.legalName}</strong>
+              <strong>IZZATBEK-EDU-GROUP</strong>
               <small>{siteIdentity.domain}</small>
             </span>
           </Link>
@@ -40,7 +47,6 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
             ))}
           </nav>
           <div className="header-actions">
-            <LanguageSwitch lang={lang} href={alternatePath} label={t.alternateLanguage} />
             <Link className="header-admissions" href={`/${lang}/admissions`}>{t.nav.admissions}</Link>
             <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle navigation">
               {open ? <X /> : <Menu />}
