@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   },
   description:
     '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasining ikki tilli rasmiy axborot platformasi.',
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
 

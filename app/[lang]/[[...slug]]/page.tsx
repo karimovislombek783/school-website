@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { AdminGateway } from "@/components/admin-gateway";
 import { AchievementDirectory, NewsDirectory, TeacherDirectory } from "@/components/content-directory";
-import { ContactForm, NewsletterForm } from "@/components/preview-forms";
 import { SiteFooter, SiteHeader } from "@/components/site-shell";
 import { copy, isLang, Lang, pillars, siteIdentity } from "@/lib/site-content";
 import { loadPublishedContent, PublishedContent } from "@/lib/content-repository";
@@ -72,13 +71,13 @@ function HomePage({ lang, news }: { lang: Lang; news: PublishedContent["news"] }
             <Link className="button button-primary" href={`/${lang}/about`}>{t.home.primaryAction}<ArrowRight size={18} /></Link>
             <Link className="button button-secondary" href={`/${lang}/admissions`}>{t.home.secondaryAction}</Link>
           </div>
-          <div className="hero-trust"><ShieldCheck size={21} /><span>{t.sections.verifiedLater}</span></div>
+          <div className="hero-trust"><ShieldCheck size={21} /><span>{lang === "uz" ? "Litsenziya № 531978 • I–XI sinflar" : "Licence № 531978 • Grades 1–11"}</span></div>
         </div>
         <div className="hero-visual" role="img" aria-label={t.sections.placeholderPhoto}>
           <div className="photo-placeholder">
             <Building2 size={46} />
-            <span>{t.sections.placeholderPhoto}</span>
-            <small>16:10 landscape image</small>
+            <span>{lang === "uz" ? "I–XI sinflar" : "Grades 1–11"}</span>
+            <small>{lang === "uz" ? "Boshlang‘ich • Tayanch o‘rta • O‘rta ta’lim" : "Primary • Basic secondary • Secondary education"}</small>
           </div>
           <div className="hero-note"><span>{t.home.trustLabel}</span><strong>{siteIdentity.license}</strong></div>
         </div>
@@ -106,9 +105,9 @@ function HomePage({ lang, news }: { lang: Lang; news: PublishedContent["news"] }
         <Link className="text-link section-link" href={`/${lang}/news`}>{t.sections.viewAll}<ArrowRight size={17} /></Link>
       </section>
 
-      <section className="newsletter-section">
-        <div><p className="eyebrow">Newsletter</p><h2>{t.home.newsletterTitle}</h2><p>{t.home.newsletterBody}</p></div>
-        <NewsletterForm lang={lang} />
+      <section className="newsletter-section official-contact-band">
+        <div><p className="eyebrow">{lang === "uz" ? "Rasmiy aloqa" : "Official contact"}</p><h2>{lang === "uz" ? "Maktab bilan bog‘laning" : "Contact the school"}</h2><p>{siteIdentity.email}</p></div>
+        <Link className="button button-light" href={`/${lang}/contact`}>{lang === "uz" ? "Aloqa ma’lumotlari" : "Contact information"}<ArrowRight size={18} /></Link>
       </section>
     </main>
   );
@@ -139,14 +138,14 @@ function AboutContent({ lang }: { lang: Lang }) {
   const values = isUz
     ? [[Target, "Maqsad", "Maktabning tasdiqlangan missiyasi va o‘quvchilar oldidagi mas’uliyati."], [HeartHandshake, "Hamjamiyat", "O‘quvchi, oila va o‘qituvchi o‘rtasidagi hamkorlik."], [Sparkles, "Rivojlanish", "Bilim, xarakter va amaliy ko‘nikmalarni birgalikda rivojlantirish."]]
     : [[Target, "Purpose", "The school’s approved mission and responsibility to its students."], [HeartHandshake, "Community", "Partnership between students, families and teachers."], [Sparkles, "Growth", "Developing knowledge, character and practical skills together."]];
-  return <section className="content-section page-content"><div className="split-panel"><div className="photo-placeholder tall"><Building2 size={46} /><span>{isUz ? "Tasdiqlangan kampus fotosurati" : "Approved campus photograph"}</span></div><div><p className="eyebrow">{isUz ? "Maktab tarixi" : "Our story"}</p><h2>{isUz ? "Tasdiqlangan tarix uchun tayyor tuzilma" : "A clear structure for the verified school story"}</h2><p>{isUz ? "Tashkil topgan yil, ta’lim faoliyatining boshlanishi, o‘sish bosqichlari va hududga xizmat qilish tarixi maktab rahbariyati tasdiqlagach shu yerda bo‘ladi." : "The establishment year, start of educational activity, development milestones and service to the local community will appear here after leadership approval."}</p></div></div><div className="value-grid">{values.map(([Icon, title, body]) => <article key={String(title)}><Icon /><h3>{title as string}</h3><p>{body as string}</p></article>)}</div></section>;
+  return <section className="content-section page-content"><div className="split-panel"><div className="photo-placeholder tall"><Building2 size={46} /><span>{isUz ? "Hazorasp • Xorazm" : "Hazorasp • Khorezm"}</span><small>{isUz ? "Litsenziya № 531978" : "Licence № 531978"}</small></div><div><p className="eyebrow">{isUz ? "Maktab haqida" : "About the school"}</p><h2>{isUz ? "I–XI sinflar uchun ta’lim" : "Education for Grades 1–11"}</h2><p>{isUz ? '“IZZATBEK-EDU-GROUP” — Hazorasp tumanida faoliyat yurituvchi nodavlat ta’lim muassasasi. Maktab boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatish uchun litsenziyaga ega.' : '“IZZATBEK-EDU-GROUP” is a non-state educational institution operating in Hazorasp District. The school is licensed to provide primary, basic secondary and secondary education.'}</p><div className="director-card"><span>{isUz ? "Direktor" : "Director"}</span><strong>{siteIdentity.director}</strong></div></div></div><div className="value-grid">{values.map(([Icon, title, body]) => <article key={String(title)}><Icon /><h3>{title as string}</h3><p>{body as string}</p></article>)}</div></section>;
 }
 
 function AcademicsContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
   const items = isUz
-    ? [[BookOpen, "O‘quv dasturi", "Davlat tomonidan tan olingan o‘quv dasturi haqidagi tasdiqlangan ma’lumot."], [GraduationCap, "Sinflar", "Maktab ta’lim beradigan sinflar va bosqichlar."], [Scale, "Baholash", "O‘quv natijalarini baholash va ota-onalarga xabar berish tartibi."], [Sparkles, "Qo‘shimcha imkoniyatlar", "To‘garaklar, olimpiadalar, musobaqalar va rivojlanish dasturlari."]]
-    : [[BookOpen, "Curriculum", "Verified information about the nationally recognised curriculum."], [GraduationCap, "Grade levels", "The grades and educational stages formally provided by the school."], [Scale, "Assessment", "How learning outcomes are evaluated and communicated to families."], [Sparkles, "Additional opportunities", "Clubs, olympiads, competitions and development programmes."]];
+    ? [[BookOpen, "Milliy o‘quv dasturi", "Ta’lim O‘zbekiston milliy o‘quv dasturi asosida olib boriladi."], [GraduationCap, "Boshlang‘ich ta’lim", "I–IV sinflar."], [Scale, "Tayanch o‘rta ta’lim", "V–IX sinflar."], [Sparkles, "O‘rta ta’lim", "X–XI sinflar."]]
+    : [[BookOpen, "National curriculum", "Education is provided in accordance with Uzbekistan’s national curriculum."], [GraduationCap, "Primary education", "Grades 1–4."], [Scale, "Basic secondary education", "Grades 5–9."], [Sparkles, "Secondary education", "Grades 10–11."]];
   return <section className="content-section page-content"><div className="info-grid">{items.map(([Icon, title, body]) => <article key={String(title)}><Icon /><h2>{title as string}</h2><p>{body as string}</p><span>{copy[lang].sections.verifiedLater}</span></article>)}</div></section>;
 }
 
@@ -167,18 +166,18 @@ function AchievementsContent({ lang, items }: { lang: Lang; items: PublishedCont
 
 function AdmissionsContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
-  const steps = isUz ? [["01", "Bog‘lanish", "Qabul bo‘yicha rasmiy aloqa kanaliga murojaat qiling."], ["02", "Ma’lumot olish", "Sinflar, joylar va zarur hujjatlar haqidagi tasdiqlangan ma’lumotni oling."], ["03", "Ariza", "Maktab belgilagan tartibda hujjatlarni taqdim eting."]] : [["01", "Enquire", "Contact the school through its official admissions channel."], ["02", "Get information", "Receive verified information about grades, availability and required documents."], ["03", "Apply", "Submit documents according to the school’s approved process."]];
-  return <section className="content-section page-content"><div className="process-grid">{steps.map(([n, title, body]) => <article key={n}><strong>{n}</strong><h2>{title}</h2><p>{body}</p></article>)}</div><div className="callout"><div><p className="eyebrow">{isUz ? "Qabul ma’lumoti" : "Admissions information"}</p><h2>{isUz ? "Ma’lumot tasdiqlangach e’lon qilinadi" : "Details will be published after approval"}</h2></div><Link className="button button-primary" href={`/${lang}/contact`}>{isUz ? "Bog‘lanish" : "Contact the school"}<ArrowRight size={18} /></Link></div></section>;
+  const steps = isUz ? [["01", "Qo‘ng‘iroq qiling", "Qabul bo‘yicha maktabning rasmiy telefon raqamiga murojaat qiling."], ["02", "Maslahat oling", "Sinflar, mavjud joylar va kerakli hujjatlar haqida ma’lumot oling."], ["03", "Maktabga tashrif buyuring", "Keyingi qadamlar maktab ma’muriyati bilan kelishiladi."]] : [["01", "Call the school", "Contact the school through its official admissions telephone number."], ["02", "Receive a consultation", "Ask about grades, availability and required documents."], ["03", "Visit the school", "Agree the next steps directly with the school administration."]];
+  return <section className="content-section page-content"><div className="process-grid">{steps.map(([n, title, body]) => <article key={n}><strong>{n}</strong><h2>{title}</h2><p>{body}</p></article>)}</div><div className="callout"><div><p className="eyebrow">{isUz ? "Ta’lim to‘lovi" : "Tuition"}</p><h2>{isUz ? "Ma’lumot individual maslahat davomida beriladi" : "Information is provided during an individual consultation"}</h2></div><Link className="button button-primary" href={`/${lang}/contact`}>{isUz ? "Bog‘lanish" : "Contact the school"}<ArrowRight size={18} /></Link></div></section>;
 }
 
 function ContactContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
-  return <section className="content-section page-content"><div className="contact-layout"><div className="contact-details"><article><MapPin /><div><h2>{isUz ? "Manzil" : "Address"}</h2><p>{siteIdentity.address}</p></div></article><article><Phone /><div><h2>{isUz ? "Telefon" : "Phone"}</h2><p>{siteIdentity.phone}</p></div></article><article><Mail /><div><h2>{isUz ? "Elektron pochta" : "Email"}</h2><p>{siteIdentity.email}</p></div></article><div className="map-placeholder"><MapPin /><span>{isUz ? "Tasdiqlangan xarita joylashuvi" : "Verified map location"}</span></div></div><ContactForm lang={lang} /></div></section>;
+  return <section className="content-section page-content"><div className="contact-details standalone"><article><MapPin /><div><h2>{isUz ? "Yuridik manzil" : "Legal address"}</h2><p>{siteIdentity.address}</p></div></article><article><Phone /><div><h2>{isUz ? "Telefon" : "Phone"}</h2><p>{siteIdentity.phone}</p></div></article><article><Mail /><div><h2>{isUz ? "Elektron pochta" : "Email"}</h2><a href={`mailto:${siteIdentity.email}`}>{siteIdentity.email}</a></div></article><div className="map-placeholder"><MapPin /><span>{isUz ? "Asosiy tashrif manzili va xarita joylashuvi tasdiqlanmoqda" : "The main visitor address and map location are being confirmed"}</span></div></div></section>;
 }
 
 function LegalContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
-  const rows = [[isUz ? "Yuridik nom" : "Legal name", siteIdentity.legalName], [isUz ? "Tashkilot turi" : "Institution type", isUz ? "Nodavlat ta’lim muassasasi" : "Non-state educational institution"], [isUz ? "Litsenziya raqami" : "Licence number", siteIdentity.license], [isUz ? "Reyestr tartib raqami" : "Registry order number", siteIdentity.licenseOrder], [isUz ? "Amal qilish muddati" : "Validity", `${siteIdentity.licenseEffectiveFrom} — ${isUz ? "cheksiz" : "unlimited"}`], [isUz ? "Faoliyat turi" : "Licensed activity", siteIdentity.licensedActivity], [isUz ? "Litsenziyalangan sinflar" : "Licensed grades", siteIdentity.licensedGrades], [isUz ? "Vakolatli organ" : "Issuing authority", siteIdentity.licenseAuthority], [isUz ? "Manzil" : "Address", siteIdentity.address], [isUz ? "Domen" : "Domain", siteIdentity.domain]];
+  const rows = [[isUz ? "Yuridik nom" : "Legal name", siteIdentity.legalName], [isUz ? "Tashkilot turi" : "Institution type", isUz ? "Nodavlat ta’lim muassasasi" : "Non-state educational institution"], [isUz ? "Litsenziya raqami" : "Licence number", siteIdentity.license], [isUz ? "Reyestr tartib raqami" : "Registry order number", siteIdentity.licenseOrder], [isUz ? "Amal qilish muddati" : "Validity", `${siteIdentity.licenseEffectiveFrom} — ${isUz ? "cheksiz" : "unlimited"}`], [isUz ? "Faoliyat turi" : "Licensed activity", siteIdentity.licensedActivity], [isUz ? "Litsenziyalangan sinflar" : "Licensed grades", siteIdentity.licensedGrades], [isUz ? "Vakolatli organ" : "Issuing authority", siteIdentity.licenseAuthority], [isUz ? "Yuridik manzil" : "Legal address", siteIdentity.address], [isUz ? "Ta’lim faoliyati manzillari" : "Licensed activity addresses", siteIdentity.activityAddresses.join("; ")], [isUz ? "Domen" : "Domain", siteIdentity.domain]];
   return <section className="content-section page-content"><div className="legal-warning"><ShieldCheck /><div><h2>{isUz ? "Tekshirilmagan da’volar e’lon qilinmaydi" : "Unverified claims will not be published"}</h2><p>{isUz ? "To‘liq litsenziya nusxasi imzo va shaxsiy ma’lumotlarni himoya qilish uchun avtomatik ravishda ommaga chiqarilmaydi." : "The complete licence scan will not be published automatically, protecting signatures and personal information."}</p></div></div><dl className="legal-list">{rows.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl></section>;
 }
 

@@ -16,7 +16,7 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
 
   return (
     <>
-      <div className="preview-strip">
+      <div className="preview-strip official-strip">
         <strong>{t.development}</strong>
         <span>{t.developmentNote}</span>
       </div>
@@ -79,7 +79,7 @@ export function SiteFooter({ lang }: { lang: Lang }) {
       </div>
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} {siteIdentity.legalName}. {t.footer.rights}</span>
-        <span>{t.development}</span>
+        <span>{siteIdentity.domain}</span>
       </div>
     </footer>
   );
