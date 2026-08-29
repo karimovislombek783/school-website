@@ -176,7 +176,7 @@ function AdmissionsContent({ lang }: { lang: Lang }) {
 
 function ContactContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
-  return <section className="content-section page-content"><div className="contact-details standalone"><article><MapPin /><div><h2>{isUz ? "Yuridik manzil" : "Legal address"}</h2><p>{siteIdentity.address}</p></div></article><article><Phone /><div><h2>{isUz ? "Telefon" : "Phone"}</h2><p>{siteIdentity.phone}</p></div></article><article><Mail /><div><h2>{isUz ? "Elektron pochta" : "Email"}</h2><a href={`mailto:${siteIdentity.email}`}>{siteIdentity.email}</a></div></article><div className="map-placeholder"><MapPin /><span>{isUz ? "Asosiy tashrif manzili va xarita joylashuvi tasdiqlanmoqda" : "The main visitor address and map location are being confirmed"}</span></div></div></section>;
+  return <section className="content-section page-content"><div className="contact-details standalone"><article><MapPin /><div><h2>{isUz ? "Yuridik manzil" : "Legal address"}</h2><p>{siteIdentity.address}</p></div></article><article><Phone /><div><h2>{isUz ? "Telefon" : "Phone"}</h2><p>{siteIdentity.phone}</p></div></article><article><Mail /><div><h2>{isUz ? "Elektron pochta" : "Email"}</h2><a href={`mailto:${siteIdentity.email}`}>{siteIdentity.email}</a></div></article><a className="map-link-card" href={siteIdentity.mapsUrl} target="_blank" rel="noreferrer"><MapPin /><div><strong>{isUz ? "Google Maps’da ochish" : "Open in Google Maps"}</strong><span>{isUz ? "Maktab joylashuvini xaritada ko‘ring" : "View the school location on the map"}</span></div><ArrowRight size={20} /></a></div></section>;
 }
 
 function LegalContent({ lang }: { lang: Lang }) {

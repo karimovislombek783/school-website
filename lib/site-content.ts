@@ -8,6 +8,7 @@ export const siteIdentity = {
   director: "Izzatbek Jumaniyozov",
   phone: "Rasmiy raqam tasdiqlanmoqda / Official number to be confirmed",
   email: "info@izzatbek-edu-group.uz",
+  mapsUrl: "https://maps.app.goo.gl/frTJGBnyF6VYtQvY7",
   address: "Xorazm viloyati, Hazorasp tumani, Al-Xorazmiy mahallasi, Mustaqillik ko‘chasi",
   activityAddresses: [
     "Xorazm viloyati, Hazorasp tumani, Sanoat MFY, Bazm ko‘chasi, 60A-uy",

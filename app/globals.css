@@ -216,6 +216,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .contact-details h2 { margin: 0 0 5px; font-size: 1.2rem; }
 .contact-details p { margin: 0; }
 .map-placeholder { display: grid; min-height: 220px; place-items: center; align-content: center; gap: 10px; margin-top: 25px; border: 1px dashed #aabed3; border-radius: var(--radius); background: var(--blue-soft); color: var(--navy); }
+.map-link-card { display: grid; grid-template-columns: auto 1fr auto; gap: 17px; align-items: center; margin-top: 28px; padding: 25px; border: 1px solid #cbd9e5; border-radius: var(--radius); background: var(--blue-soft); color: var(--navy); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.map-link-card:hover { transform: translateY(-2px); border-color: var(--navy); box-shadow: 0 15px 35px rgba(9,44,77,.09); }
+.map-link-card > svg:first-child { width: 30px; height: 30px; }
+.map-link-card div { display: grid; gap: 4px; }
+.map-link-card strong { font-family: Georgia, serif; font-size: 1.2rem; }
+.map-link-card span { color: var(--muted); font-size: .82rem; }
 .contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 30px; border: 1px solid var(--line); border-radius: var(--radius); background: white; }
 .contact-form label { color: var(--ink); font-size: .82rem; font-weight: 700; }
 .contact-form label input, .contact-form label textarea { margin-top: 7px; }
