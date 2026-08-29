@@ -49,6 +49,8 @@ h3 { font-size: 1.25rem; line-height: 1.3; }
 .preview-strip { display: flex; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; padding: 9px max(20px, calc((100vw - 1240px)/2)); background: var(--navy-deep); border-bottom: 1px solid rgba(255,255,255,.12); font-size: .76rem; color: #e3edf6; }
 .preview-strip strong { text-transform: uppercase; letter-spacing: .08em; }
 .preview-strip span, .preview-strip a { display: inline-flex; align-items: center; gap: 7px; }
+.utility-links { display: flex; align-items: center; gap: 20px; }
+.utility-links a:last-child { padding-left: 20px; border-left: 1px solid rgba(255,255,255,.2); font-weight: 750; }
 .site-header { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid rgba(220,229,239,.95); background: rgba(255,255,255,.96); backdrop-filter: blur(16px); }
 .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: min(1240px, calc(100% - 40px)); min-height: 76px; margin: auto; }
 .site-brand { display: inline-flex; align-items: center; gap: 11px; min-width: max-content; }
@@ -375,6 +377,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 }
 
 @media (max-width: 540px) {
+  .preview-strip { justify-content: center; }
+  .preview-strip > span { display: none; }
+  .utility-links { width: 100%; justify-content: space-between; gap: 10px; }
+  .utility-links a { font-size: .68rem; }
+  .utility-links a:last-child { padding-left: 10px; }
   .header-inner { width: min(100% - 24px, 1240px); min-height: 68px; }
   .language-link { font-size: 0; }
   .language-link svg { width: 21px; height: 21px; }

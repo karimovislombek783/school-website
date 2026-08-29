@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Mail, Menu, ShieldCheck, X } from "lucide-react";
+import { Mail, MapPin, Menu, ShieldCheck, X } from "lucide-react";
 import { copy, Lang, siteIdentity } from "@/lib/site-content";
 import { LanguageSwitch } from "@/components/language-switch";
 
@@ -18,7 +18,10 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
     <>
       <div className="preview-strip official-strip">
         <span><ShieldCheck size={14} /> {lang === "uz" ? "Litsenziya № 531978" : "Licence № 531978"}</span>
-        <a href={`mailto:${siteIdentity.email}`}><Mail size={14} /> {siteIdentity.email}</a>
+        <div className="utility-links">
+          <a href={`mailto:${siteIdentity.email}`}><Mail size={14} /> {siteIdentity.email}</a>
+          <a href={siteIdentity.mapsUrl} target="_blank" rel="noreferrer"><MapPin size={14} /> {lang === "uz" ? "Manzil" : "Location"}</a>
+        </div>
       </div>
       <header className="site-header">
         <div className="header-inner">
