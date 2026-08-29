@@ -16,12 +16,16 @@ export function TeacherDirectory({ lang, items }: { lang: Lang; items: TeacherRe
   const [department, setDepartment] = useState("all");
   const filters = [
     ["all", lang === "uz" ? "Barchasi" : "All"],
+    ["leadership", lang === "uz" ? "Rahbariyat" : "Leadership"],
     ["stem", "STEM"],
     ["languages", lang === "uz" ? "Tillar" : "Languages"],
-    ["leadership", lang === "uz" ? "Rahbariyat" : "Leadership"],
+    ["social-sciences", lang === "uz" ? "Ijtimoiy fanlar" : "Social sciences"],
+    ["primary", lang === "uz" ? "Boshlang‘ich ta’lim" : "Primary education"],
+    ["arts-pe", lang === "uz" ? "San’at va jismoniy tarbiya" : "Arts & physical education"],
+    ["student-support", lang === "uz" ? "O‘quvchilarni qo‘llab-quvvatlash" : "Student support"],
   ];
   const visible = useMemo(
-    () => department === "all" ? items : items.filter((item) => item.department === department),
+    () => department === "all" ? items : items.filter((item) => department === "leadership" ? item.isLeadership : item.departments.includes(department as TeacherRecord["departments"][number])),
     [department, items],
   );
 
@@ -38,7 +42,7 @@ export function TeacherDirectory({ lang, items }: { lang: Lang; items: TeacherRe
           {visible.map((teacher) => (
             <Link className="teacher-card teacher-link" href={`/${lang}/teachers/${teacher.slug}`} key={teacher.slug}>
               <div className="teacher-avatar">{teacher.imageUrl ? <img src={teacher.imageUrl} alt="" /> : teacher.initials}</div>
-              <span>{departmentLabel(teacher.department, lang)}</span>
+              <div className="teacher-tags">{teacher.isLeadership && <span>{lang === "uz" ? "Rahbariyat" : "Leadership"}</span>}{teacher.departments.map((item) => <span key={item}>{departmentLabel(item, lang)}</span>)}</div>
               <h2>{teacher.name[lang]}</h2>
               <p>{teacher.role[lang]}</p>
               <small>{lang === "uz" ? "Profilni ko‘rish" : "View profile"} <ArrowRight size={14} /></small>
@@ -88,7 +92,7 @@ function EmptyState({ lang, kind, filtered = false }: { lang: Lang; kind: "teach
   return <div className="public-empty"><Icon size={34} /><h3>{text}</h3><p>{lang === "uz" ? "Faqat maktab tasdiqlagan va nashr etilgan ma’lumotlar bu yerda ko‘rinadi." : "Only school-approved records marked as published appear here."}</p></div>;
 }
 
-function departmentLabel(value: TeacherRecord["department"], lang: Lang) {
-  const labels = { leadership: { uz: "Rahbariyat", en: "Leadership" }, stem: { uz: "Aniq fanlar", en: "STEM" }, languages: { uz: "Tillar", en: "Languages" }, "social-sciences": { uz: "Ijtimoiy fanlar", en: "Social sciences" } };
+function departmentLabel(value: TeacherRecord["departments"][number], lang: Lang) {
+  const labels = { stem: { uz: "Aniq va tabiiy fanlar", en: "STEM" }, languages: { uz: "Tillar", en: "Languages" }, "social-sciences": { uz: "Ijtimoiy fanlar", en: "Social sciences" }, primary: { uz: "Boshlang‘ich ta’lim", en: "Primary education" }, "arts-pe": { uz: "San’at va jismoniy tarbiya", en: "Arts & physical education" }, "student-support": { uz: "O‘quvchilarni qo‘llab-quvvatlash", en: "Student support" } };
   return labels[value][lang];
 }

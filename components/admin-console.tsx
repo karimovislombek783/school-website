@@ -14,7 +14,7 @@ export type AuditRecord = { id: number; actor_id: string | null; action: string;
 export type AdminRecord = {
   id: string; type: "teacher" | "news" | "achievement"; slug: string; status: "draft" | "published";
   title_uz: string; title_en: string; summary_uz: string; summary_en: string; body_uz: string | null; body_en: string | null;
-  category: string | null; department: string | null; event_date: string | null; recipient_uz: string | null; recipient_en: string | null;
+  category: string | null; departments: string[]; subjects_uz: string[]; subjects_en: string[]; is_leadership: boolean; event_date: string | null; recipient_uz: string | null; recipient_en: string | null;
   source_url: string | null; image_path: string | null; created_by: string;
 };
 
@@ -74,7 +74,10 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       body_uz: String(data.get("body_uz") || "").trim(),
       body_en: String(data.get("body_en") || "").trim(),
       category: String(data.get("category") || "") || null,
-      department: String(data.get("department") || "") || null,
+      departments: type === "teacher" ? data.getAll("departments").map(String) : [],
+      subjects_uz: type === "teacher" ? parseList(String(data.get("subjects_uz") || "")) : [],
+      subjects_en: type === "teacher" ? parseList(String(data.get("subjects_en") || "")) : [],
+      is_leadership: type === "teacher" && data.get("is_leadership") === "on",
       event_date: String(data.get("event_date") || "") || null,
       recipient_uz: String(data.get("recipient_uz") || "").trim() || null,
       recipient_en: String(data.get("recipient_en") || "").trim() || null,
@@ -139,7 +142,14 @@ function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { la
       <label className="full-field">{fieldLabel(type, "summary", "en", lang)}<textarea name="summary_en" required rows={3} defaultValue={record?.summary_en} /></label>
       <label className="full-field">{fieldLabel(type, "body", "uz", lang)}<textarea name="body_uz" rows={5} defaultValue={record?.body_uz ?? ""} /></label>
       <label className="full-field">{fieldLabel(type, "body", "en", lang)}<textarea name="body_en" rows={5} defaultValue={record?.body_en ?? ""} /></label>
-      {type === "teacher" && <><label>{lang === "uz" ? "Lavozim (o‘zbekcha)" : "Role (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label><label>{lang === "uz" ? "Lavozim (inglizcha)" : "Role (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label><label>{lang === "uz" ? "Bo‘lim" : "Department"}<select name="department" defaultValue={record?.department ?? "stem"}><option value="leadership">{lang === "uz" ? "Rahbariyat" : "Leadership"}</option><option value="stem">STEM</option><option value="languages">{lang === "uz" ? "Tillar" : "Languages"}</option><option value="social-sciences">{lang === "uz" ? "Ijtimoiy fanlar" : "Social sciences"}</option></select></label></>}
+      {type === "teacher" && <>
+        <label>{lang === "uz" ? "Lavozim (o‘zbekcha)" : "Role (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label>
+        <label>{lang === "uz" ? "Lavozim (inglizcha)" : "Role (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label>
+        <label className="full-field consent cms-check"><input name="is_leadership" type="checkbox" defaultChecked={record?.is_leadership ?? false} />{lang === "uz" ? "Rahbariyat a’zosi (direktor, direktor o‘rinbosari yoki boshqa rahbar)" : "Leadership member (director, deputy principal or another school leader)"}</label>
+        <fieldset className="full-field cms-options"><legend>{lang === "uz" ? "Fan bo‘limlari (bir nechtasini tanlash mumkin)" : "Academic departments (select all that apply)"}</legend>{departmentOptions(lang).map(([value, label]) => <label key={value} className="consent"><input name="departments" type="checkbox" value={value} defaultChecked={record?.departments?.includes(value) ?? false} />{label}</label>)}</fieldset>
+        <label className="full-field">{lang === "uz" ? "O‘qitadigan fanlar (o‘zbekcha, vergul yoki yangi qator bilan)" : "Subjects taught (Uzbek, separated by commas or new lines)"}<textarea name="subjects_uz" rows={3} defaultValue={record?.subjects_uz?.join(", ") ?? ""} /></label>
+        <label className="full-field">{lang === "uz" ? "O‘qitadigan fanlar (inglizcha, vergul yoki yangi qator bilan)" : "Subjects taught (English, separated by commas or new lines)"}<textarea name="subjects_en" rows={3} defaultValue={record?.subjects_en?.join(", ") ?? ""} /></label>
+      </>}
       {type !== "teacher" && <label>{lang === "uz" ? "Sana" : "Date"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>}
       {type === "news" && <label>{lang === "uz" ? "Tur" : "Category"}<select name="category" defaultValue={record?.category ?? "news"}><option value="news">{lang === "uz" ? "Yangilik" : "News"}</option><option value="announcement">{lang === "uz" ? "E’lon" : "Announcement"}</option></select></label>}
       {type === "achievement" && <><label>{lang === "uz" ? "Qabul qiluvchi (o‘zbekcha)" : "Recipient (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label><label>{lang === "uz" ? "Qabul qiluvchi (inglizcha)" : "Recipient (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label><label className="full-field">{lang === "uz" ? "Tasdiqlash manbasi (HTTPS)" : "Verification source (HTTPS)"}<input name="source_url" type="url" pattern="https://.*" defaultValue={record?.source_url ?? ""} /></label></>}
@@ -188,6 +198,19 @@ function auditType(type: string | null, lang: Lang) {
   if (type === "news") return lang === "uz" ? "Yangilik" : "News";
   if (type === "achievement") return lang === "uz" ? "Yutuq" : "Achievement";
   return lang === "uz" ? "Yozuv" : "Record";
+}
+
+function parseList(value: string) { return value.split(/[,\n]/).map((item) => item.trim()).filter(Boolean); }
+
+function departmentOptions(lang: Lang): Array<[string, string]> {
+  return [
+    ["stem", lang === "uz" ? "Aniq va tabiiy fanlar (STEM)" : "STEM"],
+    ["languages", lang === "uz" ? "Tillar" : "Languages"],
+    ["social-sciences", lang === "uz" ? "Ijtimoiy fanlar" : "Social sciences"],
+    ["primary", lang === "uz" ? "Boshlang‘ich ta’lim" : "Primary education"],
+    ["arts-pe", lang === "uz" ? "San’at va jismoniy tarbiya" : "Arts & physical education"],
+    ["student-support", lang === "uz" ? "O‘quvchilarni qo‘llab-quvvatlash" : "Student support"],
+  ];
 }
 
 function friendlyError(error: { code?: string; message?: string }, lang: Lang) {

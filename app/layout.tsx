@@ -3,11 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "School Website Project",
-    template: "%s | School Website Project",
+    default: '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi',
+    template: '%s | "IZZATBEK-EDU-GROUP"',
   },
   description:
-    "A bilingual institutional website foundation for a licensed school in Uzbekistan.",
+    '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasining ikki tilli rasmiy axborot platformasi.',
   robots: { index: false, follow: false },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };

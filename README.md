@@ -1,6 +1,6 @@
 # School Website Project
 
-A light, bilingual Uzbek–English website foundation for a licensed private K–12 school in Uzbekistan. This version uses placeholders until the school confirms its exact legal name, licence details, contacts, staff, and policies.
+A bilingual Uzbek–English website foundation for `"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi`. The legal name and licence details are taken from the supplied licence; contacts, staff, imagery and policies remain pending approval.
 
 ## Included
 
@@ -14,6 +14,7 @@ A light, bilingual Uzbek–English website foundation for a licensed private K�
 - Responsive, accessible navigation and forms
 - Uzbek-default entry with a remembered English preference
 - Functional public filters and publication-gated detail-page templates
+- Multi-subject teacher profiles with independent leadership and multi-department classification
 - Honest empty states: drafts and missing records never appear publicly
 
 ## Run locally

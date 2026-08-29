@@ -21,7 +21,10 @@ create table if not exists public.content_items (
   body_uz text,
   body_en text,
   category text check (category is null or category in ('news', 'announcement')),
-  department text check (department is null or department in ('leadership', 'stem', 'languages', 'social-sciences')),
+  departments text[] not null default '{}',
+  subjects_uz text[] not null default '{}',
+  subjects_en text[] not null default '{}',
+  is_leadership boolean not null default false,
   event_date date,
   recipient_uz text,
   recipient_en text,
@@ -33,14 +36,19 @@ create table if not exists public.content_items (
   updated_at timestamptz not null default now(),
   published_at timestamptz,
   unique(type, slug),
-  check (
+  constraint content_items_departments_allowed check (departments <@ array['stem', 'languages', 'social-sciences', 'primary', 'arts-pe', 'student-support']::text[]),
+  constraint content_items_publish_requirements check (
     status = 'draft' or (
       length(trim(title_uz)) > 0 and length(trim(title_en)) > 0 and
       length(trim(summary_uz)) > 0 and length(trim(summary_en)) > 0 and
       case type
         when 'teacher' then
           length(trim(coalesce(recipient_uz, ''))) > 0 and
-          length(trim(coalesce(recipient_en, ''))) > 0 and department is not null
+          length(trim(coalesce(recipient_en, ''))) > 0 and
+          (is_leadership or (
+            cardinality(departments) > 0 and
+            cardinality(subjects_uz) > 0 and cardinality(subjects_en) > 0
+          ))
         when 'news' then
           length(trim(coalesce(body_uz, ''))) > 0 and
           length(trim(coalesce(body_en, ''))) > 0 and

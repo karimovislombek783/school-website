@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
   return {
-    title: lang === "uz" ? "Administrator | Izzatbek Edu Group" : "Administrator | Izzatbek Edu Group",
+    title: lang === "uz" ? 'Administrator | "IZZATBEK-EDU-GROUP"' : 'Administrator | "IZZATBEK-EDU-GROUP"',
     robots: { index: false, follow: false },
   };
 }

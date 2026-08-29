@@ -76,4 +76,8 @@ Use `owner`, `administrator`, `editor`, or `writer` exactly.
 - Uploaded files reject non-JPEG/PNG/WebP content and files over 5 MB.
 - Contact and newsletter collection remain inactive until approved privacy and consent wording exists.
 
+## Existing project update
+
+If the original schema was already installed before the multi-subject teacher update, run `supabase/migrations/20260829_teacher_profiles.sql` once in SQL Editor. It adds independent leadership status, multiple departments, and bilingual subject lists without removing existing content.
+
 Free projects may pause after inactivity and have usage quotas. Review current Supabase plan limits before the official public launch.

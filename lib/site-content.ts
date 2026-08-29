@@ -1,22 +1,27 @@
 export type Lang = "uz" | "en";
 
 export const siteIdentity = {
-  legalName: "[Maktabning aniq yuridik nomi]",
-  publicName: "Maktab nomi",
-  shortName: "MN",
-  domain: "[maktab.uz]",
+  legalName: '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi',
+  shortName: "IEG",
+  domain: "izzatbek-edu-group.uz",
   established: "[Tasdiqlanadi]",
   phone: "[Rasmiy telefon raqami]",
   email: "[Rasmiy elektron pochta]",
-  address: "[Tuman, viloyat, O‘zbekiston]",
-  license: "[Litsenziya ma’lumotlari tasdiqlanadi]",
+  address: "Xorazm viloyati, Xazorasp tumani, Al-Xorazmiy mahallasi, Mustaqillik ko‘chasi",
+  license: "531978",
+  licenseOrder: "L-44091385",
+  licenseEffectiveFrom: "24.08.2024",
+  licenseDuration: "Cheksiz / Unlimited",
+  licenseAuthority: "O‘zbekiston Respublikasi Maktabgacha va maktab ta’limi vazirligi",
+  licensedActivity: "Umumiy o‘rta va o‘rta maxsus ta’lim xizmatlari",
+  licensedGrades: "I–XI sinflar / Grades I–XI",
 };
 
 export const copy = {
   uz: {
     languageName: "O‘zbekcha", alternateLanguage: "English",
     development: "Rivojlantirish namunasi",
-    developmentNote: "Yuridik nom, litsenziya, aloqa ma’lumotlari va fotosuratlar maktab tomonidan tasdiqlangach yangilanadi.",
+    developmentNote: "Aloqa ma’lumotlari, rahbariyat, xodimlar va fotosuratlar maktab tomonidan tasdiqlangach yangilanadi.",
     nav: { home: "Bosh sahifa", about: "Maktab haqida", academics: "Ta’lim", teachers: "Jamoa", news: "Yangiliklar", achievements: "Yutuqlar", admissions: "Qabul", contact: "Aloqa" },
     home: {
       eyebrow: "Bilim • Mas’uliyat • Taraqqiyot", title: "Har bir o‘quvchi uchun mustahkam ta’lim poydevori",
@@ -44,7 +49,7 @@ export const copy = {
   },
   en: {
     languageName: "English", alternateLanguage: "O‘zbekcha",
-    development: "Development preview", developmentNote: "The legal name, licence, contact details and photography will be updated after school approval.",
+    development: "Development preview", developmentNote: "Contact details, leadership, staff information and photography will be updated after school approval.",
     nav: { home: "Home", about: "About", academics: "Academics", teachers: "Our team", news: "News", achievements: "Achievements", admissions: "Admissions", contact: "Contact" },
     home: {
       eyebrow: "Knowledge • Responsibility • Growth", title: "A strong educational foundation for every student",
@@ -90,7 +95,9 @@ export type PublicationStatus = "draft" | "published";
 export type TeacherRecord = {
   slug: string;
   status: PublicationStatus;
-  department: "leadership" | "stem" | "languages" | "social-sciences";
+  departments: TeacherDepartment[];
+  isLeadership: boolean;
+  subjects: Record<Lang, string[]>;
   name: Record<Lang, string>;
   role: Record<Lang, string>;
   biography: Record<Lang, string>;
@@ -98,6 +105,8 @@ export type TeacherRecord = {
   initials: string;
   imageUrl?: string;
 };
+
+export type TeacherDepartment = "stem" | "languages" | "social-sciences" | "primary" | "arts-pe" | "student-support";
 
 export type NewsRecord = {
   slug: string;

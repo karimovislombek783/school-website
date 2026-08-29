@@ -2,12 +2,12 @@
 
 Obtain school leadership's approval before replacing placeholders.
 
-- Exact registered legal name in Uzbek and English
-- Public school name and approved logo
-- Licence number, issuing authority, issue date, and approved wording
+- Approved English rendering of the registered legal name, if the school wants one
+- Approved logo or mark (the exact legal name is currently used as the site identity)
+- Approval of the licence wording already extracted from licence No. 531978
 - Official address, phone, email, hours, and map location
 - Authorized photos with appropriate student or parent consent
-- Verified staff names, roles, biographies, qualifications, and photos
+- Verified staff names, administrative roles, departments, subjects, biographies, qualifications, and photos
 - Curriculum, grade levels, admissions process, fees wording, and deadlines
 - Real news, achievements, certificates, and permission to publish them
 - Privacy notice, newsletter consent, retention rules, and contact person

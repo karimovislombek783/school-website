@@ -139,7 +139,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .teacher-card { padding: 25px; border: 1px solid var(--line); border-radius: var(--radius); background: white; }
 .teacher-avatar { display: grid; width: 100%; aspect-ratio: 1.05; place-items: center; margin-bottom: 21px; border-radius: 9px; background: var(--blue-soft); color: var(--navy); font-family: Georgia, serif; font-size: 2.3rem; }
 .teacher-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
-.teacher-card > span { color: var(--navy); font-size: .72rem; font-weight: 800; text-transform: uppercase; }
+.teacher-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.teacher-tags span { padding: 4px 8px; border-radius: 999px; background: var(--blue-soft); color: var(--navy); font-size: .68rem; font-weight: 800; }
 .teacher-card h2 { margin: 8px 0 5px; font-size: 1.25rem; }
 .teacher-card p { margin: 0 0 13px; }
 .teacher-card small { color: var(--muted); line-height: 1.5; }
@@ -230,6 +231,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .cms-close { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border: 1px solid var(--line); border-radius: 9px; color: var(--navy); font-size: 1.5rem; line-height: 1; }
 .cms-close:hover { background: var(--blue-soft); }
 .cms-form-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+.cms-check { align-items: center; padding: 13px 14px; border: 1px solid var(--line); border-radius: 9px; background: #fafcff; color: var(--ink); }
+.cms-check input, .cms-options input { width: 17px; min-height: 17px; margin: 0; }
+.cms-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: 9px; }
+.cms-options legend { padding: 0 7px; color: var(--ink); font-size: .82rem; font-weight: 750; }
+.cms-options label { align-items: center; color: var(--ink); font-size: .8rem; }
 .cms-form input[type="file"] { min-height: 0; padding: 12px; }
 .role-note { align-self: end; margin: 0; padding: 12px; border-radius: 8px; background: var(--gold-soft); color: #6a501a; font-size: .82rem; }
 .cms-remove-image { align-items: center; color: var(--ink); }
@@ -336,6 +342,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .admin-main { padding: 18px; }
   .admin-session { align-items: flex-start; flex-direction: column; }
   .admin-session-actions { width: 100%; justify-content: space-between; }
+  .cms-options { grid-template-columns: 1fr; }
   .admin-heading { align-items: flex-start; flex-direction: column; }
   .admin-stats { grid-template-columns: 1fr; }
   .form-row, .footer-bottom { align-items: flex-start; flex-direction: column; }

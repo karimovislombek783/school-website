@@ -6,6 +6,8 @@ const schema = readFileSync("supabase/schema.sql", "utf8");
 const gateway = readFileSync("components/admin-gateway.tsx", "utf8");
 const consoleSource = readFileSync("components/admin-console.tsx", "utf8");
 const adminRoute = readFileSync("app/[lang]/admin/page.tsx", "utf8");
+const siteContent = readFileSync("lib/site-content.ts", "utf8");
+const directory = readFileSync("components/content-directory.tsx", "utf8");
 
 test("database defines separated staff roles", () => {
   for (const role of ["owner", "administrator", "editor", "writer"]) {
@@ -43,4 +45,20 @@ test("CMS editor is on-demand and fully language-aware", () => {
   assert.match(consoleSource, /Qoralama/);
   assert.match(consoleSource, /Nashr qilingan/);
   assert.match(gateway, /<LanguageSwitch/);
+});
+
+test("teacher identity supports leadership, multiple departments, and multiple subjects", () => {
+  assert.match(schema, /departments text\[\]/);
+  assert.match(schema, /subjects_uz text\[\]/);
+  assert.match(schema, /subjects_en text\[\]/);
+  assert.match(schema, /is_leadership boolean/);
+  assert.match(consoleSource, /getAll\("departments"\)/);
+  assert.match(directory, /item\.isLeadership/);
+  assert.match(directory, /item\.departments\.includes/);
+});
+
+test("confirmed legal identity replaces the public-name placeholder", () => {
+  assert.match(siteContent, /IZZATBEK-EDU-GROUP/);
+  assert.match(siteContent, /license: "531978"/);
+  assert.doesNotMatch(siteContent, /publicName:/);
 });

@@ -22,10 +22,10 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
       </div>
       <header className="site-header">
         <div className="header-inner">
-          <Link href={`/${lang}`} className="site-brand" aria-label={`${siteIdentity.publicName} — ${t.nav.home}`}>
-            <span className="brand-mark">M</span>
+          <Link href={`/${lang}`} className="site-brand" aria-label={`${siteIdentity.legalName} — ${t.nav.home}`}>
+            <span className="brand-mark">I</span>
             <span className="brand-copy">
-              <strong>{siteIdentity.publicName}</strong>
+              <strong>{siteIdentity.legalName}</strong>
               <small>{siteIdentity.domain}</small>
             </span>
           </Link>
@@ -63,7 +63,7 @@ export function SiteFooter({ lang }: { lang: Lang }) {
     <footer className="site-footer">
       <div className="footer-grid">
         <div>
-          <div className="site-brand footer-brand"><span className="brand-mark">M</span><strong>{siteIdentity.publicName}</strong></div>
+          <div className="site-brand footer-brand"><span className="brand-mark">I</span><strong>{siteIdentity.legalName}</strong></div>
           <p>{t.footer.description}</p>
         </div>
         <div>
