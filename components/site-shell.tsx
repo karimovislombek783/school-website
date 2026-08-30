@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Mail, MapPin, Menu, Phone, ShieldCheck, X } from "lucide-react";
+import { Camera, Mail, MapPin, Menu, Phone, Send, ShieldCheck, X } from "lucide-react";
 import { copy, Lang, siteIdentity } from "@/lib/site-content";
 import { LanguageSwitch } from "@/components/language-switch";
 
@@ -20,13 +20,15 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
         <div className="masthead-inner">
           <div className="masthead-side masthead-left">
             <a className="masthead-chip" href={siteIdentity.mapsUrl} target="_blank" rel="noreferrer"><MapPin size={17} /><span>{lang === "uz" ? "Hazorasp tumani" : "Hazorasp District"}</span></a>
-            <a className="masthead-chip" href={`tel:${siteIdentity.phoneHref}`}><Phone size={17} /><span>{siteIdentity.phone}</span></a>
+            <a className="masthead-chip masthead-phone" href={`tel:${siteIdentity.phoneHref}`}><Phone size={17} /><span>{siteIdentity.phone}</span></a>
             <a className="masthead-chip" href={`mailto:${siteIdentity.email}`}><Mail size={17} /><span>{siteIdentity.email}</span></a>
           </div>
           <Link href={`/${lang}`} className="masthead-emblem" aria-label={`${siteIdentity.legalName} — ${t.nav.home}`}>
             <span>IEG</span><small>Education</small>
           </Link>
           <div className="masthead-side masthead-right">
+            <a className="masthead-chip masthead-social" href={siteIdentity.telegramUrl} target="_blank" rel="noreferrer" aria-label={lang === "uz" ? "Maktabning rasmiy Telegram guruhi" : "School official Telegram group"} title="Telegram"><Send size={17} /></a>
+            <a className="masthead-chip masthead-social" href={siteIdentity.schoolInstagramUrl} target="_blank" rel="noreferrer" aria-label={lang === "uz" ? "Maktabning Instagram sahifasi" : "School Instagram"} title="Instagram"><Camera size={17} /></a>
             <Link className="masthead-chip" href={`/${lang}/legal`}><ShieldCheck size={17} /><span>{lang === "uz" ? "Litsenziya № 531978" : "Licence № 531978"}</span></Link>
             <LanguageSwitch lang={lang} href={alternatePath} label={t.alternateLanguage} />
           </div>
