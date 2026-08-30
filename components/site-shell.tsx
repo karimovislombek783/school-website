@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Mail, MapPin, Menu, ShieldCheck, X } from "lucide-react";
+import { Mail, MapPin, Menu, Phone, ShieldCheck, X } from "lucide-react";
 import { copy, Lang, siteIdentity } from "@/lib/site-content";
 import { LanguageSwitch } from "@/components/language-switch";
 
@@ -20,6 +20,7 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
         <div className="masthead-inner">
           <div className="masthead-side masthead-left">
             <a className="masthead-chip" href={siteIdentity.mapsUrl} target="_blank" rel="noreferrer"><MapPin size={17} /><span>{lang === "uz" ? "Hazorasp tumani" : "Hazorasp District"}</span></a>
+            <a className="masthead-chip" href={`tel:${siteIdentity.phoneHref}`}><Phone size={17} /><span>{siteIdentity.phone}</span></a>
             <a className="masthead-chip" href={`mailto:${siteIdentity.email}`}><Mail size={17} /><span>{siteIdentity.email}</span></a>
           </div>
           <Link href={`/${lang}`} className="masthead-emblem" aria-label={`${siteIdentity.legalName} — ${t.nav.home}`}>
@@ -78,7 +79,7 @@ export function SiteFooter({ lang }: { lang: Lang }) {
         </div>
         <div>
           <h2>{lang === "uz" ? "Bog‘lanish" : "Contact"}</h2>
-          <p>{siteIdentity.address}</p><p>{siteIdentity.phone}</p><p>{siteIdentity.email}</p>
+          <p>{siteIdentity.address}</p><p><a href={`tel:${siteIdentity.phoneHref}`}>{siteIdentity.phone}</a> · {siteIdentity.callingHours}</p><p><a href={`mailto:${siteIdentity.email}`}>{siteIdentity.email}</a></p>
         </div>
         <div>
           <h2>{lang === "uz" ? "Ma’lumot" : "Information"}</h2>

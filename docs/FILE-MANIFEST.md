@@ -16,7 +16,8 @@
 | `components/language-switch.tsx` | Remembers the visitor's chosen language |
 | `lib/site-content.ts` | Confirmed legal identity, bilingual content, and remaining placeholders |
 | `public/favicon.svg` | Temporary school mark |
-| `public/robots.txt` | Temporary search-indexing block |
+| `public/robots.txt` | Allows public search indexing and points crawlers to the sitemap |
+| `public/sitemap.xml` | Public Uzbek and English page index for search engines |
 | `tests/` | Automated route, interface, and security-contract checks |
 | `vercel.json` | Vercel build configuration |
 | `.env.example` | Future service configuration template |

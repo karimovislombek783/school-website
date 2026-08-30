@@ -3,9 +3,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
-  ArrowRight, BookOpen, Building2, CheckCircle2,
-  GraduationCap, HeartHandshake, Mail, MapPin, Phone,
-  Scale, ShieldCheck, Sparkles, Target, Users,
+  ArrowRight, BookOpen, Building2, CheckCircle2, Clock,
+  Camera, GraduationCap, HeartHandshake, Mail, MapPin, Phone,
+  Scale, Send, ShieldCheck, Sparkles, Target, Users,
 } from "lucide-react";
 import { AdminGateway } from "@/components/admin-gateway";
 import { AchievementDirectory, NewsDirectory, TeacherDirectory } from "@/components/content-directory";
@@ -147,10 +147,13 @@ function AboutContent({ lang }: { lang: Lang }) {
 
 function AcademicsContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
-  const items = isUz
-    ? [[BookOpen, "Milliy o‘quv dasturi", "Ta’lim O‘zbekiston milliy o‘quv dasturi asosida olib boriladi."], [GraduationCap, "Boshlang‘ich ta’lim", "I–IV sinflar."], [Scale, "Tayanch o‘rta ta’lim", "V–IX sinflar."], [Sparkles, "O‘rta ta’lim", "X–XI sinflar."]]
-    : [[BookOpen, "National curriculum", "Education is provided in accordance with Uzbekistan’s national curriculum."], [GraduationCap, "Primary education", "Grades 1–4."], [Scale, "Basic secondary education", "Grades 5–9."], [Sparkles, "Secondary education", "Grades 10–11."]];
-  return <section className="content-section page-content"><div className="info-grid">{items.map(([Icon, title, body]) => <article key={String(title)}><Icon /><h2>{title as string}</h2><p>{body as string}</p><span>{copy[lang].sections.verifiedLater}</span></article>)}</div></section>;
+  const stages = isUz
+    ? [[GraduationCap, "Boshlang‘ich ta’lim", "I–IV sinflar."], [Scale, "Tayanch o‘rta ta’lim", "V–IX sinflar."], [Sparkles, "O‘rta ta’lim", "X–XI sinflar."]]
+    : [[GraduationCap, "Primary education", "Grades 1–4."], [Scale, "Basic secondary education", "Grades 5–9."], [Sparkles, "Secondary education", "Grades 10–11."]];
+  const subjects = isUz
+    ? ["Matematika", "Ingliz tili", "Tarix va huquq", "Biologiya va kimyo", "Ona tili va adabiyot"]
+    : ["Mathematics", "English", "History and Law", "Biology and Chemistry", "Mother Tongue and Literature"];
+  return <section className="content-section page-content"><div className="info-grid">{stages.map(([Icon, title, body]) => <article key={String(title)}><Icon /><h2>{title as string}</h2><p>{body as string}</p><span>{isUz ? "Tasdiqlangan ta’lim bosqichi" : "Confirmed education stage"}</span></article>)}</div><div className="callout"><div><p className="eyebrow">{isUz ? "Chuqurlashtirilgan fanlar" : "Subjects taught in depth"}</p><h2>{isUz ? "Sertifikatlar va kirish imtihonlariga tayyorgarlik" : "Preparation for certificates and entrance examinations"}</h2><p>{subjects.join(" • ")}</p></div><BookOpen size={42} /></div></section>;
 }
 
 function TeachersContent({ lang, items }: { lang: Lang; items: PublishedContent["teachers"] }) {
@@ -176,12 +179,12 @@ function AdmissionsContent({ lang }: { lang: Lang }) {
 
 function ContactContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
-  return <section className="content-section page-content"><div className="contact-details standalone"><article><MapPin /><div><h2>{isUz ? "Yuridik manzil" : "Legal address"}</h2><p>{siteIdentity.address}</p></div></article><article><Phone /><div><h2>{isUz ? "Telefon" : "Phone"}</h2><p>{siteIdentity.phone}</p></div></article><article><Mail /><div><h2>{isUz ? "Elektron pochta" : "Email"}</h2><a href={`mailto:${siteIdentity.email}`}>{siteIdentity.email}</a></div></article><a className="map-link-card" href={siteIdentity.mapsUrl} target="_blank" rel="noreferrer"><MapPin /><div><strong>{isUz ? "Google Maps’da ochish" : "Open in Google Maps"}</strong><span>{isUz ? "Maktab joylashuvini xaritada ko‘ring" : "View the school location on the map"}</span></div><ArrowRight size={20} /></a></div></section>;
+  return <section className="content-section page-content"><div className="contact-details standalone"><article><MapPin /><div><h2>{isUz ? "Maktab manzili" : "School address"}</h2><p>{siteIdentity.address}</p></div></article><article><Phone /><div><h2>{isUz ? "Telefon" : "Phone"}</h2><a href={`tel:${siteIdentity.phoneHref}`}>{siteIdentity.phone}</a></div></article><article><Clock /><div><h2>{isUz ? "Qo‘ng‘iroq qilish vaqti" : "Calling hours"}</h2><p>{siteIdentity.callingHours}</p></div></article><article><Mail /><div><h2>{isUz ? "Elektron pochta" : "Email"}</h2><a href={`mailto:${siteIdentity.email}`}>{siteIdentity.email}</a></div></article><a className="map-link-card" href={siteIdentity.mapsUrl} target="_blank" rel="noreferrer"><MapPin /><div><strong>{isUz ? "Google Maps’da ochish" : "Open in Google Maps"}</strong><span>{isUz ? "Maktab joylashuvini xaritada ko‘ring" : "View the school location on the map"}</span></div><ArrowRight size={20} /></a></div><div className="info-grid social-links-grid"><a href={siteIdentity.telegramUrl} target="_blank" rel="noreferrer"><Send /><h2>{isUz ? "Rasmiy Telegram guruhi" : "Official Telegram group"}</h2><p>{isUz ? "Faqat e’lonlar — a’zolar uchun yozish yopiq" : "Announcements only — member messaging is disabled"}</p></a><a href={siteIdentity.schoolInstagramUrl} target="_blank" rel="noreferrer"><Camera /><h2>{isUz ? "Maktab Instagram sahifasi" : "School Instagram"}</h2><p>@izzatbek_oliytalim_maktabi</p></a><a href={siteIdentity.directorInstagramUrl} target="_blank" rel="noreferrer"><Camera /><h2>{isUz ? "Direktor Instagram sahifasi" : "Director’s Instagram"}</h2><p>@izzatbekedu</p></a></div></section>;
 }
 
 function LegalContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
-  const rows = [[isUz ? "Yuridik nom" : "Legal name", siteIdentity.legalName], [isUz ? "Tashkilot turi" : "Institution type", isUz ? "Nodavlat ta’lim muassasasi" : "Non-state educational institution"], [isUz ? "Litsenziya raqami" : "Licence number", siteIdentity.license], [isUz ? "Reyestr tartib raqami" : "Registry order number", siteIdentity.licenseOrder], [isUz ? "Amal qilish muddati" : "Validity", `${siteIdentity.licenseEffectiveFrom} — ${isUz ? "cheksiz" : "unlimited"}`], [isUz ? "Faoliyat turi" : "Licensed activity", siteIdentity.licensedActivity], [isUz ? "Litsenziyalangan sinflar" : "Licensed grades", siteIdentity.licensedGrades], [isUz ? "Vakolatli organ" : "Issuing authority", siteIdentity.licenseAuthority], [isUz ? "Yuridik manzil" : "Legal address", siteIdentity.address], [isUz ? "Ta’lim faoliyati manzillari" : "Licensed activity addresses", siteIdentity.activityAddresses.join("; ")], [isUz ? "Domen" : "Domain", siteIdentity.domain]];
+  const rows = [[isUz ? "Yuridik nom" : "Legal name", siteIdentity.legalName], [isUz ? "Tashkilot turi" : "Institution type", isUz ? "Nodavlat ta’lim muassasasi" : "Non-state educational institution"], [isUz ? "Litsenziya raqami" : "Licence number", siteIdentity.license], [isUz ? "Reyestr tartib raqami" : "Registry order number", siteIdentity.licenseOrder], [isUz ? "Amal qilish muddati" : "Validity", `${siteIdentity.licenseEffectiveFrom} — ${isUz ? "cheksiz" : "unlimited"}`], [isUz ? "Faoliyat turi" : "Licensed activity", siteIdentity.licensedActivity], [isUz ? "Litsenziyalangan sinflar" : "Licensed grades", siteIdentity.licensedGrades], [isUz ? "Vakolatli organ" : "Issuing authority", siteIdentity.licenseAuthority], [isUz ? "Yuridik manzil" : "Legal address", siteIdentity.legalAddress], [isUz ? "Ta’lim faoliyati manzillari" : "Licensed activity addresses", siteIdentity.activityAddresses.join("; ")], [isUz ? "Domen" : "Domain", siteIdentity.domain]];
   return <section className="content-section page-content"><div className="legal-warning"><ShieldCheck /><div><h2>{isUz ? "Tekshirilmagan da’volar e’lon qilinmaydi" : "Unverified claims will not be published"}</h2><p>{isUz ? "To‘liq litsenziya nusxasi imzo va shaxsiy ma’lumotlarni himoya qilish uchun avtomatik ravishda ommaga chiqarilmaydi." : "The complete licence scan will not be published automatically, protecting signatures and personal information."}</p></div></div><dl className="legal-list">{rows.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl></section>;
 }
 
