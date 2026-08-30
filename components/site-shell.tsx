@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Camera, Mail, MapPin, Menu, Phone, Send, ShieldCheck, X } from "lucide-react";
+import { Mail, MapPin, Menu, Phone, Send, ShieldCheck, X } from "lucide-react";
 import { copy, Lang, siteIdentity } from "@/lib/site-content";
 import { LanguageSwitch } from "@/components/language-switch";
 
@@ -27,8 +27,10 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
             <span>IEG</span><small>Education</small>
           </Link>
           <div className="masthead-side masthead-right">
-            <a className="masthead-chip masthead-social" href={siteIdentity.telegramUrl} target="_blank" rel="noreferrer" aria-label={lang === "uz" ? "Maktabning rasmiy Telegram guruhi" : "School official Telegram group"} title="Telegram"><Send size={17} /></a>
-            <a className="masthead-chip masthead-social" href={siteIdentity.schoolInstagramUrl} target="_blank" rel="noreferrer" aria-label={lang === "uz" ? "Maktabning Instagram sahifasi" : "School Instagram"} title="Instagram"><Camera size={17} /></a>
+            <div className="masthead-socials" aria-label={lang === "uz" ? "Maktabning ijtimoiy tarmoqlari" : "School social media"}>
+              <a className="masthead-social" href={siteIdentity.telegramUrl} target="_blank" rel="noreferrer" aria-label={lang === "uz" ? "Maktabning rasmiy Telegram guruhi" : "School official Telegram group"} title="Telegram"><Send size={15} /></a>
+              <a className="masthead-social" href={siteIdentity.schoolInstagramUrl} target="_blank" rel="noreferrer" aria-label={lang === "uz" ? "Maktabning Instagram sahifasi" : "School Instagram"} title="Instagram"><InstagramMark /></a>
+            </div>
             <Link className="masthead-chip" href={`/${lang}/legal`}><ShieldCheck size={17} /><span>{lang === "uz" ? "Litsenziya № 531978" : "Licence № 531978"}</span></Link>
             <LanguageSwitch lang={lang} href={alternatePath} label={t.alternateLanguage} />
           </div>
@@ -67,6 +69,16 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
         )}
       </header>
     </>
+  );
+}
+
+function InstagramMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4.1" />
+      <circle cx="17.4" cy="6.7" r=".8" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
 
