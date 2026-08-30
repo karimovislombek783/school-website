@@ -21,23 +21,33 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const lang = rawLang as Lang;
   const page = slug?.[0] ?? "home";
   const detail = slug?.[1];
+  const path = slug?.length ? slug.join("/") : "";
+  const canonical = `/${lang}${path ? `/${path}` : ""}`;
+  const languagePath = path ? `/${path}` : "";
+  const alternates = {
+    canonical,
+    languages: {
+      uz: `/uz${languagePath}`,
+      en: `/en${languagePath}`,
+    },
+  };
   const content = detail ? await loadPublishedContent() : null;
   if (detail && page === "teachers") {
     const item = content?.teachers.find((record) => record.slug === detail);
-    if (item) return { title: item.name[lang], description: item.biography[lang] };
+    if (item) return { title: item.name[lang], description: item.biography[lang], alternates };
   }
   if (detail && page === "news") {
     const item = content?.news.find((record) => record.slug === detail);
-    if (item) return { title: item.title[lang], description: item.excerpt[lang] };
+    if (item) return { title: item.title[lang], description: item.excerpt[lang], alternates };
   }
   if (detail && page === "achievements") {
     const item = content?.achievements.find((record) => record.slug === detail);
-    if (item) return { title: item.title[lang], description: item.summary[lang] };
+    if (item) return { title: item.title[lang], description: item.summary[lang], alternates };
   }
-  if (page === "home") return { title: copy[lang].home.title, description: copy[lang].home.intro };
+  if (page === "home") return { title: copy[lang].home.title, description: copy[lang].home.intro, alternates };
   if (page === "admin") return { title: lang === "uz" ? "Kontent boshqaruvi" : "Content management", robots: { index: false, follow: false } };
   const pageCopy = copy[lang].pages[page as keyof typeof copy[typeof lang]["pages"]];
-  return pageCopy ? { title: pageCopy.title, description: pageCopy.intro } : {};
+  return pageCopy ? { title: pageCopy.title, description: pageCopy.intro, alternates } : {};
 }
 
 export default async function SchoolPage({ params }: { params: Promise<{ lang: string; slug?: string[] }> }) {

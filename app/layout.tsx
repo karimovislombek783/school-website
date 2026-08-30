@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://izzatbek-edu-group.uz"),
   title: {
     default: '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi',
     template: '%s | "IZZATBEK-EDU-GROUP"',
