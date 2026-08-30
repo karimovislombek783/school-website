@@ -13,6 +13,10 @@ import { SiteFooter, SiteHeader } from "@/components/site-shell";
 import { copy, isLang, Lang, pillars, siteIdentity } from "@/lib/site-content";
 import { loadPublishedContent, PublishedContent } from "@/lib/content-repository";
 
+// Public CMS pages must reflect newly published records immediately.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "admin"];
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string; slug?: string[] }> }): Promise<Metadata> {
