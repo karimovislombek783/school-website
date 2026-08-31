@@ -19,6 +19,29 @@ export type AdminRecord = {
 };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 2400;
+
+async function normalizeImage(file: File): Promise<File> {
+  if (file.size > MAX_IMAGE_BYTES) throw new Error("invalid-image");
+  const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  const isPng = bytes.length >= 8 && [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((value, index) => bytes[index] === value);
+  const isWebp = bytes.length >= 12 && new TextDecoder().decode(bytes.slice(0, 4)) === "RIFF" && new TextDecoder().decode(bytes.slice(8, 12)) === "WEBP";
+  if (!isJpeg && !isPng && !isWebp) throw new Error("invalid-image");
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const context = canvas.getContext("2d");
+  if (!context) { bitmap.close(); throw new Error("invalid-image"); }
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.88));
+  if (!blob || blob.size > MAX_IMAGE_BYTES) throw new Error("invalid-image");
+  return new File([blob], "approved-image.webp", { type: "image/webp", lastModified: Date.now() });
+}
 
 export function AdminConsole({ lang, initialRecords, initialAudit, role, currentUserId }: { lang: Lang; initialRecords: AdminRecord[]; initialAudit: AuditRecord[]; role: StaffRole; currentUserId: string }) {
   const [records, setRecords] = useState(initialRecords);
@@ -40,8 +63,19 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
     const formElement = event.currentTarget;
     const data = new FormData(formElement);
     const client = createBrowserSupabase();
-    const image = data.get("image");
+    const selectedImage = data.get("image");
+    let image = selectedImage;
     let uploadedPath: string | null = null;
+
+    if (selectedImage instanceof File && selectedImage.size > 0) {
+      try {
+        image = await normalizeImage(selectedImage);
+      } catch {
+        setBusy(false);
+        setMessage(lang === "uz" ? "Fayl haqiqiy JPG, PNG yoki WebP rasmi bo‘lishi va 5 MB dan kichik bo‘lishi kerak." : "The file must be a genuine JPG, PNG or WebP image smaller than 5 MB.");
+        return;
+      }
+    }
 
     if (image instanceof File && image.size > 0) {
       const allowed: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };

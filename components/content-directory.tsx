@@ -41,7 +41,7 @@ export function TeacherDirectory({ lang, items }: { lang: Lang; items: TeacherRe
         <div className="teacher-grid">
           {visible.map((teacher) => (
             <Link className="teacher-card teacher-link" href={`/${lang}/teachers/${teacher.slug}`} key={teacher.slug}>
-              <div className="teacher-avatar">{teacher.imageUrl ? <img src={teacher.imageUrl} alt="" /> : teacher.initials}</div>
+              <div className="teacher-avatar">{teacher.imageUrl ? <img src={teacher.imageUrl} alt={lang === "uz" ? `${teacher.name[lang]}, ${teacher.role[lang]}` : `Portrait of ${teacher.name[lang]}, ${teacher.role[lang]}`} /> : teacher.initials}</div>
               <div className="teacher-tags">{teacher.isLeadership && <span>{lang === "uz" ? "Rahbariyat" : "Leadership"}</span>}{teacher.departments.map((item) => <span key={item}>{departmentLabel(item, lang)}</span>)}</div>
               <h2>{teacher.name[lang]}</h2>
               <p>{teacher.role[lang]}</p>
@@ -66,8 +66,8 @@ export function NewsDirectory({ lang, items, limit }: { lang: Lang; items: NewsR
       </div>}
       {visible.length ? <div className="news-grid">{visible.map((item) => (
         <article className="news-card" key={item.slug}>
-          <div className="news-art">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Newspaper size={38} />}</div>
-          <div className="news-body"><div className="news-meta"><span>{item.category === "announcement" ? (lang === "uz" ? "E’lon" : "Announcement") : copy[lang].nav.news}</span><time>{item.date}</time></div><h3>{item.title[lang]}</h3><p>{item.excerpt[lang]}</p><Link className="text-link" href={`/${lang}/news/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div>
+          <div className="news-art">{item.imageUrl ? <img src={item.imageUrl} alt={item.title[lang]} /> : <Newspaper size={38} aria-hidden="true" />}</div>
+          <div className="news-body"><div className="news-meta"><span>{item.category === "announcement" ? (lang === "uz" ? "E’lon" : "Announcement") : copy[lang].nav.news}</span><time dateTime={item.date}>{item.date}</time></div><h3>{item.title[lang]}</h3><p>{item.excerpt[lang]}</p><Link className="text-link" href={`/${lang}/news/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div>
         </article>
       ))}</div> : <EmptyState lang={lang} kind="news" filtered={items.length > 0} />}
     </>
@@ -76,7 +76,7 @@ export function NewsDirectory({ lang, items, limit }: { lang: Lang; items: NewsR
 
 export function AchievementDirectory({ lang, items }: { lang: Lang; items: AchievementRecord[] }) {
   return items.length ? <div className="news-grid">{items.map((item) => (
-    <article className="news-card" key={item.slug}><div className="news-art">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Award size={38} />}</div><div className="news-body"><div className="news-meta"><span>{lang === "uz" ? "Tasdiqlangan yutuq" : "Verified achievement"}</span><time>{item.date}</time></div><h3>{item.title[lang]}</h3><p>{item.summary[lang]}</p><Link className="text-link" href={`/${lang}/achievements/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div></article>
+    <article className="news-card" key={item.slug}><div className="news-art">{item.imageUrl ? <img src={item.imageUrl} alt={item.title[lang]} /> : <Award size={38} aria-hidden="true" />}</div><div className="news-body"><div className="news-meta"><span>{lang === "uz" ? "Tasdiqlangan yutuq" : "Verified achievement"}</span><time dateTime={item.date}>{item.date}</time></div><h3>{item.title[lang]}</h3><p>{item.summary[lang]}</p><Link className="text-link" href={`/${lang}/achievements/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div></article>
   ))}</div> : <EmptyState lang={lang} kind="achievements" />;
 }
 
@@ -87,9 +87,9 @@ function EmptyState({ lang, kind, filtered = false }: { lang: Lang; kind: "teach
     : kind === "teachers"
       ? (lang === "uz" ? "Tasdiqlangan o‘qituvchi profillari tez orada qo‘shiladi." : "Approved teacher profiles will be added soon.")
       : kind === "news"
-        ? (lang === "uz" ? "Hozircha nashr etilgan yangiliklar yo‘q." : "There are no published news items yet.")
-        : (lang === "uz" ? "Tasdiqlangan yutuqlar tez orada qo‘shiladi." : "Verified achievements will be added soon.");
-  return <div className="public-empty"><Icon size={34} /><h3>{text}</h3><p>{lang === "uz" ? "Faqat maktab tasdiqlagan va nashr etilgan ma’lumotlar bu yerda ko‘rinadi." : "Only school-approved records marked as published appear here."}</p></div>;
+        ? (lang === "uz" ? "Maktab yangiliklari arxivi tayyorlanmoqda." : "The school news archive is being prepared.")
+        : (lang === "uz" ? "Tasdiqlangan yutuqlar arxivi tayyorlanmoqda." : "The verified achievements archive is being prepared.");
+  return <div className="public-empty"><Icon size={34} aria-hidden="true" /><h3>{text}</h3><p>{lang === "uz" ? "Yangi ma’lumot maktab rahbariyati tasdiqlaganidan so‘ng sana va manbasi bilan e’lon qilinadi." : "New information is published with its date and source after approval by school leadership."}</p></div>;
 }
 
 function departmentLabel(value: TeacherRecord["departments"][number], lang: Lang) {

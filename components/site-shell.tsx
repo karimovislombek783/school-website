@@ -16,6 +16,7 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
 
   return (
     <>
+      <a className="skip-link" href="#main-content">{lang === "uz" ? "Asosiy mazmunga o‘tish" : "Skip to main content"}</a>
       <div className="institutional-masthead">
         <div className="masthead-inner">
           <div className="masthead-side masthead-left">
@@ -44,7 +45,7 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
               <small>{siteIdentity.domain}</small>
             </span>
           </Link>
-          <nav className="desktop-nav" aria-label="Primary navigation">
+          <nav className="desktop-nav" aria-label={lang === "uz" ? "Asosiy navigatsiya" : "Primary navigation"}>
             {navRoutes.map((route) => (
               <Link key={route} className={current.split("/")[0] === route ? "active" : ""} href={`/${lang}/${route}`}>
                 {t.nav[route]}
@@ -53,13 +54,13 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
           </nav>
           <div className="header-actions">
             <Link className="header-admissions" href={`/${lang}/admissions`}>{t.nav.admissions}</Link>
-            <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle navigation">
+            <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-navigation" aria-label={lang === "uz" ? "Navigatsiyani ochish yoki yopish" : "Toggle navigation"}>
               {open ? <X /> : <Menu />}
             </button>
           </div>
         </div>
         {open && (
-          <nav className="mobile-nav" aria-label="Mobile navigation">
+          <nav id="mobile-navigation" className="mobile-nav" aria-label={lang === "uz" ? "Mobil navigatsiya" : "Mobile navigation"}>
             <Link href={`/${lang}`} onClick={() => setOpen(false)}>{t.nav.home}</Link>
             {navRoutes.map((route) => (
               <Link key={route} href={`/${lang}/${route}`} onClick={() => setOpen(false)}>{t.nav[route]}</Link>

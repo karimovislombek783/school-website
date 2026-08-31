@@ -8,6 +8,9 @@ const consoleSource = readFileSync("components/admin-console.tsx", "utf8");
 const adminRoute = readFileSync("app/[lang]/admin/page.tsx", "utf8");
 const siteContent = readFileSync("lib/site-content.ts", "utf8");
 const directory = readFileSync("components/content-directory.tsx", "utf8");
+const nextConfig = readFileSync("next.config.ts", "utf8");
+const layout = readFileSync("app/layout.tsx", "utf8");
+const proxy = readFileSync("proxy.ts", "utf8");
 
 test("database defines separated staff roles", () => {
   for (const role of ["owner", "administrator", "editor", "writer"]) {
@@ -31,6 +34,23 @@ test("school media is private and validates uploads", () => {
   assert.match(schema, /image\/png/);
   assert.match(schema, /image\/webp/);
   assert.match(consoleSource, /MAX_IMAGE_BYTES = 5 \* 1024 \* 1024/);
+  assert.match(consoleSource, /normalizeImage/);
+  assert.match(consoleSource, /createImageBitmap/);
+  assert.match(consoleSource, /canvas\.toBlob/);
+});
+
+test("deployment defines defensive browser headers", () => {
+  for (const header of ["Content-Security-Policy", "X-Content-Type-Options", "X-Frame-Options", "Referrer-Policy", "Permissions-Policy", "Strict-Transport-Security"]) {
+    assert.match(nextConfig, new RegExp(header));
+  }
+  assert.match(nextConfig, /poweredByHeader: false/);
+});
+
+test("localized pages expose language and structured school identity", () => {
+  assert.match(proxy, /x-school-lang/);
+  assert.match(layout, /requestHeaders\.get\("x-school-lang"\)/);
+  assert.match(layout, /"@type": "School"/);
+  assert.match(directory, /Portrait of/);
 });
 
 test("browser code does not request a service-role secret", () => {

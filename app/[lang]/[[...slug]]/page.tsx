@@ -66,7 +66,9 @@ export default async function SchoolPage({ params }: { params: Promise<{ lang: s
   return (
     <div className="site-page">
       <SiteHeader lang={lang} current={slug?.join("/") ?? page} />
-      {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} content={content} /> : page === "home" ? <HomePage lang={lang} news={content.news} /> : page === "admin" ? <AdminPage lang={lang} /> : <InnerPage lang={lang} page={page} content={content} />}
+      <div id="main-content" tabIndex={-1}>
+        {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} content={content} /> : page === "home" ? <HomePage lang={lang} news={content.news} /> : page === "admin" ? <AdminPage lang={lang} /> : <InnerPage lang={lang} page={page} content={content} />}
+      </div>
       <SiteFooter lang={lang} />
     </div>
   );
@@ -188,7 +190,16 @@ function AchievementsContent({ lang, items }: { lang: Lang; items: PublishedCont
 function AdmissionsContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
   const steps = isUz ? [["01", "Qo‘ng‘iroq qiling", "Qabul bo‘yicha maktabning rasmiy telefon raqamiga murojaat qiling."], ["02", "Maslahat oling", "Sinflar, mavjud joylar va kerakli hujjatlar haqida ma’lumot oling."], ["03", "Maktabga tashrif buyuring", "Keyingi qadamlar maktab ma’muriyati bilan kelishiladi."]] : [["01", "Call the school", "Contact the school through its official admissions telephone number."], ["02", "Receive a consultation", "Ask about grades, availability and required documents."], ["03", "Visit the school", "Agree the next steps directly with the school administration."]];
-  return <section className="content-section page-content"><div className="process-grid">{steps.map(([n, title, body]) => <article key={n}><strong>{n}</strong><h2>{title}</h2><p>{body}</p></article>)}</div><div className="callout"><div><p className="eyebrow">{isUz ? "Ta’lim to‘lovi" : "Tuition"}</p><h2>{isUz ? "Ma’lumot individual maslahat davomida beriladi" : "Information is provided during an individual consultation"}</h2></div><Link className="button button-primary" href={`/${lang}/contact`}>{isUz ? "Bog‘lanish" : "Contact the school"}<ArrowRight size={18} /></Link></div></section>;
+  const answers = isUz ? [
+    ["Maslahat vaqtida nimalar aniqlanadi?", "Sinf, mavjud joylar, kerakli hujjatlar, ta’lim to‘lovi va tashrif vaqti maktab ma’muriyati bilan tasdiqlanadi."],
+    ["Qachon qo‘ng‘iroq qilish mumkin?", `Maktab ${siteIdentity.callingHours} oralig‘ida qo‘ng‘iroqlarni qabul qiladi.`],
+    ["Qayerga tashrif buyurish kerak?", siteIdentity.address],
+  ] : [
+    ["What is confirmed during the consultation?", "The school administration confirms the grade, available places, required documents, tuition and visit time."],
+    ["When may families call?", `The school receives calls between ${siteIdentity.callingHours}.`],
+    ["Where should families visit?", siteIdentity.address],
+  ];
+  return <section className="content-section page-content"><div className="process-grid">{steps.map(([n, title, body]) => <article key={n}><strong>{n}</strong><h2>{title}</h2><p>{body}</p></article>)}</div><div className="admissions-faq"><p className="eyebrow">{isUz ? "Qabul bo‘yicha qisqa ma’lumot" : "Admissions at a glance"}</p>{answers.map(([question, answer]) => <article key={question}><h2>{question}</h2><p>{answer}</p></article>)}</div><div className="callout"><div><p className="eyebrow">{isUz ? "Ta’lim to‘lovi" : "Tuition"}</p><h2>{isUz ? "Ma’lumot individual maslahat davomida beriladi" : "Information is provided during an individual consultation"}</h2></div><Link className="button button-primary" href={`/${lang}/contact`}>{isUz ? "Bog‘lanish" : "Contact the school"}<ArrowRight size={18} /></Link></div></section>;
 }
 
 function ContactContent({ lang }: { lang: Lang }) {
@@ -199,7 +210,7 @@ function ContactContent({ lang }: { lang: Lang }) {
 function LegalContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
   const rows = [[isUz ? "Yuridik nom" : "Legal name", siteIdentity.legalName], [isUz ? "Tashkilot turi" : "Institution type", isUz ? "Nodavlat ta’lim muassasasi" : "Non-state educational institution"], [isUz ? "Litsenziya raqami" : "Licence number", siteIdentity.license], [isUz ? "Reyestr tartib raqami" : "Registry order number", siteIdentity.licenseOrder], [isUz ? "Amal qilish muddati" : "Validity", `${siteIdentity.licenseEffectiveFrom} — ${isUz ? "cheksiz" : "unlimited"}`], [isUz ? "Faoliyat turi" : "Licensed activity", siteIdentity.licensedActivity], [isUz ? "Litsenziyalangan sinflar" : "Licensed grades", siteIdentity.licensedGrades], [isUz ? "Vakolatli organ" : "Issuing authority", siteIdentity.licenseAuthority], [isUz ? "Yuridik manzil" : "Legal address", siteIdentity.legalAddress], [isUz ? "Ta’lim faoliyati manzillari" : "Licensed activity addresses", siteIdentity.activityAddresses.join("; ")], [isUz ? "Domen" : "Domain", siteIdentity.domain]];
-  return <section className="content-section page-content"><div className="legal-warning"><ShieldCheck /><div><h2>{isUz ? "Tekshirilmagan da’volar e’lon qilinmaydi" : "Unverified claims will not be published"}</h2><p>{isUz ? "To‘liq litsenziya nusxasi imzo va shaxsiy ma’lumotlarni himoya qilish uchun avtomatik ravishda ommaga chiqarilmaydi." : "The complete licence scan will not be published automatically, protecting signatures and personal information."}</p></div></div><dl className="legal-list">{rows.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl></section>;
+  return <section className="content-section page-content"><div className="legal-warning"><ShieldCheck /><div><h2>{isUz ? "Rasmiy ma’lumotlar tekshirilgandan so‘ng e’lon qilinadi" : "Official information is published after verification"}</h2><p>{isUz ? "Ma’lumotlar maktab ma’muriyati tomonidan tasdiqlanadi. To‘liq litsenziya nusxasi imzo va shaxsiy ma’lumotlarni himoya qilish uchun ommaga chiqarilmaydi." : "Information is approved by the school administration. The complete licence scan is not published in order to protect signatures and personal information."}</p><small>{isUz ? "So‘nggi yangilanish: 31.08.2026" : "Last updated: 31 August 2026"}</small></div></div><dl className="legal-list">{rows.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl></section>;
 }
 
 function PrivacyContent({ lang }: { lang: Lang }) {
@@ -212,7 +223,7 @@ function DetailPage({ lang, page, slug, content }: { lang: Lang; page: string; s
   if (page === "teachers") {
     const teacher = content.teachers.find((item) => item.slug === slug);
     if (!teacher) notFound();
-    return <main><section className="page-hero compact"><p className="eyebrow">{teacher.role[lang]}</p><h1>{teacher.name[lang]}</h1><p>{teacher.biography[lang]}</p></section><section className="content-section page-content"><div className="profile-detail"><div className="teacher-avatar large">{teacher.imageUrl ? <img src={teacher.imageUrl} alt="" /> : teacher.initials}</div><div>{teacher.subjects[lang].length > 0 && <><h2>{lang === "uz" ? "O‘qitadigan fanlar" : "Subjects taught"}</h2><ul className="detail-list">{teacher.subjects[lang].map((item) => <li key={item}>{item}</li>)}</ul></>}<h2>{lang === "uz" ? "Malaka va tajriba" : "Qualifications and experience"}</h2>{teacher.qualifications[lang].length ? <ul className="detail-list">{teacher.qualifications[lang].map((item) => <li key={item}>{item}</li>)}</ul> : <p>{copy[lang].sections.verifiedLater}</p>}</div></div><Link className="text-link back-link" href={`/${lang}/teachers`}>← {lang === "uz" ? "Jamoaga qaytish" : "Back to the team"}</Link></section></main>;
+    return <main><section className="page-hero compact"><p className="eyebrow">{teacher.role[lang]}</p><h1>{teacher.name[lang]}</h1><p>{teacher.biography[lang]}</p></section><section className="content-section page-content"><div className="profile-detail"><div className="teacher-avatar large">{teacher.imageUrl ? <img src={teacher.imageUrl} alt={lang === "uz" ? `${teacher.name[lang]}, ${teacher.role[lang]}` : `Portrait of ${teacher.name[lang]}, ${teacher.role[lang]}`} /> : teacher.initials}</div><div>{teacher.subjects[lang].length > 0 && <><h2>{lang === "uz" ? "O‘qitadigan fanlar" : "Subjects taught"}</h2><ul className="detail-list">{teacher.subjects[lang].map((item) => <li key={item}>{item}</li>)}</ul></>}<h2>{lang === "uz" ? "Malaka va tajriba" : "Qualifications and experience"}</h2>{teacher.qualifications[lang].length ? <ul className="detail-list">{teacher.qualifications[lang].map((item) => <li key={item}>{item}</li>)}</ul> : <p>{copy[lang].sections.verifiedLater}</p>}</div></div><Link className="text-link back-link" href={`/${lang}/teachers`}>← {lang === "uz" ? "Jamoaga qaytish" : "Back to the team"}</Link></section></main>;
   }
   if (page === "news") {
     const item = content.news.find((record) => record.slug === slug);

@@ -36,6 +36,16 @@ test("renders both language routes", async () => {
   }
 });
 
+test("declares the correct document language and school schema", async () => {
+  for (const [pathname, lang] of [["/uz", "uz"], ["/en", "en"]]) {
+    const response = await render(pathname);
+    const html = await response.text();
+    assert.match(html, new RegExp(`<html[^>]+lang="${lang}"`));
+    assert.match(html, /application\/ld\+json/);
+    assert.match(html, /"@type":"School"/);
+  }
+});
+
 test("defaults the root route to Uzbek", async () => {
   const response = await render("/");
   assert.ok([307, 308].includes(response.status));

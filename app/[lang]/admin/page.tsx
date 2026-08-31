@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
   return {
-    title: lang === "uz" ? 'Administrator | "IZZATBEK-EDU-GROUP"' : 'Administrator | "IZZATBEK-EDU-GROUP"',
+    title: lang === "uz" ? "Kontent boshqaruvi" : "Content management",
     robots: { index: false, follow: false },
   };
 }
@@ -17,7 +17,7 @@ export default async function AdminPage({ params }: { params: Promise<{ lang: st
   const { lang: rawLang } = await params;
   if (rawLang !== "uz" && rawLang !== "en") notFound();
   const lang = rawLang as Lang;
-  return <main>
+  return <main id="main-content" tabIndex={-1}>
     <section className="page-hero compact">
       <p className="eyebrow">{lang === "uz" ? "Kontent boshqaruvi" : "Content management"}</p>
       <h1>{lang === "uz" ? "Maktab kontentini xavfsiz boshqarish" : "Manage school content safely"}</h1>
