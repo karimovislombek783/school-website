@@ -29,6 +29,10 @@ create table if not exists public.content_items (
   recipient_uz text,
   recipient_en text,
   source_url text check (source_url is null or source_url ~ '^https://'),
+  teacher_email text check (teacher_email is null or teacher_email ~* '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'),
+  show_teacher_email boolean not null default false,
+  cv_url text check (cv_url is null or cv_url ~ '^https://'),
+  related_links jsonb not null default '[]'::jsonb,
   image_path text check (image_path is null or image_path ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}\.(jpg|jpeg|png|webp)$'),
   created_by uuid not null default auth.uid() references auth.users(id),
   updated_by uuid not null default auth.uid() references auth.users(id),
@@ -37,6 +41,7 @@ create table if not exists public.content_items (
   published_at timestamptz,
   unique(type, slug),
   constraint content_items_departments_allowed check (departments <@ array['stem', 'languages', 'social-sciences', 'primary', 'arts-pe', 'student-support']::text[]),
+  constraint content_items_related_links_valid check (jsonb_typeof(related_links) = 'array' and jsonb_array_length(related_links) <= 8),
   constraint content_items_publish_requirements check (
     status = 'draft' or (
       length(trim(title_uz)) > 0 and length(trim(title_en)) > 0 and
@@ -63,6 +68,25 @@ create table if not exists public.content_items (
     )
   )
 );
+
+-- Safe to run on projects created with an earlier version of this schema.
+alter table public.content_items add column if not exists teacher_email text;
+alter table public.content_items add column if not exists show_teacher_email boolean not null default false;
+alter table public.content_items add column if not exists cv_url text;
+alter table public.content_items add column if not exists related_links jsonb not null default '[]'::jsonb;
+
+do $$ begin
+  alter table public.content_items add constraint content_items_teacher_email_valid
+    check (teacher_email is null or teacher_email ~* '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$');
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter table public.content_items add constraint content_items_cv_url_valid
+    check (cv_url is null or cv_url ~ '^https://');
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter table public.content_items add constraint content_items_related_links_shape
+    check (jsonb_typeof(related_links) = 'array' and jsonb_array_length(related_links) <= 8);
+exception when duplicate_object then null; end $$;
 
 create table if not exists public.audit_log (
   id bigint generated always as identity primary key,

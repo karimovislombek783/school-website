@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { FilePenLine, GraduationCap, Newspaper, Plus, ShieldCheck, Trash2, Users } from "lucide-react";
+import { FilePenLine, GraduationCap, Link2, Newspaper, Plus, ShieldCheck, Trash2, Users, X } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -16,6 +16,8 @@ export type AdminRecord = {
   title_uz: string; title_en: string; summary_uz: string; summary_en: string; body_uz: string | null; body_en: string | null;
   category: string | null; departments: string[]; subjects_uz: string[]; subjects_en: string[]; is_leadership: boolean; event_date: string | null; recipient_uz: string | null; recipient_en: string | null;
   source_url: string | null; image_path: string | null; created_by: string;
+  teacher_email: string | null; show_teacher_email: boolean; cv_url: string | null;
+  related_links: Array<{ label_uz: string; label_en: string; url: string }>;
 };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -97,6 +99,15 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
     }
 
     const removeImage = data.get("remove_image") === "on";
+    const relatedLabelsUz = data.getAll("related_label_uz").map(String);
+    const relatedLabelsEn = data.getAll("related_label_en").map(String);
+    const relatedUrls = data.getAll("related_url").map(String);
+    const relatedLinks = type === "teacher" ? relatedUrls.slice(0, 8).flatMap((url, index) => {
+      const cleanUrl = url.trim();
+      const labelUz = relatedLabelsUz[index]?.trim() ?? "";
+      const labelEn = relatedLabelsEn[index]?.trim() ?? "";
+      return cleanUrl && (labelUz || labelEn) ? [{ label_uz: labelUz || labelEn, label_en: labelEn || labelUz, url: cleanUrl }] : [];
+    }) : [];
     const payload = {
       type,
       slug: String(data.get("slug")).trim().toLowerCase(),
@@ -116,6 +127,10 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       recipient_uz: String(data.get("recipient_uz") || "").trim() || null,
       recipient_en: String(data.get("recipient_en") || "").trim() || null,
       source_url: String(data.get("source_url") || "").trim() || null,
+      teacher_email: type === "teacher" ? String(data.get("teacher_email") || "").trim() || null : null,
+      show_teacher_email: type === "teacher" && data.get("show_teacher_email") === "on",
+      cv_url: type === "teacher" ? String(data.get("cv_url") || "").trim() || null : null,
+      related_links: relatedLinks,
       image_path: uploadedPath ?? (removeImage ? null : editing?.image_path ?? null),
     };
 
@@ -165,6 +180,7 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
 
 function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { lang: Lang; type: AdminRecord["type"]; record: AdminRecord | null; role: StaffRole; busy: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onCancel: () => void }) {
   const canPublish = role !== "writer";
+  const [relatedLinks, setRelatedLinks] = useState(record?.related_links ?? []);
   return <form className="cms-form" onSubmit={onSubmit}>
     <div className="cms-form-heading"><div><p className="cms-kicker">{typeLabel(type, lang)}</p><h2>{record ? (lang === "uz" ? "Ma’lumotni tahrirlash" : "Edit record") : newLabel(type, lang)}</h2></div><button type="button" className="cms-close" onClick={onCancel} aria-label={lang === "uz" ? "Yopish" : "Close"}>×</button></div>
     <div className="editor-grid">
@@ -183,6 +199,19 @@ function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { la
         <fieldset className="full-field cms-options"><legend>{lang === "uz" ? "Fan bo‘limlari (bir nechtasini tanlash mumkin)" : "Academic departments (select all that apply)"}</legend>{departmentOptions(lang).map(([value, label]) => <label key={value} className="consent"><input name="departments" type="checkbox" value={value} defaultChecked={record?.departments?.includes(value) ?? false} />{label}</label>)}</fieldset>
         <label className="full-field">{lang === "uz" ? "O‘qitadigan fanlar (o‘zbekcha, vergul yoki yangi qator bilan)" : "Subjects taught (Uzbek, separated by commas or new lines)"}<textarea name="subjects_uz" rows={3} defaultValue={record?.subjects_uz?.join(", ") ?? ""} /></label>
         <label className="full-field">{lang === "uz" ? "O‘qitadigan fanlar (inglizcha, vergul yoki yangi qator bilan)" : "Subjects taught (English, separated by commas or new lines)"}<textarea name="subjects_en" rows={3} defaultValue={record?.subjects_en?.join(", ") ?? ""} /></label>
+        <label>{lang === "uz" ? "O‘qituvchi emaili (ixtiyoriy)" : "Teacher email (optional)"}<input name="teacher_email" type="email" autoComplete="off" defaultValue={record?.teacher_email ?? ""} /></label>
+        <label>{lang === "uz" ? "CV yoki profil havolasi (HTTPS)" : "CV or profile link (HTTPS)"}<input name="cv_url" type="url" pattern="https://.*" placeholder="https://…" defaultValue={record?.cv_url ?? ""} /></label>
+        <label className="full-field consent cms-check"><input name="show_teacher_email" type="checkbox" defaultChecked={record?.show_teacher_email ?? false} />{lang === "uz" ? "Emailni ommaviy profilda ko‘rsatish uchun o‘qituvchi roziligi olingan" : "Teacher consent has been obtained to show the email publicly"}</label>
+        <fieldset className="full-field cms-related-editor"><legend>{lang === "uz" ? "Tegishli havolalar (8 tagacha)" : "Related links (up to 8)"}</legend>
+          <p>{lang === "uz" ? "Instagram, Telegram, YouTube va boshqa mashhur xizmatlar logotipi URL bo‘yicha avtomatik tanlanadi." : "Instagram, Telegram, YouTube and other popular service icons are selected automatically from the URL."}</p>
+          {relatedLinks.map((link, index) => <div className="cms-related-row" key={index}>
+            <input name="related_label_uz" aria-label={lang === "uz" ? "Havola nomi o‘zbekcha" : "Link label in Uzbek"} placeholder={lang === "uz" ? "Nomi (o‘zbekcha)" : "Label (Uzbek)"} defaultValue={link.label_uz} />
+            <input name="related_label_en" aria-label={lang === "uz" ? "Havola nomi inglizcha" : "Link label in English"} placeholder={lang === "uz" ? "Nomi (inglizcha)" : "Label (English)"} defaultValue={link.label_en} />
+            <input name="related_url" aria-label="HTTPS URL" type="url" pattern="https://.*" placeholder="https://…" defaultValue={link.url} />
+            <button type="button" aria-label={lang === "uz" ? "Havolani olib tashlash" : "Remove link"} onClick={() => setRelatedLinks((items) => items.filter((_, itemIndex) => itemIndex !== index))}><X size={17} /></button>
+          </div>)}
+          {relatedLinks.length < 8 && <button className="button button-secondary cms-add-link" type="button" onClick={() => setRelatedLinks((items) => [...items, { label_uz: "", label_en: "", url: "" }])}><Link2 size={16} />{lang === "uz" ? "Havola qo‘shish" : "Add link"}</button>}
+        </fieldset>
       </>}
       {type !== "teacher" && <label>{lang === "uz" ? "Sana" : "Date"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>}
       {type === "news" && <label>{lang === "uz" ? "Tur" : "Category"}<select name="category" defaultValue={record?.category ?? "news"}><option value="news">{lang === "uz" ? "Yangilik" : "News"}</option><option value="announcement">{lang === "uz" ? "E’lon" : "Announcement"}</option></select></label>}

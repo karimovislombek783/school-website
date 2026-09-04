@@ -116,7 +116,12 @@ export type TeacherRecord = {
   qualifications: Record<Lang, string[]>;
   initials: string;
   imageUrl?: string;
+  email?: string;
+  cvUrl?: string;
+  relatedLinks: TeacherRelatedLink[];
 };
+
+export type TeacherRelatedLink = { label: Record<Lang, string>; url: string };
 
 export type TeacherDepartment = "stem" | "languages" | "social-sciences" | "primary" | "arts-pe" | "student-support";
 

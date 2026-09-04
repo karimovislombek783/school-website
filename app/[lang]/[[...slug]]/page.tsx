@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   ArrowRight, BookOpen, Building2, CheckCircle2, Clock,
-  Camera, GraduationCap, HeartHandshake, Mail, MapPin, Phone,
-  Scale, Send, ShieldCheck, Sparkles, Target, Users,
+  BriefcaseBusiness, Camera, Code2, ExternalLink, FileText, Globe2, GraduationCap, HeartHandshake,
+  Mail, MapPin, Phone, Play, Scale, Send, ShieldCheck, Sparkles, Target, Users,
 } from "lucide-react";
 import { AdminGateway } from "@/components/admin-gateway";
 import { AchievementDirectory, NewsDirectory, TeacherDirectory } from "@/components/content-directory";
@@ -13,9 +13,8 @@ import { SiteFooter, SiteHeader } from "@/components/site-shell";
 import { copy, isLang, Lang, pillars, siteIdentity } from "@/lib/site-content";
 import { loadPublishedContent, PublishedContent } from "@/lib/content-repository";
 
-// Public CMS pages must reflect newly published records immediately.
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// A short cache removes repeated database and signed-image work while keeping updates timely.
+export const revalidate = 120;
 
 const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "admin"];
 
@@ -223,7 +222,8 @@ function DetailPage({ lang, page, slug, content }: { lang: Lang; page: string; s
   if (page === "teachers") {
     const teacher = content.teachers.find((item) => item.slug === slug);
     if (!teacher) notFound();
-    return <main><section className="page-hero compact"><p className="eyebrow">{teacher.role[lang]}</p><h1>{teacher.name[lang]}</h1><p>{teacher.biography[lang]}</p></section><section className="content-section page-content"><div className="profile-detail"><div className="teacher-avatar large">{teacher.imageUrl ? <img src={teacher.imageUrl} alt={lang === "uz" ? `${teacher.name[lang]}, ${teacher.role[lang]}` : `Portrait of ${teacher.name[lang]}, ${teacher.role[lang]}`} /> : teacher.initials}</div><div>{teacher.subjects[lang].length > 0 && <><h2>{lang === "uz" ? "O‘qitadigan fanlar" : "Subjects taught"}</h2><ul className="detail-list">{teacher.subjects[lang].map((item) => <li key={item}>{item}</li>)}</ul></>}<h2>{lang === "uz" ? "Malaka va tajriba" : "Qualifications and experience"}</h2>{teacher.qualifications[lang].length ? <ul className="detail-list">{teacher.qualifications[lang].map((item) => <li key={item}>{item}</li>)}</ul> : <p>{copy[lang].sections.verifiedLater}</p>}</div></div><Link className="text-link back-link" href={`/${lang}/teachers`}>← {lang === "uz" ? "Jamoaga qaytish" : "Back to the team"}</Link></section></main>;
+    const hasLinks = Boolean(teacher.email || teacher.cvUrl || teacher.relatedLinks.length);
+    return <main><section className="page-hero compact"><p className="eyebrow">{teacher.role[lang]}</p><h1>{teacher.name[lang]}</h1><p>{teacher.biography[lang]}</p></section><section className="content-section page-content"><div className="profile-detail"><div className="teacher-avatar large">{teacher.imageUrl ? <img src={teacher.imageUrl} alt={lang === "uz" ? `${teacher.name[lang]}, ${teacher.role[lang]}` : `Portrait of ${teacher.name[lang]}, ${teacher.role[lang]}`} /> : teacher.initials}</div><div>{teacher.subjects[lang].length > 0 && <><h2>{lang === "uz" ? "O‘qitadigan fanlar" : "Subjects taught"}</h2><ul className="detail-list">{teacher.subjects[lang].map((item) => <li key={item}>{item}</li>)}</ul></>}<h2>{lang === "uz" ? "Malaka va tajriba" : "Qualifications and experience"}</h2>{teacher.qualifications[lang].length ? <ul className="detail-list">{teacher.qualifications[lang].map((item) => <li key={item}>{item}</li>)}</ul> : <p>{copy[lang].sections.verifiedLater}</p>}{hasLinks && <section className="teacher-links" aria-labelledby="teacher-links-title"><h2 id="teacher-links-title">{lang === "uz" ? "Aloqa va tegishli havolalar" : "Contact and related links"}</h2><div className="teacher-link-grid">{teacher.email && <a className="teacher-profile-link" href={`mailto:${teacher.email}`}><Mail /><span><small>{lang === "uz" ? "Elektron pochta" : "Email"}</small><strong>{teacher.email}</strong></span></a>}{teacher.cvUrl && <a className="teacher-profile-link" href={teacher.cvUrl} target="_blank" rel="noreferrer"><FileText /><span><small>CV</small><strong>{lang === "uz" ? "CV yoki professional profil" : "CV or professional profile"}</strong></span><ExternalLink className="external-mark" /></a>}{teacher.relatedLinks.map((item) => <a className="teacher-profile-link" href={item.url} target="_blank" rel="noreferrer" key={`${item.url}-${item.label[lang]}`}><TeacherLinkIcon url={item.url} /><span><small>{linkService(item.url)}</small><strong>{item.label[lang]}</strong></span><ExternalLink className="external-mark" /></a>)}</div></section>}</div></div><Link className="text-link back-link" href={`/${lang}/teachers`}>← {lang === "uz" ? "Jamoaga qaytish" : "Back to the team"}</Link></section></main>;
   }
   if (page === "news") {
     const item = content.news.find((record) => record.slug === slug);
@@ -236,6 +236,33 @@ function DetailPage({ lang, page, slug, content }: { lang: Lang; page: string; s
     return <main><article className="article-detail"><p className="eyebrow">{item.date}</p><h1>{item.title[lang]}</h1><p className="article-lead">{item.recipient[lang]}</p><p>{item.summary[lang]}</p><div className="legal-warning"><ShieldCheck /><div><h2>{lang === "uz" ? "Tasdiqlash manbasi" : "Verification source"}</h2><p>{item.source}</p></div></div><Link className="text-link back-link" href={`/${lang}/achievements`}>← {lang === "uz" ? "Yutuqlarga qaytish" : "Back to achievements"}</Link></article></main>;
   }
   notFound();
+}
+
+function TeacherLinkIcon({ url }: { url: string }) {
+  const service = linkService(url);
+  if (service === "Instagram") return <Camera />;
+  if (service === "Telegram") return <Send />;
+  if (service === "LinkedIn") return <BriefcaseBusiness />;
+  if (service === "YouTube") return <Play />;
+  if (service === "Facebook") return <Users />;
+  if (service === "GitHub") return <Code2 />;
+  if (service === "PDF") return <FileText />;
+  return <Globe2 />;
+}
+
+function linkService(value: string) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "instagram.com") return "Instagram";
+    if (host === "t.me" || host === "telegram.me") return "Telegram";
+    if (host === "linkedin.com") return "LinkedIn";
+    if (host === "youtube.com" || host === "youtu.be") return "YouTube";
+    if (host === "facebook.com" || host === "fb.com") return "Facebook";
+    if (host === "github.com") return "GitHub";
+    if (url.pathname.toLowerCase().endsWith(".pdf")) return "PDF";
+    return host;
+  } catch { return "Website"; }
 }
 
 function AdminPage({ lang }: { lang: Lang }) {

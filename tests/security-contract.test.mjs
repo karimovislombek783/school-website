@@ -11,6 +11,8 @@ const directory = readFileSync("components/content-directory.tsx", "utf8");
 const nextConfig = readFileSync("next.config.ts", "utf8");
 const layout = readFileSync("app/layout.tsx", "utf8");
 const proxy = readFileSync("proxy.ts", "utf8");
+const publicPage = readFileSync("app/[lang]/[[...slug]]/page.tsx", "utf8");
+const repository = readFileSync("lib/content-repository.ts", "utf8");
 
 test("database defines separated staff roles", () => {
   for (const role of ["owner", "administrator", "editor", "writer"]) {
@@ -75,6 +77,25 @@ test("teacher identity supports leadership, multiple departments, and multiple s
   assert.match(consoleSource, /getAll\("departments"\)/);
   assert.match(directory, /item\.isLeadership/);
   assert.match(directory, /item\.departments\.includes/);
+});
+
+test("teacher contact details are optional, consent-gated, and safe", () => {
+  assert.match(schema, /teacher_email text/);
+  assert.match(schema, /show_teacher_email boolean not null default false/);
+  assert.match(schema, /cv_url text/);
+  assert.match(schema, /related_links jsonb/);
+  assert.match(consoleSource, /show_teacher_email/);
+  assert.match(consoleSource, /relatedLinks\.length < 8/);
+  assert.match(repository, /row\.show_teacher_email \? cleanEmail/);
+  assert.match(repository, /url\.protocol === "https:"/);
+  assert.match(publicPage, /const hasLinks = Boolean\(teacher\.email \|\| teacher\.cvUrl \|\| teacher\.relatedLinks\.length\)/);
+  assert.match(publicPage, /target="_blank" rel="noreferrer"/);
+});
+
+test("public content uses a short response cache and longer-lived signed images", () => {
+  assert.match(publicPage, /revalidate = 120/);
+  assert.doesNotMatch(publicPage, /dynamic = "force-dynamic"/);
+  assert.match(repository, /createSignedUrl\(row\.image_path, 86400\)/);
 });
 
 test("confirmed legal identity replaces the public-name placeholder", () => {
