@@ -144,9 +144,14 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
     }) : [];
     const studentName = String(data.get("student_name") || "").trim();
     const achievementResult = String(data.get("achievement_result") || "").trim();
+    const achievementType = String(data.get("achievement_type") || "").trim();
+    const academicYear = String(data.get("academic_year") || "").trim();
+    const generatedSlug = type === "achievement" && !editing
+      ? uniqueAchievementSlug(studentName, achievementType, academicYear, records)
+      : editing?.slug ?? String(data.get("slug") || "").trim().toLowerCase();
     const payload = {
       type,
-      slug: String(data.get("slug")).trim().toLowerCase(),
+      slug: generatedSlug,
       status: canPublish ? String(data.get("status")) : "draft",
       title_uz: type === "achievement" ? studentName : String(data.get("title_uz")).trim(),
       title_en: type === "achievement" ? studentName : String(data.get("title_en")).trim(),
@@ -170,11 +175,11 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       image_path: uploadedPath ?? (removeImage ? null : editing?.image_path ?? null),
       gallery_paths: type === "news" ? [...existingGalleryPaths, ...uploadedGalleryPaths] : [],
       achievement_category: type === "achievement" ? String(data.get("achievement_category") || "international") : null,
-      achievement_type: type === "achievement" ? String(data.get("achievement_type") || "").trim() : null,
+      achievement_type: type === "achievement" ? achievementType : null,
       achievement_result: type === "achievement" ? achievementResult : null,
       achievement_subject_uz: type === "achievement" ? String(data.get("achievement_subject_uz") || "").trim() || null : null,
       achievement_subject_en: type === "achievement" ? String(data.get("achievement_subject_en") || "").trim() || null : null,
-      academic_year: type === "achievement" ? String(data.get("academic_year") || "").trim() : null,
+      academic_year: type === "achievement" ? academicYear : null,
     };
 
     const result = editing
@@ -228,7 +233,8 @@ function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { la
   return <form className="cms-form" onSubmit={onSubmit}>
     <div className="cms-form-heading"><div><p className="cms-kicker">{typeLabel(type, lang)}</p><h2>{record ? (lang === "uz" ? "Ma’lumotni tahrirlash" : "Edit record") : newLabel(type, lang)}</h2></div><button type="button" className="cms-close" onClick={onCancel} aria-label={lang === "uz" ? "Yopish" : "Close"}>×</button></div>
     <div className="editor-grid">
-      <label>{lang === "uz" ? "URL nomi (slug)" : "URL slug"}<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug} /></label>
+      {type !== "achievement" && <label>{lang === "uz" ? "URL nomi (slug)" : "URL slug"}<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug} /></label>}
+      {type === "achievement" && <p className="role-note full-field">{lang === "uz" ? "URL nomi o‘quvchi ismi, sertifikat turi va o‘quv yilidan avtomatik yaratiladi." : "The URL is generated automatically from the student name, certificate type and academic year."}</p>}
       {canPublish ? <label>{lang === "uz" ? "Nashr holati" : "Publication status"}<select name="status" defaultValue={record?.status ?? "draft"}><option value="draft">{lang === "uz" ? "Qoralama" : "Draft"}</option><option value="published">{lang === "uz" ? "Nashr qilingan" : "Published"}</option></select></label> : <><input type="hidden" name="status" value="draft" /><p className="role-note">{lang === "uz" ? "Yozuvchi yozuvlarni faqat qoralama sifatida saqlaydi." : "Writers can save records only as drafts."}</p></>}
       {type !== "achievement" && <>
         <label>{fieldLabel(type, "title", "uz", lang)}<input name="title_uz" required defaultValue={record?.title_uz} /></label>
@@ -365,6 +371,31 @@ function auditType(type: string | null, lang: Lang) {
 }
 
 function parseList(value: string) { return value.split(/[,\n]/).map((item) => item.trim()).filter(Boolean); }
+
+function uniqueAchievementSlug(studentName: string, achievementType: string, academicYear: string, records: AdminRecord[]) {
+  const base = slugify(`${studentName}-${achievementType}-${academicYear}`) || `achievement-${crypto.randomUUID().slice(0, 8)}`;
+  const used = new Set(records.filter((record) => record.type === "achievement").map((record) => record.slug));
+  if (!used.has(base)) return base;
+  let suffix = 2;
+  while (used.has(`${base}-${suffix}`)) suffix += 1;
+  return `${base}-${suffix}`;
+}
+
+function slugify(value: string) {
+  const cyrillic: Record<string, string> = {
+    а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "j", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "x", ҳ: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sh", ъ: "", ы: "i", ь: "", э: "e", ю: "yu", я: "ya", қ: "q", ғ: "g",
+  };
+  return value
+    .toLocaleLowerCase("uz")
+    .replace(/[а-яёқғҳ]/g, (letter) => cyrillic[letter] ?? "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[ʻʼ‘’`']/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 110)
+    .replace(/-+$/g, "");
+}
 
 function departmentOptions(lang: Lang): Array<[string, string]> {
   return [
