@@ -241,23 +241,26 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .achievement-open svg { width: 17px; }
 .achievement-empty { display: grid; min-height: 250px; place-items: center; align-content: center; gap: 10px; border: 1px dashed #aabed3; border-radius: 13px; color: var(--muted); text-align: center; }
 .achievement-empty svg { color: var(--navy); }
-.achievement-dialog { z-index: 1001 !important; width: calc(100vw - 32px) !important; max-width: 760px !important; max-height: min(88vh, 850px); overflow-x: hidden; overflow-y: auto; gap: 0 !important; padding: 0 !important; border: 1px solid #c5d1df !important; border-radius: 16px !important; background: #fff !important; color: var(--ink); box-shadow: 0 28px 90px rgba(3,16,34,.35) !important; }
+.achievement-dialog { z-index: 1001 !important; width: calc(100vw - 32px) !important; max-width: 700px !important; max-height: min(88vh, 850px); overflow-x: hidden; overflow-y: auto; gap: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 18px !important; background: #fff !important; color: var(--ink); box-shadow: 0 30px 90px rgba(3,16,34,.38) !important; }
 [data-slot="dialog-overlay"] { z-index: 1000 !important; background: rgba(3,13,27,.74) !important; backdrop-filter: blur(3px); }
-.achievement-dialog [data-slot="dialog-close"] { z-index: 2; top: 17px !important; right: 17px !important; display: grid; width: 36px; height: 36px; place-items: center; border-radius: 999px !important; background: rgba(255,255,255,.14) !important; color: white !important; opacity: 1 !important; }
-.achievement-dialog header { padding: 28px 76px 24px 30px; background: #0d2343; color: white; }
-.achievement-dialog header h2 { max-width: 620px; color: white; font-size: clamp(1.7rem, 4vw, 2.55rem); line-height: 1.08; overflow-wrap: anywhere; }
-.achievement-dialog header p { color: #c9d8e9; }
-.achievement-dialog-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
-.achievement-dialog-meta span { padding: 5px 9px; border-radius: 6px; background: #1d63bc; font-size: .72rem; font-weight: 850; }
-.achievement-dialog-meta strong { color: #72dcff; font-size: 1.45rem; }
-.achievement-details { display: grid; grid-template-columns: repeat(3, 1fr); margin: 4px 30px 0; border: 1px solid var(--line); border-radius: 10px; }
-.achievement-details div { display: grid; gap: 5px; padding: 17px; }
-.achievement-details div + div { border-left: 1px solid var(--line); }
-.achievement-details dt { color: var(--muted); font-size: .7rem; font-weight: 800; text-transform: uppercase; }
-.achievement-details dd { margin: 0; color: var(--navy); font-weight: 800; }
+.achievement-dialog [data-slot="dialog-close"] { z-index: 2; top: 18px !important; right: 18px !important; display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid rgba(255,255,255,.2) !important; border-radius: 999px !important; background: rgba(255,255,255,.1) !important; color: white !important; opacity: 1 !important; transition: background .2s ease, transform .2s ease; }
+.achievement-dialog [data-slot="dialog-close"]:hover { background: rgba(255,255,255,.2) !important; transform: rotate(4deg); }
+.achievement-dialog-header { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: end; padding: 30px 72px 28px 32px; background: linear-gradient(135deg, #091b35 0%, #123962 100%); color: white; text-align: left !important; }
+.achievement-dialog-identity { min-width: 0; }
+.achievement-dialog-type { display: inline-flex; margin-bottom: 16px; padding: 6px 10px; border: 1px solid rgba(126,218,255,.3); border-radius: 999px; background: rgba(47,151,214,.16); color: #a9e6ff; font-size: .68rem; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+.achievement-dialog-header [data-slot="dialog-title"] { max-width: 520px; margin: 0; color: white; font-family: Georgia, serif; font-size: clamp(1.7rem, 4vw, 2.35rem); line-height: 1.08; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.achievement-dialog-header [data-slot="dialog-description"] { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; color: #bfd0e3; font-size: .82rem; }
+.achievement-dialog-result { display: grid; min-width: 92px; min-height: 92px; place-items: center; align-content: center; gap: 4px; border: 1px solid rgba(126,218,255,.28); border-radius: 14px; background: rgba(5,19,39,.42); }
+.achievement-dialog-result small { color: #b9cede; font-size: .64rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.achievement-dialog-result strong { color: #74dcff; font-family: Georgia, serif; font-size: 2.25rem; line-height: 1; }
+.achievement-dialog-subject { display: flex; align-items: center; gap: 14px; margin: 24px 32px 0; padding: 16px 18px; border-radius: 12px; background: #f2f6fa; color: var(--navy); }
+.achievement-dialog-subject > svg { width: 21px; color: var(--blue); }
+.achievement-dialog-subject div { display: grid; gap: 3px; }
+.achievement-dialog-subject span { color: var(--muted); font-size: .66rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.achievement-dialog-subject strong { font-size: .95rem; }
 .achievement-document { margin: 20px 30px 0; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #eef3f8; }
 .achievement-document img { display: block; width: 100%; max-height: 520px; object-fit: contain; }
-.achievement-confirmation { display: flex; gap: 10px; align-items: center; margin: 20px 30px 0; padding: 14px; border-radius: 9px; background: #e8f5ee; color: #235f43; font-size: .82rem; font-weight: 700; }
+.achievement-confirmation { display: flex; gap: 10px; align-items: center; margin: 20px 30px 0; padding: 14px 16px; border-radius: 10px; background: #eaf6f0; color: #235f43; font-size: .82rem; font-weight: 700; }
 .achievement-confirmation svg { flex: 0 0 auto; width: 19px; }
 .achievement-dialog > .text-link { margin: 0 30px 28px; }
 .achievement-document-image { object-fit: contain; background: #eef3f8; }
@@ -578,10 +581,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .teacher-grid { grid-template-columns: 1fr; }
   .achievement-tabs { grid-template-columns: 1fr; }
   .achievement-tabs button { justify-content: space-between; }
-  .achievement-filters, .achievement-grid, .achievement-details { grid-template-columns: 1fr; }
-  .achievement-details div + div { border-top: 1px solid var(--line); border-left: 0; }
-  .achievement-dialog header { padding: 24px 20px 20px; }
-  .achievement-details, .achievement-document, .achievement-confirmation { margin-inline: 20px; }
+  .achievement-filters, .achievement-grid { grid-template-columns: 1fr; }
+  .achievement-dialog-header { grid-template-columns: 1fr; gap: 18px; align-items: start; padding: 25px 58px 23px 20px; }
+  .achievement-dialog-header [data-slot="dialog-title"] { font-size: clamp(1.65rem, 8vw, 2.05rem); }
+  .achievement-dialog-result { min-width: 0; min-height: 0; width: max-content; grid-template-columns: auto auto; gap: 9px; padding: 9px 13px; }
+  .achievement-dialog-result strong { font-size: 1.45rem; }
+  .achievement-dialog-subject, .achievement-document, .achievement-confirmation { margin-inline: 20px; }
   .achievement-dialog > .text-link { margin-inline: 20px; }
   .empty-feature { grid-template-columns: 1fr; }
   .legal-list div { grid-template-columns: 1fr; gap: 8px; }

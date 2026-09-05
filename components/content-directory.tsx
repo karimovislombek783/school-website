@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowRight, Award, CalendarDays, CheckCircle2, Medal, Newspaper, Trophy, Users } from "lucide-react";
+import { ArrowRight, Award, BookOpen, CalendarDays, CheckCircle2, Medal, Newspaper, Trophy, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   AchievementRecord,
@@ -122,8 +122,11 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
     <div className="achievement-card-body"><span>{categoryLabel}</span><h2>{item.studentName}</h2>{item.subject[lang] && <p>{item.subject[lang]}</p>}<time>{item.academicYear}</time>
       <DialogTrigger asChild><button type="button" className="achievement-open">{lang === "uz" ? "Batafsil ko‘rish" : "View details"}<ArrowRight /></button></DialogTrigger>
     </div>
-  </article><DialogContent className="achievement-dialog"><DialogHeader><div className="achievement-dialog-meta"><span>{item.credentialType}</span><strong>{shownResult}</strong></div><DialogTitle>{item.studentName}</DialogTitle><DialogDescription>{categoryLabel} · {item.academicYear}</DialogDescription></DialogHeader>
-    <dl className="achievement-details"><div><dt>{lang === "uz" ? "Natija" : "Result"}</dt><dd>{shownResult}</dd></div>{item.subject[lang] && <div><dt>{lang === "uz" ? "Fan" : "Subject"}</dt><dd>{item.subject[lang]}</dd></div>}<div><dt>{lang === "uz" ? "O‘quv yili" : "Academic year"}</dt><dd>{item.academicYear}</dd></div></dl>
+  </article><DialogContent className="achievement-dialog"><DialogHeader className="achievement-dialog-header">
+    <div className="achievement-dialog-identity"><span className="achievement-dialog-type">{item.credentialType}</span><DialogTitle>{item.studentName}</DialogTitle><DialogDescription>{categoryLabel}<span aria-hidden="true">•</span>{item.academicYear}</DialogDescription></div>
+    <div className="achievement-dialog-result"><small>{lang === "uz" ? "Natija" : "Result"}</small><strong>{shownResult}</strong></div>
+  </DialogHeader>
+    {item.subject[lang] && <div className="achievement-dialog-subject"><BookOpen aria-hidden="true" /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
     {item.imageUrl && <div className="achievement-document"><img src={item.imageUrl} alt={lang === "uz" ? `${item.studentName} uchun tahrirlangan sertifikat nusxasi` : `Redacted certificate copy for ${item.studentName}`} /></div>}
     <div className="achievement-confirmation"><CheckCircle2 /><span>{lang === "uz" ? "Natija maktab tomonidan tekshirilgan va tasdiqlangan." : "This result has been reviewed and verified by the school."}</span></div>
     {item.source && <a className="text-link" href={item.source} target="_blank" rel="noreferrer">{lang === "uz" ? "Tasdiqlash manbasini ochish" : "Open verification source"}<ArrowRight /></a>}
