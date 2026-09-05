@@ -35,6 +35,12 @@ create table if not exists public.content_items (
   related_links jsonb not null default '[]'::jsonb,
   image_path text check (image_path is null or image_path ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}\.(jpg|jpeg|png|webp)$'),
   gallery_paths text[] not null default '{}',
+  achievement_category text check (achievement_category is null or achievement_category in ('international', 'national', 'olympiad')),
+  achievement_type text,
+  achievement_result text,
+  achievement_subject_uz text,
+  achievement_subject_en text,
+  academic_year text check (academic_year is null or academic_year ~ '^[0-9]{4}(–|-)[0-9]{4}$'),
   created_by uuid not null default auth.uid() references auth.users(id),
   updated_by uuid not null default auth.uid() references auth.users(id),
   created_at timestamptz not null default now(),
@@ -61,10 +67,10 @@ create table if not exists public.content_items (
           length(trim(coalesce(body_en, ''))) > 0 and
           event_date is not null and category is not null
         when 'achievement' then
-          event_date is not null and
-          length(trim(coalesce(recipient_uz, ''))) > 0 and
-          length(trim(coalesce(recipient_en, ''))) > 0 and
-          source_url is not null
+          achievement_category is not null and
+          length(trim(coalesce(achievement_type, ''))) > 0 and
+          length(trim(coalesce(achievement_result, ''))) > 0 and
+          length(trim(coalesce(academic_year, ''))) > 0
         else false
       end
     )
@@ -77,6 +83,12 @@ alter table public.content_items add column if not exists show_teacher_email boo
 alter table public.content_items add column if not exists cv_url text;
 alter table public.content_items add column if not exists related_links jsonb not null default '[]'::jsonb;
 alter table public.content_items add column if not exists gallery_paths text[] not null default '{}';
+alter table public.content_items add column if not exists achievement_category text;
+alter table public.content_items add column if not exists achievement_type text;
+alter table public.content_items add column if not exists achievement_result text;
+alter table public.content_items add column if not exists achievement_subject_uz text;
+alter table public.content_items add column if not exists achievement_subject_en text;
+alter table public.content_items add column if not exists academic_year text;
 
 do $$ begin
   alter table public.content_items add constraint content_items_teacher_email_valid
@@ -93,6 +105,14 @@ exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.content_items add constraint content_items_related_links_shape
     check (jsonb_typeof(related_links) = 'array' and jsonb_array_length(related_links) <= 8);
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter table public.content_items add constraint content_items_achievement_category_valid
+    check (achievement_category is null or achievement_category in ('international', 'national', 'olympiad'));
+exception when duplicate_object then null; end $$;
+do $$ begin
+  alter table public.content_items add constraint content_items_academic_year_valid
+    check (academic_year is null or academic_year ~ '^[0-9]{4}(–|-)[0-9]{4}$');
 exception when duplicate_object then null; end $$;
 
 create table if not exists public.audit_log (

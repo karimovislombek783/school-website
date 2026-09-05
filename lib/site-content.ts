@@ -141,10 +141,14 @@ export type AchievementRecord = {
   slug: string;
   status: PublicationStatus;
   date: string;
-  title: Record<Lang, string>;
-  recipient: Record<Lang, string>;
+  category: "international" | "national" | "olympiad";
+  credentialType: string;
+  result: string;
+  subject: Record<Lang, string>;
+  academicYear: string;
+  studentName: string;
   summary: Record<Lang, string>;
-  source: string;
+  source?: string;
   imageUrl?: string;
 };
 

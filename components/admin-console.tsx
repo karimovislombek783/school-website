@@ -21,6 +21,9 @@ export type AdminRecord = {
   teacher_email: string | null; show_teacher_email: boolean; cv_url: string | null;
   related_links: Array<{ label_uz: string; label_en: string; url: string }>;
   gallery_paths: string[];
+  achievement_category: "international" | "national" | "olympiad" | null;
+  achievement_type: string | null; achievement_result: string | null;
+  achievement_subject_uz: string | null; achievement_subject_en: string | null; academic_year: string | null;
 };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -139,14 +142,16 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       const labelEn = relatedLabelsEn[index]?.trim() ?? "";
       return cleanUrl && (labelUz || labelEn) ? [{ label_uz: labelUz || labelEn, label_en: labelEn || labelUz, url: cleanUrl }] : [];
     }) : [];
+    const studentName = String(data.get("student_name") || "").trim();
+    const achievementResult = String(data.get("achievement_result") || "").trim();
     const payload = {
       type,
       slug: String(data.get("slug")).trim().toLowerCase(),
       status: canPublish ? String(data.get("status")) : "draft",
-      title_uz: String(data.get("title_uz")).trim(),
-      title_en: String(data.get("title_en")).trim(),
-      summary_uz: String(data.get("summary_uz")).trim(),
-      summary_en: String(data.get("summary_en")).trim(),
+      title_uz: type === "achievement" ? studentName : String(data.get("title_uz")).trim(),
+      title_en: type === "achievement" ? studentName : String(data.get("title_en")).trim(),
+      summary_uz: type === "achievement" ? achievementResult : String(data.get("summary_uz")).trim(),
+      summary_en: type === "achievement" ? achievementResult : String(data.get("summary_en")).trim(),
       body_uz: String(data.get("body_uz") || "").trim(),
       body_en: String(data.get("body_en") || "").trim(),
       category: String(data.get("category") || "") || null,
@@ -155,8 +160,8 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       subjects_en: type === "teacher" ? parseList(String(data.get("subjects_en") || "")) : [],
       is_leadership: type === "teacher" && data.get("is_leadership") === "on",
       event_date: String(data.get("event_date") || "") || null,
-      recipient_uz: String(data.get("recipient_uz") || "").trim() || null,
-      recipient_en: String(data.get("recipient_en") || "").trim() || null,
+      recipient_uz: type === "achievement" ? studentName : String(data.get("recipient_uz") || "").trim() || null,
+      recipient_en: type === "achievement" ? studentName : String(data.get("recipient_en") || "").trim() || null,
       source_url: String(data.get("source_url") || "").trim() || null,
       teacher_email: type === "teacher" ? String(data.get("teacher_email") || "").trim() || null : null,
       show_teacher_email: type === "teacher" && data.get("show_teacher_email") === "on",
@@ -164,6 +169,12 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       related_links: relatedLinks,
       image_path: uploadedPath ?? (removeImage ? null : editing?.image_path ?? null),
       gallery_paths: type === "news" ? [...existingGalleryPaths, ...uploadedGalleryPaths] : [],
+      achievement_category: type === "achievement" ? String(data.get("achievement_category") || "international") : null,
+      achievement_type: type === "achievement" ? String(data.get("achievement_type") || "").trim() : null,
+      achievement_result: type === "achievement" ? achievementResult : null,
+      achievement_subject_uz: type === "achievement" ? String(data.get("achievement_subject_uz") || "").trim() || null : null,
+      achievement_subject_en: type === "achievement" ? String(data.get("achievement_subject_en") || "").trim() || null : null,
+      academic_year: type === "achievement" ? String(data.get("academic_year") || "").trim() : null,
     };
 
     const result = editing
@@ -213,17 +224,31 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
 function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { lang: Lang; type: AdminRecord["type"]; record: AdminRecord | null; role: StaffRole; busy: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onCancel: () => void }) {
   const canPublish = role !== "writer";
   const [relatedLinks, setRelatedLinks] = useState(record?.related_links ?? []);
+  const [achievementCategory, setAchievementCategory] = useState(record?.achievement_category ?? "international");
   return <form className="cms-form" onSubmit={onSubmit}>
     <div className="cms-form-heading"><div><p className="cms-kicker">{typeLabel(type, lang)}</p><h2>{record ? (lang === "uz" ? "Ma’lumotni tahrirlash" : "Edit record") : newLabel(type, lang)}</h2></div><button type="button" className="cms-close" onClick={onCancel} aria-label={lang === "uz" ? "Yopish" : "Close"}>×</button></div>
     <div className="editor-grid">
       <label>{lang === "uz" ? "URL nomi (slug)" : "URL slug"}<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug} /></label>
       {canPublish ? <label>{lang === "uz" ? "Nashr holati" : "Publication status"}<select name="status" defaultValue={record?.status ?? "draft"}><option value="draft">{lang === "uz" ? "Qoralama" : "Draft"}</option><option value="published">{lang === "uz" ? "Nashr qilingan" : "Published"}</option></select></label> : <><input type="hidden" name="status" value="draft" /><p className="role-note">{lang === "uz" ? "Yozuvchi yozuvlarni faqat qoralama sifatida saqlaydi." : "Writers can save records only as drafts."}</p></>}
-      <label>{fieldLabel(type, "title", "uz", lang)}<input name="title_uz" required defaultValue={record?.title_uz} /></label>
-      <label>{fieldLabel(type, "title", "en", lang)}<input name="title_en" required defaultValue={record?.title_en} /></label>
-      <label className="full-field">{fieldLabel(type, "summary", "uz", lang)}<textarea name="summary_uz" required rows={3} defaultValue={record?.summary_uz} /></label>
-      <label className="full-field">{fieldLabel(type, "summary", "en", lang)}<textarea name="summary_en" required rows={3} defaultValue={record?.summary_en} /></label>
-      <label className="full-field">{fieldLabel(type, "body", "uz", lang)}<textarea name="body_uz" rows={5} defaultValue={record?.body_uz ?? ""} /></label>
-      <label className="full-field">{fieldLabel(type, "body", "en", lang)}<textarea name="body_en" rows={5} defaultValue={record?.body_en ?? ""} /></label>
+      {type !== "achievement" && <>
+        <label>{fieldLabel(type, "title", "uz", lang)}<input name="title_uz" required defaultValue={record?.title_uz} /></label>
+        <label>{fieldLabel(type, "title", "en", lang)}<input name="title_en" required defaultValue={record?.title_en} /></label>
+        <label className="full-field">{fieldLabel(type, "summary", "uz", lang)}<textarea name="summary_uz" required rows={3} defaultValue={record?.summary_uz} /></label>
+        <label className="full-field">{fieldLabel(type, "summary", "en", lang)}<textarea name="summary_en" required rows={3} defaultValue={record?.summary_en} /></label>
+        <label className="full-field">{fieldLabel(type, "body", "uz", lang)}<textarea name="body_uz" rows={5} defaultValue={record?.body_uz ?? ""} /></label>
+        <label className="full-field">{fieldLabel(type, "body", "en", lang)}<textarea name="body_en" rows={5} defaultValue={record?.body_en ?? ""} /></label>
+      </>}
+      {type === "achievement" && <>
+        <label className="full-field">{lang === "uz" ? "O‘quvchining to‘liq ismi" : "Student’s full name"}<input name="student_name" required defaultValue={record?.title_uz ?? ""} /></label>
+        <label>{lang === "uz" ? "Asosiy yo‘nalish" : "Main category"}<select name="achievement_category" value={achievementCategory} onChange={(event) => setAchievementCategory(event.target.value as typeof achievementCategory)}><option value="international">{lang === "uz" ? "Xalqaro sertifikat" : "International certificate"}</option><option value="national">{lang === "uz" ? "Milliy sertifikat" : "National certificate"}</option><option value="olympiad">{lang === "uz" ? "Fan olimpiadasi" : "Subject olympiad"}</option></select></label>
+        <label>{lang === "uz" ? (achievementCategory === "olympiad" ? "Olimpiada nomi" : "Sertifikat turi") : (achievementCategory === "olympiad" ? "Olympiad name" : "Certificate type")}<input name="achievement_type" required list="achievement-types" placeholder={achievementCategory === "international" ? "IELTS, SAT…" : achievementCategory === "national" ? "Milliy sertifikat" : "Olimpiada nomi"} defaultValue={record?.achievement_type ?? ""} /><datalist id="achievement-types"><option value="IELTS" /><option value="SAT" /><option value="Cambridge A-Level" /><option value="Cambridge AS-Level" /><option value="Milliy sertifikat" /></datalist></label>
+        <label>{lang === "uz" ? "Natija" : "Result"}<input name="achievement_result" required placeholder={achievementCategory === "olympiad" ? (lang === "uz" ? "1-o‘rin, oltin medal…" : "1st place, gold medal…") : "8.5, 1450, C1, A+…"} defaultValue={record?.achievement_result ?? ""} /></label>
+        <label>{lang === "uz" ? "O‘quv yili" : "Academic year"}<input name="academic_year" required pattern="[0-9]{4}(?:–|-)[0-9]{4}" placeholder="2025–2026" defaultValue={record?.academic_year ?? ""} /></label>
+        <label>{lang === "uz" ? "Fan nomi (o‘zbekcha, ixtiyoriy)" : "Subject (Uzbek, optional)"}<input name="achievement_subject_uz" defaultValue={record?.achievement_subject_uz ?? ""} /></label>
+        <label>{lang === "uz" ? "Fan nomi (inglizcha, ixtiyoriy)" : "Subject (English, optional)"}<input name="achievement_subject_en" defaultValue={record?.achievement_subject_en ?? ""} /></label>
+        <label>{lang === "uz" ? "Sana (ixtiyoriy)" : "Date (optional)"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>
+        <label>{lang === "uz" ? "Tasdiqlash havolasi (ixtiyoriy, HTTPS)" : "Verification link (optional, HTTPS)"}<input name="source_url" type="url" pattern="https://.*" defaultValue={record?.source_url ?? ""} /></label>
+      </>}
       {type === "teacher" && <>
         <label>{lang === "uz" ? "Lavozim (o‘zbekcha)" : "Role (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label>
         <label>{lang === "uz" ? "Lavozim (inglizcha)" : "Role (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label>
@@ -245,24 +270,23 @@ function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { la
           {relatedLinks.length < 8 && <button className="button button-secondary cms-add-link" type="button" onClick={() => setRelatedLinks((items) => [...items, { label_uz: "", label_en: "", url: "" }])}><Link2 size={16} />{lang === "uz" ? "Havola qo‘shish" : "Add link"}</button>}
         </fieldset>
       </>}
-      {type !== "teacher" && <label>{lang === "uz" ? "Sana" : "Date"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>}
+      {type === "news" && <label>{lang === "uz" ? "Sana" : "Date"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>}
       {type === "news" && <label>{lang === "uz" ? "Tur" : "Category"}<select name="category" defaultValue={record?.category ?? "news"}><option value="news">{lang === "uz" ? "Yangilik" : "News"}</option><option value="announcement">{lang === "uz" ? "E’lon" : "Announcement"}</option></select></label>}
-      <CoverImagePicker lang={lang} hasCurrentImage={Boolean(record?.image_path)} />
+      <CoverImagePicker lang={lang} type={type} hasCurrentImage={Boolean(record?.image_path)} />
       {type === "news" && <GalleryEditor lang={lang} existingPaths={record?.gallery_paths ?? []} />}
-      {type === "achievement" && <><label>{lang === "uz" ? "Qabul qiluvchi (o‘zbekcha)" : "Recipient (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label><label>{lang === "uz" ? "Qabul qiluvchi (inglizcha)" : "Recipient (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label><label className="full-field">{lang === "uz" ? "Tasdiqlash manbasi (HTTPS)" : "Verification source (HTTPS)"}<input name="source_url" type="url" pattern="https://.*" defaultValue={record?.source_url ?? ""} /></label></>}
       {record?.image_path && <label className="full-field consent cms-remove-image"><input name="remove_image" type="checkbox" />{lang === "uz" ? "Joriy rasmni yozuvdan olib tashlash" : "Remove the current image from this record"}</label>}
       <div className="cms-form-actions full-field"><button className="button button-secondary" type="button" onClick={onCancel}>{lang === "uz" ? "Bekor qilish" : "Cancel"}</button><button className="button button-primary" type="submit" disabled={busy}>{busy ? (lang === "uz" ? "Saqlanmoqda…" : "Saving…") : (lang === "uz" ? "Saqlash" : "Save record")}</button></div>
     </div>
   </form>;
 }
 
-function CoverImagePicker({ lang, hasCurrentImage }: { lang: Lang; hasCurrentImage: boolean }) {
+function CoverImagePicker({ lang, type, hasCurrentImage }: { lang: Lang; type: AdminRecord["type"]; hasCurrentImage: boolean }) {
   const [file, setFile] = useState<File | null>(null);
   const previewUrl = useMemo(() => file ? URL.createObjectURL(file) : null, [file]);
   useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
   return <div className="full-field cms-image-picker">
-    <div><strong>{lang === "uz" ? "Muqova rasmi" : "Cover image"}</strong><small>{lang === "uz" ? "Yangilik kartasi va maqola tepasida ko‘rinadigan asosiy rasm. JPG, PNG yoki WebP; 5 MB gacha." : "The main image shown on the news card and at the top of the article. JPG, PNG or WebP; up to 5 MB."}</small></div>
+    <div><strong>{type === "achievement" ? (lang === "uz" ? "Sertifikat rasmi (ixtiyoriy)" : "Certificate image (optional)") : (lang === "uz" ? "Muqova rasmi" : "Cover image")}</strong><small>{type === "achievement" ? (lang === "uz" ? "Faqat ommaga chiqarishga tayyor nusxani yuklang. JPG, PNG yoki WebP; 5 MB gacha." : "Upload only the public-ready copy. JPG, PNG or WebP; up to 5 MB.") : (lang === "uz" ? "Yangilik kartasi va maqola tepasida ko‘rinadigan asosiy rasm. JPG, PNG yoki WebP; 5 MB gacha." : "The main image shown on the news card and at the top of the article. JPG, PNG or WebP; up to 5 MB.")}</small></div>
     <label className="cms-file-button"><ImagePlus size={18} /><span>{lang === "uz" ? "Rasmni tanlash" : "Choose image"}</span><input name="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></label>
     {file && previewUrl ? <div className="cms-cover-preview"><img src={previewUrl} alt="" /><div><strong>{file.name}</strong><small>{lang === "uz" ? "Yangi muqova rasmi tanlandi" : "New cover image selected"}</small></div></div> : <p className="cms-file-status">{hasCurrentImage ? (lang === "uz" ? "Joriy muqova rasmi saqlangan. Yangi rasm tanlasangiz, u almashtiriladi." : "A current cover is saved. Choosing a new image will replace it.") : (lang === "uz" ? "Rasm tanlanmagan" : "No image selected")}</p>}
   </div>;

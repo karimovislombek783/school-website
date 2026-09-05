@@ -80,4 +80,6 @@ Use `owner`, `administrator`, `editor`, or `writer` exactly.
 
 If the original schema was already installed before the multi-subject teacher update, run `supabase/migrations/20260829_teacher_profiles.sql` once in SQL Editor. It adds independent leadership status, multiple departments, and bilingual subject lists without removing existing content.
 
+After deploying the achievements catalogue update, run `supabase/migrations/20260905_achievement_catalog.sql` once in SQL Editor. Run it after the teacher-profile migration. It adds the International, National and Olympiad structure, optional bilingual subjects, results and academic years while preserving existing achievement records.
+
 Free projects may pause after inactivity and have usage quotas. Review current Supabase plan limits before the official public launch.

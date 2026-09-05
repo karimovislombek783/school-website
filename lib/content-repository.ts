@@ -7,6 +7,8 @@ type ContentRow = {
   category: string | null; departments: string[] | null; subjects_uz: string[] | null; subjects_en: string[] | null; is_leadership: boolean | null; event_date: string | null; recipient_uz: string | null; recipient_en: string | null; source_url: string | null; image_path: string | null;
   teacher_email: string | null; show_teacher_email: boolean | null; cv_url: string | null; related_links: unknown;
   gallery_paths: string[] | null;
+  achievement_category: string | null; achievement_type: string | null; achievement_result: string | null;
+  achievement_subject_uz: string | null; achievement_subject_en: string | null; academic_year: string | null;
 };
 
 export type PublishedContent = { teachers: TeacherRecord[]; news: NewsRecord[]; achievements: AchievementRecord[] };
@@ -17,7 +19,8 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
   if (!url || !key) return { teachers: publishedTeachers, news: publishedNews, achievements: publishedAchievements };
   const client = createClient(url, key, { auth: { persistSession: false } });
   const baseFields = "id,type,slug,status,title_uz,title_en,summary_uz,summary_en,body_uz,body_en,category,departments,subjects_uz,subjects_en,is_leadership,event_date,recipient_uz,recipient_en,source_url,image_path";
-  const enrichedQuery = await client.from("content_items").select(`${baseFields},teacher_email,show_teacher_email,cv_url,related_links,gallery_paths`).eq("status", "published").order("published_at", { ascending: false });
+  const achievementFields = "achievement_category,achievement_type,achievement_result,achievement_subject_uz,achievement_subject_en,academic_year";
+  const enrichedQuery = await client.from("content_items").select(`${baseFields},teacher_email,show_teacher_email,cv_url,related_links,gallery_paths,${achievementFields}`).eq("status", "published").order("published_at", { ascending: false });
   let data: unknown[] | null = enrichedQuery.data;
   let error = enrichedQuery.error;
   // Keep the current public site working while the additive migration is being applied.
@@ -28,7 +31,7 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
   }
   if (error || !data) return { teachers: [], news: [], achievements: [] };
   const rows = await Promise.all((data as Partial<ContentRow>[]).map(async (partial) => {
-    const row = { teacher_email: null, show_teacher_email: false, cv_url: null, related_links: [], gallery_paths: [], ...partial } as ContentRow;
+    const row = { teacher_email: null, show_teacher_email: false, cv_url: null, related_links: [], gallery_paths: [], achievement_category: null, achievement_type: null, achievement_result: null, achievement_subject_uz: null, achievement_subject_en: null, academic_year: null, ...partial } as ContentRow;
     const paths = [row.image_path, ...(row.gallery_paths ?? []).slice(0, 8)].filter((path): path is string => Boolean(path));
     const signedUrls = paths.length ? (await client.storage.from("school-media").createSignedUrls(paths, 86400)).data ?? [] : [];
     // Supabase preserves request order, while `path` can be absent from an
@@ -58,7 +61,20 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
   return {
     teachers: rows.filter((row) => row.type === "teacher").map((row) => ({ slug: row.slug, status: "published", departments: validDepartments(row.departments), isLeadership: Boolean(row.is_leadership), subjects: { uz: cleanList(row.subjects_uz), en: cleanList(row.subjects_en) }, name: { uz: row.title_uz, en: row.title_en }, role: { uz: row.recipient_uz ?? "", en: row.recipient_en ?? "" }, biography: { uz: row.summary_uz, en: row.summary_en }, qualifications: { uz: splitBody(row.body_uz), en: splitBody(row.body_en) }, initials: initials(row.title_uz), imageUrl: row.image_url, email: row.show_teacher_email ? cleanEmail(row.teacher_email) : undefined, cvUrl: cleanHttpsUrl(row.cv_url), relatedLinks: cleanRelatedLinks(row.related_links) })),
     news: rows.filter((row) => row.type === "news").map((row) => ({ slug: row.slug, status: "published", category: row.category === "announcement" ? "announcement" : "news", date: row.event_date ?? "", title: { uz: row.title_uz, en: row.title_en }, excerpt: { uz: row.summary_uz, en: row.summary_en }, body: { uz: splitBody(row.body_uz), en: splitBody(row.body_en) }, imageUrl: row.image_url, galleryUrls: row.gallery_urls ?? [] })),
-    achievements: rows.filter((row) => row.type === "achievement").map((row) => ({ slug: row.slug, status: "published", date: row.event_date ?? "", title: { uz: row.title_uz, en: row.title_en }, recipient: { uz: row.recipient_uz ?? "", en: row.recipient_en ?? "" }, summary: { uz: row.summary_uz, en: row.summary_en }, source: row.source_url ?? "", imageUrl: row.image_url })),
+    achievements: rows.filter((row) => row.type === "achievement").map((row) => ({
+      slug: row.slug,
+      status: "published",
+      date: row.event_date ?? "",
+      category: validAchievementCategory(row.achievement_category),
+      credentialType: row.achievement_type?.trim() || row.title_uz,
+      result: row.achievement_result?.trim() || row.summary_uz,
+      subject: { uz: row.achievement_subject_uz?.trim() ?? "", en: row.achievement_subject_en?.trim() || row.achievement_subject_uz?.trim() || "" },
+      academicYear: row.academic_year?.trim() || yearFromDate(row.event_date),
+      studentName: row.achievement_type ? row.title_uz : (row.recipient_uz?.trim() || row.title_uz),
+      summary: { uz: row.summary_uz, en: row.summary_en },
+      source: cleanHttpsUrl(row.source_url),
+      imageUrl: row.image_url,
+    })),
   };
 }
 
@@ -80,3 +96,7 @@ function cleanRelatedLinks(value: unknown): TeacherRelatedLink[] {
     return url && (uz || en) ? [{ url, label: { uz: uz || en, en: en || uz } }] : [];
   });
 }
+function validAchievementCategory(value: string | null): AchievementRecord["category"] {
+  return value === "national" || value === "olympiad" ? value : "international";
+}
+function yearFromDate(value: string | null) { return value?.slice(0, 4) ?? ""; }

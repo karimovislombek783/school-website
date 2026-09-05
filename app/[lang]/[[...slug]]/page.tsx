@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   }
   if (detail && page === "achievements") {
     const item = content?.achievements.find((record) => record.slug === detail);
-    if (item) return { title: item.title[lang], description: item.summary[lang], alternates };
+    if (item) return { title: `${item.studentName} — ${item.credentialType}`, description: `${item.result} · ${item.academicYear}`, alternates };
   }
   if (page === "home") return { title: copy[lang].home.title, description: copy[lang].home.intro, alternates };
   if (page === "admin") return { title: lang === "uz" ? "Kontent boshqaruvi" : "Content management", robots: { index: false, follow: false } };
@@ -183,8 +183,7 @@ function NewsGrid({ lang, items, limit }: { lang: Lang; items: PublishedContent[
 function NewsContent({ lang, items }: { lang: Lang; items: PublishedContent["news"] }) { return <section className="content-section page-content"><NewsGrid lang={lang} items={items} /></section>; }
 
 function AchievementsContent({ lang, items }: { lang: Lang; items: PublishedContent["achievements"] }) {
-  const isUz = lang === "uz";
-  return <section className="content-section page-content"><AchievementDirectory lang={lang} items={items} /><div className="process-grid"><article><strong>01</strong><h3>{isUz ? "Tekshirish" : "Verify"}</h3><p>{isUz ? "Natija va manba tasdiqlanadi." : "Confirm the result and source."}</p></article><article><strong>02</strong><h3>{isUz ? "Ruxsat" : "Permission"}</h3><p>{isUz ? "Shaxsiy ma’lumot va rasmga ruxsat olinadi." : "Obtain permission for personal data and imagery."}</p></article><article><strong>03</strong><h3>{isUz ? "Nashr" : "Publish"}</h3><p>{isUz ? "Ikki tilda ochiq va aniq e’lon qilinadi." : "Publish clearly in both languages."}</p></article></div></section>;
+  return <section className="content-section page-content"><AchievementDirectory lang={lang} items={items} /></section>;
 }
 
 function AdmissionsContent({ lang }: { lang: Lang }) {
@@ -259,7 +258,7 @@ function DetailPage({ lang, page, slug, content }: { lang: Lang; page: string; s
   if (page === "achievements") {
     const item = content.achievements.find((record) => record.slug === slug);
     if (!item) notFound();
-    return <main><article className="article-detail"><p className="eyebrow">{item.date}</p><h1>{item.title[lang]}</h1><p className="article-lead">{item.recipient[lang]}</p><p>{item.summary[lang]}</p><div className="legal-warning"><ShieldCheck /><div><h2>{lang === "uz" ? "Tasdiqlash manbasi" : "Verification source"}</h2><p>{item.source}</p></div></div><Link className="text-link back-link" href={`/${lang}/achievements`}>← {lang === "uz" ? "Yutuqlarga qaytish" : "Back to achievements"}</Link></article></main>;
+    return <main><article className="article-detail"><p className="eyebrow">{item.credentialType} · {item.academicYear}</p><h1>{item.studentName}</h1><p className="article-lead">{item.result}</p>{item.subject[lang] && <p>{item.subject[lang]}</p>}{item.imageUrl && <img className="article-cover-image achievement-document-image" src={item.imageUrl} alt={lang === "uz" ? `${item.studentName} sertifikati` : `${item.studentName} certificate`} />}<div className="legal-warning"><ShieldCheck /><div><h2>{lang === "uz" ? "Tasdiqlangan natija" : "Verified result"}</h2><p>{lang === "uz" ? "Natija maktab tomonidan tekshirilgan va tasdiqlangan." : "The result has been reviewed and verified by the school."}</p>{item.source && <a href={item.source} target="_blank" rel="noreferrer">{lang === "uz" ? "Tasdiqlash manbasi" : "Verification source"}</a>}</div></div><Link className="text-link back-link" href={`/${lang}/achievements`}>← {lang === "uz" ? "Yutuqlarga qaytish" : "Back to achievements"}</Link></article></main>;
   }
   notFound();
 }
