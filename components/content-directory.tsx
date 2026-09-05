@@ -76,7 +76,7 @@ export function NewsDirectory({ lang, items, limit }: { lang: Lang; items: NewsR
 }
 
 export function AchievementDirectory({ lang, items }: { lang: Lang; items: AchievementRecord[] }) {
-  const [category, setCategory] = useState<AchievementRecord["category"]>("international");
+  const [category, setCategory] = useState<"all" | AchievementRecord["category"]>("all");
   const [certificateType, setCertificateType] = useState("all");
   const [result, setResult] = useState("all");
   const [year, setYear] = useState("all");
@@ -85,8 +85,16 @@ export function AchievementDirectory({ lang, items }: { lang: Lang; items: Achie
   const types = unique(international.map((item) => item.credentialType));
   const results = unique(international.map((item) => item.result));
   const years = unique(international.map((item) => item.academicYear)).reverse();
-  const visible = items.filter((item) => item.category === category && (category !== "international" || ((certificateType === "all" || item.credentialType === certificateType) && (result === "all" || item.result === result) && (year === "all" || item.academicYear === year))));
-  const categories: Array<[AchievementRecord["category"], string]> = [
+  const visible = items.filter((item) => {
+    if (category === "all") return true;
+    if (item.category !== category) return false;
+    if (category !== "international") return true;
+    return (certificateType === "all" || item.credentialType === certificateType)
+      && (result === "all" || item.result === result)
+      && (year === "all" || item.academicYear === year);
+  });
+  const categories: Array<["all" | AchievementRecord["category"], string]> = [
+    ["all", lang === "uz" ? "Barchasi" : "All achievements"],
     ["international", lang === "uz" ? "Xalqaro sertifikatlar" : "International certificates"],
     ["national", lang === "uz" ? "Milliy sertifikatlar" : "National certificates"],
     ["olympiad", lang === "uz" ? "Fan olimpiadalari" : "Subject olympiads"],
@@ -94,7 +102,7 @@ export function AchievementDirectory({ lang, items }: { lang: Lang; items: Achie
 
   if (!items.length) return <EmptyState lang={lang} kind="achievements" />;
   return <div className="achievement-directory">
-    <div className="achievement-tabs" role="tablist" aria-label={lang === "uz" ? "Yutuq yo‘nalishi" : "Achievement category"}>{categories.map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={category === value} className={category === value ? "active" : ""} onClick={() => { setCategory(value); setCertificateType("all"); setResult("all"); setYear("all"); }}>{label}<span>{items.filter((item) => item.category === value).length}</span></button>)}</div>
+    <div className="achievement-tabs" role="tablist" aria-label={lang === "uz" ? "Yutuq yo‘nalishi" : "Achievement category"}>{categories.map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={category === value} className={category === value ? "active" : ""} onClick={() => { setCategory(value); setCertificateType("all"); setResult("all"); setYear("all"); }}>{label}<span>{value === "all" ? items.length : items.filter((item) => item.category === value).length}</span></button>)}</div>
     {category === "international" && international.length > 0 && <div className="achievement-filters" aria-label={lang === "uz" ? "Xalqaro sertifikatlarni filtrlash" : "Filter international certificates"}>
       <label>{lang === "uz" ? "Sertifikat turi" : "Certificate type"}<select value={certificateType} onChange={(event) => setCertificateType(event.target.value)}><option value="all">{lang === "uz" ? "Barchasi" : "All"}</option>{types.map((value) => <option key={value}>{value}</option>)}</select></label>
       <label>{lang === "uz" ? "Natija" : "Result"}<select value={result} onChange={(event) => setResult(event.target.value)}><option value="all">{lang === "uz" ? "Barchasi" : "All"}</option>{results.map((value) => <option key={value}>{value}</option>)}</select></label>
@@ -107,18 +115,24 @@ export function AchievementDirectory({ lang, items }: { lang: Lang; items: Achie
 function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }) {
   const Icon = item.category === "olympiad" ? Trophy : item.category === "national" ? Medal : Award;
   const categoryLabel = item.category === "international" ? (lang === "uz" ? "Xalqaro" : "International") : item.category === "national" ? (lang === "uz" ? "Milliy" : "National") : (lang === "uz" ? "Olimpiada" : "Olympiad");
+  const shownResult = displayResult(item.result);
   return <Dialog><article className={`achievement-card achievement-${item.category}`}>
     <div className="achievement-card-top"><span className="achievement-verified"><CheckCircle2 />{lang === "uz" ? "Tasdiqlangan natija" : "Verified result"}</span><span className="achievement-kind">{item.credentialType}</span></div>
-    <div className="achievement-score"><Icon aria-hidden="true" /><small>{lang === "uz" ? "Natija" : "Result"}</small><strong>{item.result}</strong></div>
+    <div className="achievement-score"><Icon aria-hidden="true" /><small>{lang === "uz" ? "Natija" : "Result"}</small><strong>{shownResult}</strong></div>
     <div className="achievement-card-body"><span>{categoryLabel}</span><h2>{item.studentName}</h2>{item.subject[lang] && <p>{item.subject[lang]}</p>}<time>{item.academicYear}</time>
       <DialogTrigger asChild><button type="button" className="achievement-open">{lang === "uz" ? "Batafsil ko‘rish" : "View details"}<ArrowRight /></button></DialogTrigger>
     </div>
-  </article><DialogContent className="achievement-dialog"><DialogHeader><div className="achievement-dialog-meta"><span>{item.credentialType}</span><strong>{item.result}</strong></div><DialogTitle>{item.studentName}</DialogTitle><DialogDescription>{categoryLabel} · {item.academicYear}</DialogDescription></DialogHeader>
-    <dl className="achievement-details"><div><dt>{lang === "uz" ? "Natija" : "Result"}</dt><dd>{item.result}</dd></div>{item.subject[lang] && <div><dt>{lang === "uz" ? "Fan" : "Subject"}</dt><dd>{item.subject[lang]}</dd></div>}<div><dt>{lang === "uz" ? "O‘quv yili" : "Academic year"}</dt><dd>{item.academicYear}</dd></div></dl>
+  </article><DialogContent className="achievement-dialog"><DialogHeader><div className="achievement-dialog-meta"><span>{item.credentialType}</span><strong>{shownResult}</strong></div><DialogTitle>{item.studentName}</DialogTitle><DialogDescription>{categoryLabel} · {item.academicYear}</DialogDescription></DialogHeader>
+    <dl className="achievement-details"><div><dt>{lang === "uz" ? "Natija" : "Result"}</dt><dd>{shownResult}</dd></div>{item.subject[lang] && <div><dt>{lang === "uz" ? "Fan" : "Subject"}</dt><dd>{item.subject[lang]}</dd></div>}<div><dt>{lang === "uz" ? "O‘quv yili" : "Academic year"}</dt><dd>{item.academicYear}</dd></div></dl>
     {item.imageUrl && <div className="achievement-document"><img src={item.imageUrl} alt={lang === "uz" ? `${item.studentName} uchun tahrirlangan sertifikat nusxasi` : `Redacted certificate copy for ${item.studentName}`} /></div>}
     <div className="achievement-confirmation"><CheckCircle2 /><span>{lang === "uz" ? "Natija maktab tomonidan tekshirilgan va tasdiqlangan." : "This result has been reviewed and verified by the school."}</span></div>
     {item.source && <a className="text-link" href={item.source} target="_blank" rel="noreferrer">{lang === "uz" ? "Tasdiqlash manbasini ochish" : "Open verification source"}<ArrowRight /></a>}
   </DialogContent></Dialog>;
+}
+
+function displayResult(value: string) {
+  const clean = value.trim();
+  return /^[a-f](?:[+-])?$/i.test(clean) ? clean.toUpperCase() : clean;
 }
 
 function EmptyState({ lang, kind, filtered = false }: { lang: Lang; kind: "teachers" | "news" | "achievements"; filtered?: boolean }) {

@@ -214,7 +214,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .public-empty h3 { max-width: 620px; margin: 0; font-size: 1.55rem; }
 .public-empty p { max-width: 620px; margin: 0; }
 .achievement-directory { display: grid; gap: 28px; }
-.achievement-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 7px; border: 1px solid var(--line); border-radius: 13px; background: #f4f7fb; }
+.achievement-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 7px; border: 1px solid var(--line); border-radius: 13px; background: #f4f7fb; }
 .achievement-tabs button { display: flex; min-height: 48px; align-items: center; justify-content: center; gap: 10px; padding: 10px 14px; border-radius: 9px; color: var(--navy); font-size: .86rem; font-weight: 800; }
 .achievement-tabs button span { display: grid; min-width: 25px; height: 25px; place-items: center; border-radius: 999px; background: white; color: var(--navy); font-size: .7rem; }
 .achievement-tabs button.active { background: var(--navy); color: white; box-shadow: 0 8px 20px rgba(13,47,78,.16); }
@@ -241,9 +241,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .achievement-open svg { width: 17px; }
 .achievement-empty { display: grid; min-height: 250px; place-items: center; align-content: center; gap: 10px; border: 1px dashed #aabed3; border-radius: 13px; color: var(--muted); text-align: center; }
 .achievement-empty svg { color: var(--navy); }
-.achievement-dialog { width: min(720px, calc(100% - 28px)); max-height: min(88vh, 850px); overflow-y: auto; padding: 0; border-radius: 16px; }
-.achievement-dialog header { padding: 28px 30px 22px; background: #0d2343; color: white; }
-.achievement-dialog header h2 { color: white; font-size: clamp(1.8rem, 4vw, 2.7rem); }
+.achievement-dialog { z-index: 1001 !important; width: calc(100vw - 32px) !important; max-width: 760px !important; max-height: min(88vh, 850px); overflow-x: hidden; overflow-y: auto; gap: 0 !important; padding: 0 !important; border: 1px solid #c5d1df !important; border-radius: 16px !important; background: #fff !important; color: var(--ink); box-shadow: 0 28px 90px rgba(3,16,34,.35) !important; }
+[data-slot="dialog-overlay"] { z-index: 1000 !important; background: rgba(3,13,27,.74) !important; backdrop-filter: blur(3px); }
+.achievement-dialog [data-slot="dialog-close"] { z-index: 2; top: 17px !important; right: 17px !important; display: grid; width: 36px; height: 36px; place-items: center; border-radius: 999px !important; background: rgba(255,255,255,.14) !important; color: white !important; opacity: 1 !important; }
+.achievement-dialog header { padding: 28px 76px 24px 30px; background: #0d2343; color: white; }
+.achievement-dialog header h2 { max-width: 620px; color: white; font-size: clamp(1.7rem, 4vw, 2.55rem); line-height: 1.08; overflow-wrap: anywhere; }
 .achievement-dialog header p { color: #c9d8e9; }
 .achievement-dialog-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .achievement-dialog-meta span { padding: 5px 9px; border-radius: 6px; background: #1d63bc; font-size: .72rem; font-weight: 850; }
@@ -521,6 +523,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .trust-section { align-items: start; }
   .pillar-grid, .value-grid, .news-grid, .process-grid, .admissions-faq { grid-template-columns: 1fr; }
   .achievement-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .achievement-tabs { grid-template-columns: repeat(2, 1fr); }
   .info-grid, .social-links-grid { grid-template-columns: 1fr; }
   .newsletter-form { grid-template-columns: 1fr; }
   .newsletter-form .consent, .newsletter-form small { grid-column: auto; }
