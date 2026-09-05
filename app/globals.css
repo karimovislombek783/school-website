@@ -219,6 +219,13 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .article-detail { width: min(780px, calc(100% - 40px)); margin: 0 auto; padding: 90px 0; }
 .article-detail h1 { margin-bottom: 24px; font-size: clamp(2.4rem, 5vw, 4.4rem); }
 .article-detail > p { font-size: 1.02rem; line-height: 1.85; }
+.article-cover-image { display: block; width: 100%; max-height: 760px; margin: 0 0 34px; border-radius: var(--radius); object-fit: cover; background: var(--blue-soft); }
+.article-gallery { margin-top: 48px; padding-top: 30px; border-top: 1px solid var(--line); }
+.article-gallery h2 { margin-bottom: 18px; }
+.article-gallery > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.article-gallery a { display: block; overflow: hidden; border-radius: 12px; background: var(--blue-soft); }
+.article-gallery img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; transition: transform .25s ease; }
+.article-gallery a:hover img { transform: scale(1.02); }
 .article-lead { color: var(--ink); font-size: 1.25rem !important; }
 .back-link { display: inline-flex; margin-top: 34px; }
 .not-found-shell { display: grid; min-height: 100vh; place-items: center; padding: 30px; background: var(--blue-soft); }
@@ -314,6 +321,20 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .role-note { align-self: end; margin: 0; padding: 12px; border-radius: 8px; background: var(--gold-soft); color: #6a501a; font-size: .82rem; }
 .cms-remove-image { align-items: center; color: var(--ink); }
 .cms-remove-image input { width: 17px; min-height: 17px; margin: 0; }
+.cms-gallery-editor { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 9px; }
+.cms-gallery-editor legend { padding: 0 7px; color: var(--ink); font-size: .82rem; font-weight: 750; }
+.cms-gallery-editor > p { margin: 0; color: var(--muted); font-size: .78rem; }
+.cms-gallery-editor > small { display: flex; align-items: center; gap: 7px; color: var(--muted); }
+.cms-existing-gallery { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: #fafcff; font-size: .76rem; }
+.cms-existing-gallery span { min-width: 0; overflow-wrap: anywhere; }
+.cms-existing-gallery div, .cms-gallery-previews article div { display: flex; gap: 4px; }
+.cms-existing-gallery button, .cms-gallery-previews button { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid var(--line); border-radius: 6px; color: var(--navy); }
+.cms-existing-gallery button svg, .cms-gallery-previews button svg { width: 14px; }
+.cms-existing-gallery button:disabled, .cms-gallery-previews button:disabled { opacity: .35; }
+.cms-gallery-previews { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.cms-gallery-previews article { display: grid; gap: 6px; min-width: 0; padding: 7px; border: 1px solid var(--line); border-radius: 8px; }
+.cms-gallery-previews img { width: 100%; aspect-ratio: 4 / 5; border-radius: 6px; object-fit: cover; }
+.cms-gallery-previews span { overflow: hidden; color: var(--muted); font-size: .67rem; text-overflow: ellipsis; white-space: nowrap; }
 .cms-related-editor { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 9px; }
 .cms-related-editor legend { padding: 0 7px; color: var(--ink); font-size: .82rem; font-weight: 750; }
 .cms-related-editor > p { margin: 0; color: var(--muted); font-size: .78rem; }
@@ -455,6 +476,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .admin-session { align-items: flex-start; flex-direction: column; }
   .admin-session-actions { width: 100%; justify-content: space-between; }
   .cms-options { grid-template-columns: 1fr; }
+  .cms-gallery-previews { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .article-gallery > div { grid-template-columns: 1fr; }
   .cms-related-row { grid-template-columns: 1fr 38px; }
   .cms-related-row input { grid-column: 1 / -1; }
   .cms-related-row button { grid-column: 2; }

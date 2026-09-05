@@ -134,6 +134,7 @@ export type NewsRecord = {
   excerpt: Record<Lang, string>;
   body: Record<Lang, string[]>;
   imageUrl?: string;
+  galleryUrls: string[];
 };
 
 export type AchievementRecord = {

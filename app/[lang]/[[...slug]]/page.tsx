@@ -228,7 +228,7 @@ function DetailPage({ lang, page, slug, content }: { lang: Lang; page: string; s
   if (page === "news") {
     const item = content.news.find((record) => record.slug === slug);
     if (!item) notFound();
-    return <main><article className="article-detail"><p className="eyebrow">{item.date}</p><h1>{item.title[lang]}</h1><p className="article-lead">{item.excerpt[lang]}</p>{item.body[lang].map((paragraph) => <p key={paragraph}>{paragraph}</p>)}<Link className="text-link back-link" href={`/${lang}/news`}>← {lang === "uz" ? "Yangiliklarga qaytish" : "Back to news"}</Link></article></main>;
+    return <main><article className="article-detail"><p className="eyebrow">{item.date}</p><h1>{item.title[lang]}</h1>{item.imageUrl && <img className="article-cover-image" src={item.imageUrl} alt={item.title[lang]} />}<p className="article-lead">{item.excerpt[lang]}</p>{item.body[lang].map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{item.galleryUrls.length > 0 && <section className="article-gallery" aria-labelledby="article-gallery-title"><h2 id="article-gallery-title">{lang === "uz" ? "Tadbirdan lavhalar" : "Event gallery"}</h2><div>{item.galleryUrls.map((url, index) => <a href={url} target="_blank" rel="noreferrer" key={url}><img src={url} loading="lazy" alt={lang === "uz" ? `${item.title[lang]} — ${index + 1}-rasm` : `${item.title[lang]} — image ${index + 1}`} /></a>)}</div></section>}<Link className="text-link back-link" href={`/${lang}/news`}>← {lang === "uz" ? "Yangiliklarga qaytish" : "Back to news"}</Link></article></main>;
   }
   if (page === "achievements") {
     const item = content.achievements.find((record) => record.slug === slug);

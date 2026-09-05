@@ -95,7 +95,19 @@ test("teacher contact details are optional, consent-gated, and safe", () => {
 test("public content uses a short response cache and longer-lived signed images", () => {
   assert.match(publicPage, /revalidate = 120/);
   assert.doesNotMatch(publicPage, /dynamic = "force-dynamic"/);
-  assert.match(repository, /createSignedUrl\(row\.image_path, 86400\)/);
+  assert.match(repository, /createSignedUrls\(paths, 86400\)/);
+});
+
+test("news supports a private, ordered and bounded image gallery", () => {
+  assert.match(schema, /gallery_paths text\[\] not null default '\{\}'/);
+  assert.match(schema, /cardinality\(gallery_paths\) <= 8/);
+  assert.match(schema, /storage\.objects\.name = any\(gallery_paths\)/);
+  assert.match(consoleSource, /multiple onChange=/);
+  assert.match(consoleSource, /existingGalleryPaths\.length \+ selectedGalleryFiles\.length > 8/);
+  assert.match(consoleSource, /gallery_paths: type === "news"/);
+  assert.match(repository, /galleryUrls: row\.gallery_urls \?\? \[\]/);
+  assert.match(publicPage, /item\.galleryUrls\.length > 0/);
+  assert.match(publicPage, /loading="lazy"/);
 });
 
 test("confirmed legal identity replaces the public-name placeholder", () => {

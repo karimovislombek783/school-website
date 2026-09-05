@@ -1,7 +1,9 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
-import { FilePenLine, GraduationCap, Link2, Newspaper, Plus, ShieldCheck, Trash2, Users, X } from "lucide-react";
+/* eslint-disable @next/next/no-img-element -- local object URLs preview images before upload. */
+
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight, FilePenLine, GraduationCap, ImagePlus, Link2, Newspaper, Plus, ShieldCheck, Trash2, Users, X } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -18,6 +20,7 @@ export type AdminRecord = {
   source_url: string | null; image_path: string | null; created_by: string;
   teacher_email: string | null; show_teacher_email: boolean; cv_url: string | null;
   related_links: Array<{ label_uz: string; label_en: string; url: string }>;
+  gallery_paths: string[];
 };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -68,6 +71,17 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
     const selectedImage = data.get("image");
     let image = selectedImage;
     let uploadedPath: string | null = null;
+    const existingGalleryPaths = data.getAll("existing_gallery_path").map(String).slice(0, 8);
+    const selectedGalleryFiles = data.getAll("gallery_images").filter((item): item is File => item instanceof File && item.size > 0);
+    if (existingGalleryPaths.length + selectedGalleryFiles.length > 8) {
+      setBusy(false); setMessage(lang === "uz" ? "Galereyada ko‘pi bilan 8 ta qo‘shimcha rasm bo‘lishi mumkin." : "A gallery can contain at most 8 additional images."); return;
+    }
+    let galleryImages: File[] = [];
+    try { galleryImages = await Promise.all(selectedGalleryFiles.map(normalizeImage)); }
+    catch {
+      setBusy(false); setMessage(lang === "uz" ? "Barcha galereya fayllari haqiqiy JPG, PNG yoki WebP rasmi va 5 MB dan kichik bo‘lishi kerak." : "Every gallery file must be a genuine JPG, PNG or WebP image smaller than 5 MB."); return;
+    }
+    const uploadedGalleryPaths: string[] = [];
 
     if (selectedImage instanceof File && selectedImage.size > 0) {
       try {
@@ -95,6 +109,23 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       const { error: uploadError } = await client.storage.from("school-media").upload(uploadedPath, image, { cacheControl: "3600", contentType: image.type, upsert: false });
       if (uploadError) {
         setBusy(false); setMessage(friendlyError(uploadError, lang)); return;
+      }
+    }
+
+    if (galleryImages.length) {
+      const { data: userData } = await client.auth.getUser();
+      if (!userData.user) {
+        if (uploadedPath) await client.storage.from("school-media").remove([uploadedPath]);
+        setBusy(false); setMessage(lang === "uz" ? "Sessiya tugagan. Qayta kiring." : "Your session expired. Sign in again."); return;
+      }
+      for (const galleryImage of galleryImages) {
+        const galleryPath = `${userData.user.id}/${crypto.randomUUID()}.webp`;
+        const { error: galleryError } = await client.storage.from("school-media").upload(galleryPath, galleryImage, { cacheControl: "86400", contentType: "image/webp", upsert: false });
+        if (galleryError) {
+          await client.storage.from("school-media").remove([...(uploadedPath ? [uploadedPath] : []), ...uploadedGalleryPaths]);
+          setBusy(false); setMessage(friendlyError(galleryError, lang)); return;
+        }
+        uploadedGalleryPaths.push(galleryPath);
       }
     }
 
@@ -132,13 +163,14 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       cv_url: type === "teacher" ? String(data.get("cv_url") || "").trim() || null : null,
       related_links: relatedLinks,
       image_path: uploadedPath ?? (removeImage ? null : editing?.image_path ?? null),
+      gallery_paths: type === "news" ? [...existingGalleryPaths, ...uploadedGalleryPaths] : [],
     };
 
     const result = editing
       ? await client.from("content_items").update(payload).eq("id", editing.id).select().single()
       : await client.from("content_items").insert(payload).select().single();
     if (result.error) {
-      if (uploadedPath) await client.storage.from("school-media").remove([uploadedPath]);
+      await client.storage.from("school-media").remove([...(uploadedPath ? [uploadedPath] : []), ...uploadedGalleryPaths]);
       setBusy(false); setMessage(friendlyError(result.error, lang)); return;
     }
 
@@ -215,12 +247,45 @@ function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { la
       </>}
       {type !== "teacher" && <label>{lang === "uz" ? "Sana" : "Date"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>}
       {type === "news" && <label>{lang === "uz" ? "Tur" : "Category"}<select name="category" defaultValue={record?.category ?? "news"}><option value="news">{lang === "uz" ? "Yangilik" : "News"}</option><option value="announcement">{lang === "uz" ? "E’lon" : "Announcement"}</option></select></label>}
+      {type === "news" && <GalleryEditor lang={lang} existingPaths={record?.gallery_paths ?? []} />}
       {type === "achievement" && <><label>{lang === "uz" ? "Qabul qiluvchi (o‘zbekcha)" : "Recipient (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label><label>{lang === "uz" ? "Qabul qiluvchi (inglizcha)" : "Recipient (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label><label className="full-field">{lang === "uz" ? "Tasdiqlash manbasi (HTTPS)" : "Verification source (HTTPS)"}<input name="source_url" type="url" pattern="https://.*" defaultValue={record?.source_url ?? ""} /></label></>}
       <label className="full-field">{lang === "uz" ? "Tasdiqlangan rasm (JPG, PNG yoki WebP; 5 MB gacha)" : "Approved image (JPG, PNG or WebP; up to 5 MB)"}<input name="image" type="file" accept="image/jpeg,image/png,image/webp" /></label>
       {record?.image_path && <label className="full-field consent cms-remove-image"><input name="remove_image" type="checkbox" />{lang === "uz" ? "Joriy rasmni yozuvdan olib tashlash" : "Remove the current image from this record"}</label>}
       <div className="cms-form-actions full-field"><button className="button button-secondary" type="button" onClick={onCancel}>{lang === "uz" ? "Bekor qilish" : "Cancel"}</button><button className="button button-primary" type="submit" disabled={busy}>{busy ? (lang === "uz" ? "Saqlanmoqda…" : "Saving…") : (lang === "uz" ? "Saqlash" : "Save record")}</button></div>
     </div>
   </form>;
+}
+
+function GalleryEditor({ lang, existingPaths }: { lang: Lang; existingPaths: string[] }) {
+  const [existing, setExisting] = useState(existingPaths.slice(0, 8));
+  const [files, setFiles] = useState<File[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const previews = useMemo(() => files.map((file) => ({ file, url: URL.createObjectURL(file) })), [files]);
+  useEffect(() => () => previews.forEach((item) => URL.revokeObjectURL(item.url)), [previews]);
+
+  function syncFiles(next: File[]) {
+    setFiles(next);
+    if (inputRef.current) {
+      const transfer = new DataTransfer();
+      next.forEach((file) => transfer.items.add(file));
+      inputRef.current.files = transfer.files;
+    }
+  }
+  function move<T>(items: T[], index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= items.length) return items;
+    const next = [...items];
+    [next[index], next[target]] = [next[target], next[index]];
+    return next;
+  }
+  const remaining = 8 - existing.length;
+  return <fieldset className="full-field cms-gallery-editor"><legend>{lang === "uz" ? "Yangilik galereyasi (8 tagacha qo‘shimcha rasm)" : "News gallery (up to 8 additional images)"}</legend>
+    <p>{lang === "uz" ? "Muqova rasmi yuqoridagi oddiy rasm maydonida qoladi. Bu yerda galereya rasmlarini tanlang va tartiblang." : "The cover remains in the standard image field below. Select and arrange additional gallery images here."}</p>
+    {existing.map((path, index) => <div className="cms-existing-gallery" key={path}><input type="hidden" name="existing_gallery_path" value={path} /><span>{index + 1}. {path.split("/").pop()}</span><div><button type="button" disabled={index === 0} onClick={() => setExisting((items) => move(items, index, -1))} aria-label={lang === "uz" ? "Oldinga surish" : "Move earlier"}><ArrowLeft /></button><button type="button" disabled={index === existing.length - 1} onClick={() => setExisting((items) => move(items, index, 1))} aria-label={lang === "uz" ? "Orqaga surish" : "Move later"}><ArrowRight /></button><button type="button" onClick={() => setExisting((items) => items.filter((_, itemIndex) => itemIndex !== index))} aria-label={lang === "uz" ? "Rasmni olib tashlash" : "Remove image"}><Trash2 /></button></div></div>)}
+    <input ref={inputRef} name="gallery_images" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => syncFiles(Array.from(event.target.files ?? []).slice(0, remaining))} />
+    {previews.length > 0 && <div className="cms-gallery-previews">{previews.map((item, index) => <article key={`${item.file.name}-${item.file.lastModified}`}><img src={item.url} alt="" /><span>{existing.length + index + 1}. {item.file.name}</span><div><button type="button" disabled={index === 0} onClick={() => syncFiles(move(files, index, -1))} aria-label={lang === "uz" ? "Oldinga surish" : "Move earlier"}><ArrowLeft /></button><button type="button" disabled={index === files.length - 1} onClick={() => syncFiles(move(files, index, 1))} aria-label={lang === "uz" ? "Orqaga surish" : "Move later"}><ArrowRight /></button><button type="button" onClick={() => syncFiles(files.filter((_, itemIndex) => itemIndex !== index))} aria-label={lang === "uz" ? "Rasmni olib tashlash" : "Remove image"}><X /></button></div></article>)}</div>}
+    <small><ImagePlus size={16} />{lang === "uz" ? `${existing.length + files.length}/8 ta rasm tanlandi` : `${existing.length + files.length}/8 images selected`}</small>
+  </fieldset>;
 }
 
 function typeLabel(type: AdminRecord["type"], lang: Lang) {
