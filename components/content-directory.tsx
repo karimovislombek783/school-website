@@ -123,11 +123,14 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
       <DialogTrigger asChild><button type="button" className="achievement-open">{lang === "uz" ? "Batafsil ko‘rish" : "View details"}<ArrowRight /></button></DialogTrigger>
     </div>
   </article><DialogContent className="achievement-dialog"><DialogHeader className="achievement-dialog-header">
-    <div className="achievement-dialog-identity"><span className="achievement-dialog-type">{item.credentialType}</span><DialogTitle>{item.studentName}</DialogTitle><DialogDescription>{categoryLabel}<span aria-hidden="true">•</span>{item.academicYear}</DialogDescription></div>
-    <div className="achievement-dialog-result"><small>{lang === "uz" ? "Natija" : "Result"}</small><strong>{shownResult}</strong></div>
+    <div className="achievement-dialog-heading"><span className="achievement-dialog-type">{item.credentialType}</span><DialogTitle>{item.studentName}</DialogTitle><DialogDescription>{categoryLabel}</DialogDescription></div>
   </DialogHeader>
-    {item.subject[lang] && <div className="achievement-dialog-subject"><BookOpen aria-hidden="true" /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
-    {item.imageUrl && <div className="achievement-document"><img src={item.imageUrl} alt={lang === "uz" ? `${item.studentName} uchun tahrirlangan sertifikat nusxasi` : `Redacted certificate copy for ${item.studentName}`} /></div>}
+    <div className={`achievement-dialog-facts ${item.subject[lang] ? "has-subject" : ""}`}>
+      <div className="achievement-dialog-fact achievement-dialog-score"><span>{lang === "uz" ? "Natija" : "Result"}</span><strong>{shownResult}</strong></div>
+      {item.subject[lang] && <div className="achievement-dialog-fact achievement-dialog-subject"><BookOpen aria-hidden="true" /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
+      <div className="achievement-dialog-fact"><span>{lang === "uz" ? "O‘quv yili" : "Academic year"}</span><strong>{item.academicYear}</strong></div>
+    </div>
+    {item.imageUrl && <figure className="achievement-document"><img src={item.imageUrl} alt={lang === "uz" ? `${item.studentName} sertifikati` : `Certificate for ${item.studentName}`} /><figcaption>{lang === "uz" ? "Sertifikat nusxasi" : "Certificate copy"}</figcaption></figure>}
     <div className="achievement-confirmation"><CheckCircle2 /><span>{lang === "uz" ? "Natija maktab tomonidan tekshirilgan va tasdiqlangan." : "This result has been reviewed and verified by the school."}</span></div>
     {item.source && <a className="text-link" href={item.source} target="_blank" rel="noreferrer">{lang === "uz" ? "Tasdiqlash manbasini ochish" : "Open verification source"}<ArrowRight /></a>}
   </DialogContent></Dialog>;
