@@ -13,6 +13,7 @@ const layout = readFileSync("app/layout.tsx", "utf8");
 const proxy = readFileSync("proxy.ts", "utf8");
 const publicPage = readFileSync("app/[lang]/[[...slug]]/page.tsx", "utf8");
 const repository = readFileSync("lib/content-repository.ts", "utf8");
+const photoGallery = readFileSync("components/news-photo-gallery.tsx", "utf8");
 
 test("database defines separated staff roles", () => {
   for (const role of ["owner", "administrator", "editor", "writer"]) {
@@ -102,12 +103,14 @@ test("news supports a private, ordered and bounded image gallery", () => {
   assert.match(schema, /gallery_paths text\[\] not null default '\{\}'/);
   assert.match(schema, /cardinality\(gallery_paths\) <= 8/);
   assert.match(schema, /storage\.objects\.name = any\(gallery_paths\)/);
-  assert.match(consoleSource, /multiple onChange=/);
+  assert.match(consoleSource, /multiple[^>]*onChange=/);
   assert.match(consoleSource, /existingGalleryPaths\.length \+ selectedGalleryFiles\.length > 8/);
   assert.match(consoleSource, /gallery_paths: type === "news"/);
   assert.match(repository, /galleryUrls: row\.gallery_urls \?\? \[\]/);
   assert.match(publicPage, /item\.galleryUrls\.length > 0/);
-  assert.match(publicPage, /loading="lazy"/);
+  assert.match(photoGallery, /loading="lazy"/);
+  assert.match(photoGallery, /role="dialog"/);
+  assert.match(repository, /fallbackCoverPath/);
 });
 
 test("confirmed legal identity replaces the public-name placeholder", () => {

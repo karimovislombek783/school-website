@@ -247,13 +247,25 @@ function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { la
       </>}
       {type !== "teacher" && <label>{lang === "uz" ? "Sana" : "Date"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>}
       {type === "news" && <label>{lang === "uz" ? "Tur" : "Category"}<select name="category" defaultValue={record?.category ?? "news"}><option value="news">{lang === "uz" ? "Yangilik" : "News"}</option><option value="announcement">{lang === "uz" ? "E’lon" : "Announcement"}</option></select></label>}
+      <CoverImagePicker lang={lang} hasCurrentImage={Boolean(record?.image_path)} />
       {type === "news" && <GalleryEditor lang={lang} existingPaths={record?.gallery_paths ?? []} />}
       {type === "achievement" && <><label>{lang === "uz" ? "Qabul qiluvchi (o‘zbekcha)" : "Recipient (Uzbek)"}<input name="recipient_uz" defaultValue={record?.recipient_uz ?? ""} /></label><label>{lang === "uz" ? "Qabul qiluvchi (inglizcha)" : "Recipient (English)"}<input name="recipient_en" defaultValue={record?.recipient_en ?? ""} /></label><label className="full-field">{lang === "uz" ? "Tasdiqlash manbasi (HTTPS)" : "Verification source (HTTPS)"}<input name="source_url" type="url" pattern="https://.*" defaultValue={record?.source_url ?? ""} /></label></>}
-      <label className="full-field">{lang === "uz" ? "Tasdiqlangan rasm (JPG, PNG yoki WebP; 5 MB gacha)" : "Approved image (JPG, PNG or WebP; up to 5 MB)"}<input name="image" type="file" accept="image/jpeg,image/png,image/webp" /></label>
       {record?.image_path && <label className="full-field consent cms-remove-image"><input name="remove_image" type="checkbox" />{lang === "uz" ? "Joriy rasmni yozuvdan olib tashlash" : "Remove the current image from this record"}</label>}
       <div className="cms-form-actions full-field"><button className="button button-secondary" type="button" onClick={onCancel}>{lang === "uz" ? "Bekor qilish" : "Cancel"}</button><button className="button button-primary" type="submit" disabled={busy}>{busy ? (lang === "uz" ? "Saqlanmoqda…" : "Saving…") : (lang === "uz" ? "Saqlash" : "Save record")}</button></div>
     </div>
   </form>;
+}
+
+function CoverImagePicker({ lang, hasCurrentImage }: { lang: Lang; hasCurrentImage: boolean }) {
+  const [file, setFile] = useState<File | null>(null);
+  const previewUrl = useMemo(() => file ? URL.createObjectURL(file) : null, [file]);
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
+
+  return <div className="full-field cms-image-picker">
+    <div><strong>{lang === "uz" ? "Muqova rasmi" : "Cover image"}</strong><small>{lang === "uz" ? "Yangilik kartasi va maqola tepasida ko‘rinadigan asosiy rasm. JPG, PNG yoki WebP; 5 MB gacha." : "The main image shown on the news card and at the top of the article. JPG, PNG or WebP; up to 5 MB."}</small></div>
+    <label className="cms-file-button"><ImagePlus size={18} /><span>{lang === "uz" ? "Rasmni tanlash" : "Choose image"}</span><input name="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></label>
+    {file && previewUrl ? <div className="cms-cover-preview"><img src={previewUrl} alt="" /><div><strong>{file.name}</strong><small>{lang === "uz" ? "Yangi muqova rasmi tanlandi" : "New cover image selected"}</small></div></div> : <p className="cms-file-status">{hasCurrentImage ? (lang === "uz" ? "Joriy muqova rasmi saqlangan. Yangi rasm tanlasangiz, u almashtiriladi." : "A current cover is saved. Choosing a new image will replace it.") : (lang === "uz" ? "Rasm tanlanmagan" : "No image selected")}</p>}
+  </div>;
 }
 
 function GalleryEditor({ lang, existingPaths }: { lang: Lang; existingPaths: string[] }) {
@@ -280,9 +292,9 @@ function GalleryEditor({ lang, existingPaths }: { lang: Lang; existingPaths: str
   }
   const remaining = 8 - existing.length;
   return <fieldset className="full-field cms-gallery-editor"><legend>{lang === "uz" ? "Yangilik galereyasi (8 tagacha qo‘shimcha rasm)" : "News gallery (up to 8 additional images)"}</legend>
-    <p>{lang === "uz" ? "Muqova rasmi yuqoridagi oddiy rasm maydonida qoladi. Bu yerda galereya rasmlarini tanlang va tartiblang." : "The cover remains in the standard image field below. Select and arrange additional gallery images here."}</p>
+    <p>{lang === "uz" ? "Bu yerga faqat qo‘shimcha rasmlarni yuklang. Muqova rasmi yuqoridagi alohida maydonda tanlanadi." : "Upload supporting images here only. Choose the cover in the separate field above."}</p>
     {existing.map((path, index) => <div className="cms-existing-gallery" key={path}><input type="hidden" name="existing_gallery_path" value={path} /><span>{index + 1}. {path.split("/").pop()}</span><div><button type="button" disabled={index === 0} onClick={() => setExisting((items) => move(items, index, -1))} aria-label={lang === "uz" ? "Oldinga surish" : "Move earlier"}><ArrowLeft /></button><button type="button" disabled={index === existing.length - 1} onClick={() => setExisting((items) => move(items, index, 1))} aria-label={lang === "uz" ? "Orqaga surish" : "Move later"}><ArrowRight /></button><button type="button" onClick={() => setExisting((items) => items.filter((_, itemIndex) => itemIndex !== index))} aria-label={lang === "uz" ? "Rasmni olib tashlash" : "Remove image"}><Trash2 /></button></div></div>)}
-    <input ref={inputRef} name="gallery_images" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => syncFiles(Array.from(event.target.files ?? []).slice(0, remaining))} />
+    <label className={`cms-file-button ${remaining === 0 ? "disabled" : ""}`}><ImagePlus size={18} /><span>{lang === "uz" ? "Rasmlarni tanlash" : "Choose images"}</span><input ref={inputRef} name="gallery_images" type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={remaining === 0} onChange={(event) => syncFiles(Array.from(event.target.files ?? []).slice(0, remaining))} /></label>
     {previews.length > 0 && <div className="cms-gallery-previews">{previews.map((item, index) => <article key={`${item.file.name}-${item.file.lastModified}`}><img src={item.url} alt="" /><span>{existing.length + index + 1}. {item.file.name}</span><div><button type="button" disabled={index === 0} onClick={() => syncFiles(move(files, index, -1))} aria-label={lang === "uz" ? "Oldinga surish" : "Move earlier"}><ArrowLeft /></button><button type="button" disabled={index === files.length - 1} onClick={() => syncFiles(move(files, index, 1))} aria-label={lang === "uz" ? "Orqaga surish" : "Move later"}><ArrowRight /></button><button type="button" onClick={() => syncFiles(files.filter((_, itemIndex) => itemIndex !== index))} aria-label={lang === "uz" ? "Rasmni olib tashlash" : "Remove image"}><X /></button></div></article>)}</div>}
     <small><ImagePlus size={16} />{lang === "uz" ? `${existing.length + files.length}/8 ta rasm tanlandi` : `${existing.length + files.length}/8 images selected`}</small>
   </fieldset>;

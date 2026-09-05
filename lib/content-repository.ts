@@ -31,8 +31,29 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
     const row = { teacher_email: null, show_teacher_email: false, cv_url: null, related_links: [], gallery_paths: [], ...partial } as ContentRow;
     const paths = [row.image_path, ...(row.gallery_paths ?? []).slice(0, 8)].filter((path): path is string => Boolean(path));
     const signedUrls = paths.length ? (await client.storage.from("school-media").createSignedUrls(paths, 86400)).data ?? [] : [];
-    const urlByPath = new Map(signedUrls.map((item) => [item.path, item.signedUrl]));
-    return { ...row, image_url: row.image_path ? urlByPath.get(row.image_path) ?? undefined : undefined, gallery_urls: (row.gallery_paths ?? []).flatMap((path) => { const url = urlByPath.get(path); return url ? [url] : []; }) };
+    // Supabase preserves request order, while `path` can be absent from an
+    // individual response. Indexing first prevents a valid cover from being
+    // lost just because response metadata is incomplete.
+    const urlByPath = new Map<string, string>();
+    signedUrls.forEach((item, index) => {
+      if (item.signedUrl && paths[index]) urlByPath.set(paths[index], item.signedUrl);
+      if (item.signedUrl && item.path) urlByPath.set(item.path, item.signedUrl);
+    });
+    const galleryPaths = (row.gallery_paths ?? []).slice(0, 8);
+    const storedCoverUrl = row.image_path ? urlByPath.get(row.image_path) : undefined;
+    const fallbackCoverPath = row.type === "news" && !storedCoverUrl
+      ? galleryPaths.find((path) => urlByPath.has(path)) ?? null
+      : null;
+    const coverUrl = storedCoverUrl ?? (fallbackCoverPath ? urlByPath.get(fallbackCoverPath) : undefined);
+    const visibleGalleryPaths = fallbackCoverPath ? galleryPaths.filter((path) => path !== fallbackCoverPath) : galleryPaths;
+    return {
+      ...row,
+      image_url: coverUrl,
+      gallery_urls: visibleGalleryPaths.flatMap((path) => {
+        const signedUrl = urlByPath.get(path);
+        return signedUrl ? [signedUrl] : [];
+      }),
+    };
   }));
   return {
     teachers: rows.filter((row) => row.type === "teacher").map((row) => ({ slug: row.slug, status: "published", departments: validDepartments(row.departments), isLeadership: Boolean(row.is_leadership), subjects: { uz: cleanList(row.subjects_uz), en: cleanList(row.subjects_en) }, name: { uz: row.title_uz, en: row.title_en }, role: { uz: row.recipient_uz ?? "", en: row.recipient_en ?? "" }, biography: { uz: row.summary_uz, en: row.summary_en }, qualifications: { uz: splitBody(row.body_uz), en: splitBody(row.body_en) }, initials: initials(row.title_uz), imageUrl: row.image_url, email: row.show_teacher_email ? cleanEmail(row.teacher_email) : undefined, cvUrl: cleanHttpsUrl(row.cv_url), relatedLinks: cleanRelatedLinks(row.related_links) })),
