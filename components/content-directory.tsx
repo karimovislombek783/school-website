@@ -116,10 +116,11 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
   const Icon = item.category === "olympiad" ? Trophy : item.category === "national" ? Medal : Award;
   const categoryLabel = item.category === "international" ? (lang === "uz" ? "Xalqaro" : "International") : item.category === "national" ? (lang === "uz" ? "Milliy" : "National") : (lang === "uz" ? "Olimpiada" : "Olympiad");
   const shownResult = displayResult(item.result);
+  const subjectTone = item.subject[lang] ? achievementSubjectTone(item.subject[lang]) : "";
   return <Dialog><article className={`achievement-card achievement-${item.category}`}>
     <div className="achievement-card-top"><span className="achievement-verified"><CheckCircle2 />{lang === "uz" ? "Tasdiqlangan natija" : "Verified result"}</span><span className="achievement-kind">{item.credentialType}</span></div>
     <div className="achievement-score"><Icon aria-hidden="true" /><small>{lang === "uz" ? "Natija" : "Result"}</small><strong>{shownResult}</strong></div>
-    <div className="achievement-card-body"><span>{categoryLabel}</span><h2>{item.studentName}</h2>{item.subject[lang] && <p>{item.subject[lang]}</p>}<time>{item.academicYear}</time>
+    <div className="achievement-card-body"><span>{categoryLabel}</span><h2>{item.studentName}</h2>{item.subject[lang] && <p className={`achievement-subject-badge ${subjectTone}`}><BookOpen aria-hidden="true" />{item.subject[lang]}</p>}<time>{item.academicYear}</time>
       <DialogTrigger asChild><button type="button" className="achievement-open">{lang === "uz" ? "Batafsil ko‘rish" : "View details"}<ArrowRight /></button></DialogTrigger>
     </div>
   </article><DialogContent className="achievement-dialog"><DialogHeader className="achievement-dialog-header">
@@ -127,7 +128,7 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
   </DialogHeader>
     <div className={`achievement-dialog-facts ${item.subject[lang] ? "has-subject" : ""}`}>
       <div className="achievement-dialog-fact achievement-dialog-score"><span>{lang === "uz" ? "Natija" : "Result"}</span><strong>{shownResult}</strong></div>
-      {item.subject[lang] && <div className="achievement-dialog-fact achievement-dialog-subject"><BookOpen aria-hidden="true" /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
+      {item.subject[lang] && <div className={`achievement-dialog-fact achievement-dialog-subject ${subjectTone}`}><BookOpen aria-hidden="true" /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
       <div className="achievement-dialog-fact"><span>{lang === "uz" ? "O‘quv yili" : "Academic year"}</span><strong>{item.academicYear}</strong></div>
     </div>
     {item.imageUrl && <figure className="achievement-document"><img src={item.imageUrl} alt={lang === "uz" ? `${item.studentName} sertifikati` : `Certificate for ${item.studentName}`} /><figcaption>{lang === "uz" ? "Sertifikat nusxasi" : "Certificate copy"}</figcaption></figure>}
@@ -139,6 +140,17 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
 function displayResult(value: string) {
   const clean = value.trim();
   return /^[a-f](?:[+-])?$/i.test(clean) ? clean.toUpperCase() : clean;
+}
+
+function achievementSubjectTone(subject: string) {
+  const value = subject.toLocaleLowerCase();
+  if (/math|matemat/.test(value)) return "subject-math";
+  if (/english|ingliz/.test(value)) return "subject-english";
+  if (/uzbek|o['‘’`]zbek|ona tili|adabiyot|literature/.test(value)) return "subject-language";
+  if (/biology|biolog/.test(value)) return "subject-biology";
+  if (/chemistry|kimyo/.test(value)) return "subject-chemistry";
+  if (/history|tarix/.test(value)) return "subject-history";
+  return "subject-general";
 }
 
 function EmptyState({ lang, kind, filtered = false }: { lang: Lang; kind: "teachers" | "news" | "achievements"; filtered?: boolean }) {

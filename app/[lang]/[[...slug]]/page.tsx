@@ -139,7 +139,7 @@ function InnerPage({ lang, page, content }: { lang: Lang; page: string; content:
   if (!pageCopy) notFound();
   return (
     <main>
-      <section className="page-hero"><p className="eyebrow">{pageCopy.eyebrow}</p><h1>{pageCopy.title}</h1><p>{pageCopy.intro}</p></section>
+      <section className={`page-hero ${page === "achievements" ? "achievements-page-hero" : ""}`}><p className="eyebrow">{pageCopy.eyebrow}</p><h1>{pageCopy.title}</h1><p>{pageCopy.intro}</p></section>
       {page === "about" && <AboutContent lang={lang} />}
       {page === "academics" && <AcademicsContent lang={lang} />}
       {page === "teachers" && <TeachersContent lang={lang} items={content.teachers} />}

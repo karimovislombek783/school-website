@@ -180,6 +180,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .page-hero h1 { max-width: 880px; margin: 0 auto 22px; font-size: clamp(2.5rem, 5vw, 4.6rem); }
 .page-hero > p:last-child { max-width: 720px; margin: auto; font-size: 1.05rem; }
 .page-hero.compact { padding-block: 60px; }
+.page-hero.achievements-page-hero { padding-block: 46px 50px; }
+.page-hero.achievements-page-hero h1 { max-width: 760px; margin-bottom: 14px; font-size: clamp(2.3rem, 4vw, 3.8rem); }
+.page-hero.achievements-page-hero > p:last-child { font-size: 1rem; }
 .page-content { min-height: 450px; }
 .split-panel { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; align-items: center; margin-bottom: 70px; }
 .split-panel h2 { font-size: clamp(1.8rem, 3vw, 3rem); }
@@ -236,6 +239,16 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .achievement-card-body > span { color: var(--blue); font-size: .7rem; font-weight: 850; text-transform: uppercase; letter-spacing: .07em; }
 .achievement-card-body h2 { margin: 9px 0 6px; font-size: 1.35rem; }
 .achievement-card-body p { margin: 0 0 8px; color: var(--muted); }
+.achievement-subject-badge { display: inline-flex; width: fit-content; max-width: 100%; align-items: center; gap: 7px; margin: 2px 0 10px !important; padding: 6px 9px; border: 1px solid; border-radius: 7px; font-size: .78rem; font-weight: 800; line-height: 1.35; transition: transform .18s ease; }
+.achievement-subject-badge svg { flex: 0 0 auto; width: 15px; height: 15px; }
+.achievement-card:hover .achievement-subject-badge { transform: translateY(-1px); }
+.subject-english { border-color: #9bd7f2; background: #eaf8ff; color: #075f80 !important; }
+.subject-math { border-color: #e9c765; background: #fff8df; color: #745500 !important; }
+.subject-language { border-color: #c9b7ef; background: #f5efff; color: #5c3996 !important; }
+.subject-biology { border-color: #9dd9b7; background: #edf9f2; color: #21643e !important; }
+.subject-chemistry { border-color: #91d9d1; background: #eaf9f7; color: #12655e !important; }
+.subject-history { border-color: #efb3a8; background: #fff1ee; color: #8b382a !important; }
+.subject-general { border-color: #b7cce2; background: #eff5fb; color: #244f78 !important; }
 .achievement-card-body time { color: var(--muted); font-size: .8rem; }
 .achievement-open { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line); color: var(--navy); font-weight: 800; }
 .achievement-open svg { width: 17px; }
@@ -260,6 +273,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .achievement-dialog-subject { display: flex; align-items: center; gap: 12px; margin: 0; }
 .achievement-dialog-subject > svg { flex: 0 0 auto; width: 20px; height: 20px; color: var(--blue); }
 .achievement-dialog-subject div { display: grid; min-width: 0; gap: 7px; }
+.achievement-dialog-subject.subject-english, .achievement-dialog-subject.subject-math, .achievement-dialog-subject.subject-language, .achievement-dialog-subject.subject-biology, .achievement-dialog-subject.subject-chemistry, .achievement-dialog-subject.subject-history, .achievement-dialog-subject.subject-general { border-width: 1px; }
+.achievement-dialog-subject.subject-english > svg, .achievement-dialog-subject.subject-english strong,
+.achievement-dialog-subject.subject-math > svg, .achievement-dialog-subject.subject-math strong,
+.achievement-dialog-subject.subject-language > svg, .achievement-dialog-subject.subject-language strong,
+.achievement-dialog-subject.subject-biology > svg, .achievement-dialog-subject.subject-biology strong,
+.achievement-dialog-subject.subject-chemistry > svg, .achievement-dialog-subject.subject-chemistry strong,
+.achievement-dialog-subject.subject-history > svg, .achievement-dialog-subject.subject-history strong,
+.achievement-dialog-subject.subject-general > svg, .achievement-dialog-subject.subject-general strong { color: inherit; }
 .achievement-document { position: relative; margin: 20px 30px 0; overflow: hidden; border: 1px solid #d7e1eb; border-radius: 12px; background: #eef3f8; }
 .achievement-document img { display: block; width: 100%; max-height: 520px; object-fit: contain; }
 .achievement-document figcaption { position: absolute; right: 10px; bottom: 10px; padding: 5px 9px; border-radius: 6px; background: rgba(8,26,52,.82); color: white; font-size: .7rem; font-weight: 700; }
@@ -580,6 +601,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .photo-placeholder { min-height: 300px; border-radius: 18px 18px 45px 18px; }
   .hero-note { position: relative; right: auto; bottom: auto; width: calc(100% - 24px); margin: -25px auto 0; }
   .page-hero { padding-block: 65px; }
+  .page-hero.achievements-page-hero { padding-block: 36px 40px; }
+  .page-hero.achievements-page-hero h1 { font-size: clamp(2.1rem, 10vw, 3rem); }
   .content-section { padding-block: 70px; }
   .teacher-grid { grid-template-columns: 1fr; }
   .achievement-tabs { grid-template-columns: 1fr; }
