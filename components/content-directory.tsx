@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowRight, Award, BookOpen, CalendarDays, CheckCircle2, Medal, Newspaper, Trophy, Users } from "lucide-react";
+import { ArrowRight, Award, BookOpen, CalendarDays, CheckCircle2, Dna, FlaskConical, Landmark, Languages, Medal, Newspaper, Sigma, Trophy, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   AchievementRecord,
@@ -117,10 +117,11 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
   const categoryLabel = item.category === "international" ? (lang === "uz" ? "Xalqaro" : "International") : item.category === "national" ? (lang === "uz" ? "Milliy" : "National") : (lang === "uz" ? "Olimpiada" : "Olympiad");
   const shownResult = displayResult(item.result);
   const subjectTone = item.subject[lang] ? achievementSubjectTone(item.subject[lang]) : "";
+  const SubjectIcon = item.subject[lang] ? achievementSubjectIcon(item.subject[lang]) : BookOpen;
   return <Dialog><article className={`achievement-card achievement-${item.category}`}>
     <div className="achievement-card-top"><span className="achievement-verified"><CheckCircle2 />{lang === "uz" ? "Tasdiqlangan natija" : "Verified result"}</span><span className="achievement-kind">{item.credentialType}</span></div>
     <div className="achievement-score"><Icon aria-hidden="true" /><small>{lang === "uz" ? "Natija" : "Result"}</small><strong>{shownResult}</strong></div>
-    <div className="achievement-card-body"><span>{categoryLabel}</span><h2>{item.studentName}</h2>{item.subject[lang] && <p className={`achievement-subject-badge ${subjectTone}`}><BookOpen aria-hidden="true" />{item.subject[lang]}</p>}<time>{item.academicYear}</time>
+    <div className="achievement-card-body"><span>{categoryLabel}</span><h2>{item.studentName}</h2>{item.subject[lang] && <p className={`achievement-subject-badge ${subjectTone}`}><SubjectIcon aria-hidden="true" />{item.subject[lang]}</p>}<time>{item.academicYear}</time>
       <DialogTrigger asChild><button type="button" className="achievement-open">{lang === "uz" ? "Batafsil ko‘rish" : "View details"}<ArrowRight /></button></DialogTrigger>
     </div>
   </article><DialogContent className="achievement-dialog"><DialogHeader className="achievement-dialog-header">
@@ -128,7 +129,7 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
   </DialogHeader>
     <div className={`achievement-dialog-facts ${item.subject[lang] ? "has-subject" : ""}`}>
       <div className="achievement-dialog-fact achievement-dialog-score"><span>{lang === "uz" ? "Natija" : "Result"}</span><strong>{shownResult}</strong></div>
-      {item.subject[lang] && <div className={`achievement-dialog-fact achievement-dialog-subject ${subjectTone}`}><BookOpen aria-hidden="true" /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
+      {item.subject[lang] && <div className={`achievement-dialog-fact achievement-dialog-subject ${subjectTone}`}><SubjectIcon aria-hidden="true" /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
       <div className="achievement-dialog-fact"><span>{lang === "uz" ? "O‘quv yili" : "Academic year"}</span><strong>{item.academicYear}</strong></div>
     </div>
     {item.imageUrl && <figure className="achievement-document"><img src={item.imageUrl} alt={lang === "uz" ? `${item.studentName} sertifikati` : `Certificate for ${item.studentName}`} /><figcaption>{lang === "uz" ? "Sertifikat nusxasi" : "Certificate copy"}</figcaption></figure>}
@@ -151,6 +152,17 @@ function achievementSubjectTone(subject: string) {
   if (/chemistry|kimyo/.test(value)) return "subject-chemistry";
   if (/history|tarix/.test(value)) return "subject-history";
   return "subject-general";
+}
+
+function achievementSubjectIcon(subject: string) {
+  const value = subject.toLocaleLowerCase();
+  if (/math|matemat/.test(value)) return Sigma;
+  if (/english|ingliz/.test(value)) return BookOpen;
+  if (/uzbek|o['‘’`]zbek|ona tili|adabiyot|literature/.test(value)) return Languages;
+  if (/biology|biolog/.test(value)) return Dna;
+  if (/chemistry|kimyo/.test(value)) return FlaskConical;
+  if (/history|tarix/.test(value)) return Landmark;
+  return BookOpen;
 }
 
 function EmptyState({ lang, kind, filtered = false }: { lang: Lang; kind: "teachers" | "news" | "achievements"; filtered?: boolean }) {
