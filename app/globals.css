@@ -176,9 +176,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .consent { display: flex; align-items: flex-start; gap: 9px; color: #e3ecf6; font-size: .78rem; }
 .consent input { width: 17px; min-height: 17px; margin-top: 2px; }
 
-.page-hero { padding: 90px max(20px, calc((100vw - 980px)/2)); background: linear-gradient(180deg, #edf4fb, #f9fbfe); text-align: center; }
-.page-hero h1 { max-width: 880px; margin: 0 auto 22px; font-size: clamp(2.5rem, 5vw, 4.6rem); }
-.page-hero > p:last-child { max-width: 720px; margin: auto; font-size: 1.05rem; }
+.page-hero { padding: 34px max(20px, calc((100vw - 980px)/2)); background: linear-gradient(180deg, #edf4fb, #f9fbfe); text-align: center; }
+.page-hero .eyebrow { margin-bottom: 8px; }
+.page-hero h1 { max-width: 760px; margin: 0 auto 10px; font-size: clamp(1.9rem, 3.2vw, 2.9rem); }
+.page-hero > p:last-child { max-width: 580px; margin: auto; font-size: .95rem; }
 .page-hero.compact { padding-block: 60px; }
 .page-hero.achievements-page-hero { padding-block: 20px 22px; }
 .page-hero.achievements-page-hero .eyebrow { margin-bottom: 8px; }
@@ -601,7 +602,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .facts-ribbon { grid-template-columns: 1fr; }
   .photo-placeholder { min-height: 300px; border-radius: 18px 18px 45px 18px; }
   .hero-note { position: relative; right: auto; bottom: auto; width: calc(100% - 24px); margin: -25px auto 0; }
-  .page-hero { padding-block: 65px; }
+  .page-hero { padding-block: 26px; }
+  .page-hero h1 { font-size: clamp(1.7rem, 7vw, 2.3rem); }
   .page-hero.achievements-page-hero { padding-block: 18px 20px; }
   .page-hero.achievements-page-hero h1 { font-size: clamp(1.5rem, 7vw, 2rem); }
   .content-section { padding-block: 70px; }
