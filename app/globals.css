@@ -180,9 +180,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .page-hero h1 { max-width: 880px; margin: 0 auto 22px; font-size: clamp(2.5rem, 5vw, 4.6rem); }
 .page-hero > p:last-child { max-width: 720px; margin: auto; font-size: 1.05rem; }
 .page-hero.compact { padding-block: 60px; }
-.page-hero.achievements-page-hero { padding-block: 46px 50px; }
-.page-hero.achievements-page-hero h1 { max-width: 760px; margin-bottom: 14px; font-size: clamp(2.3rem, 4vw, 3.8rem); }
-.page-hero.achievements-page-hero > p:last-child { font-size: 1rem; }
+.page-hero.achievements-page-hero { padding-block: 20px 22px; }
+.page-hero.achievements-page-hero .eyebrow { margin-bottom: 8px; }
+.page-hero.achievements-page-hero h1 { max-width: 640px; margin-bottom: 8px; font-size: clamp(1.6rem, 2.6vw, 2.35rem); }
+.page-hero.achievements-page-hero > p:last-child { max-width: 560px; font-size: .92rem; }
 .page-content { min-height: 450px; }
 .split-panel { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; align-items: center; margin-bottom: 70px; }
 .split-panel h2 { font-size: clamp(1.8rem, 3vw, 3rem); }
@@ -601,8 +602,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .photo-placeholder { min-height: 300px; border-radius: 18px 18px 45px 18px; }
   .hero-note { position: relative; right: auto; bottom: auto; width: calc(100% - 24px); margin: -25px auto 0; }
   .page-hero { padding-block: 65px; }
-  .page-hero.achievements-page-hero { padding-block: 36px 40px; }
-  .page-hero.achievements-page-hero h1 { font-size: clamp(2.1rem, 10vw, 3rem); }
+  .page-hero.achievements-page-hero { padding-block: 18px 20px; }
+  .page-hero.achievements-page-hero h1 { font-size: clamp(1.5rem, 7vw, 2rem); }
   .content-section { padding-block: 70px; }
   .teacher-grid { grid-template-columns: 1fr; }
   .achievement-tabs { grid-template-columns: 1fr; }
