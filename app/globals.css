@@ -175,6 +175,24 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .newsletter-form .consent, .newsletter-form small { grid-column: 1 / -1; }
 .consent { display: flex; align-items: flex-start; gap: 9px; color: #e3ecf6; font-size: .78rem; }
 .consent input { width: 17px; min-height: 17px; margin-top: 2px; }
+.newsletter-signup { display: grid; grid-template-columns: 1.05fr .95fr; gap: 42px 70px; align-items: center; padding: 58px max(20px, calc((100vw - 1120px)/2)); border-top: 1px solid #d6e2ef; background: linear-gradient(135deg, #edf5fc, #f9fbfe 62%, #fff6dd); }
+.newsletter-signup-copy { display: flex; gap: 18px; align-items: flex-start; }
+.newsletter-signup-copy h2 { margin: 2px 0 9px; font-size: clamp(1.65rem, 2.8vw, 2.45rem); }
+.newsletter-signup-copy p { margin: 0; }
+.newsletter-icon { display: grid; flex: 0 0 48px; width: 48px; height: 48px; place-items: center; border-radius: 12px; background: var(--navy); color: white; }
+.newsletter-subscribe-form { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+.newsletter-subscribe-form small, .newsletter-feedback { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: .78rem; }
+.newsletter-subscribe-form .button { min-height: 47px; }
+.newsletter-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
+.newsletter-feedback { display: flex; gap: 9px; align-items: center; padding: 14px 16px; border-radius: 8px; }
+.newsletter-feedback.success { background: #e4f3eb; color: #1f6646; }
+.newsletter-feedback.error { background: #fff0ed; color: #8f3027; }
+.newsletter-feedback svg { flex: 0 0 19px; width: 19px; }
+.newsletter-status-page { display: grid; min-height: 520px; padding: 70px 20px; place-items: center; background: var(--blue-soft); }
+.newsletter-status-card { width: min(620px, 100%); padding: 46px; border: 1px solid var(--line); border-radius: var(--radius); background: white; text-align: center; box-shadow: 0 18px 48px rgba(23,63,115,.08); }
+.newsletter-status-card > svg { width: 44px; height: 44px; color: var(--blue); }
+.newsletter-status-card h1 { margin: 16px 0 10px; }
+.newsletter-status-card p { margin: 0 0 24px; }
 
 .page-hero { padding: 34px max(20px, calc((100vw - 980px)/2)); background: linear-gradient(180deg, #edf4fb, #f9fbfe); text-align: center; }
 .page-hero .eyebrow { margin-bottom: 8px; }
@@ -536,6 +554,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 }
 
 @media (max-width: 780px) {
+  .newsletter-signup { grid-template-columns: 1fr; gap: 28px; padding-block: 46px; }
+  .newsletter-subscribe-form { grid-template-columns: 1fr; }
+  .newsletter-subscribe-form small, .newsletter-feedback { grid-column: auto; }
+  .newsletter-status-card { padding: 32px 22px; }
   .institutional-masthead { min-height: 64px; border-top-width: 4px; }
   .masthead-inner { min-height: 64px; }
   .masthead-emblem { top: 7px; width: 76px; height: 76px; border-width: 3px; outline-width: 2px; }

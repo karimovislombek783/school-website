@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- local object URLs preview images before upload. */
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, FilePenLine, GraduationCap, ImagePlus, Link2, Newspaper, Plus, ShieldCheck, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, FilePenLine, GraduationCap, ImagePlus, Link2, Mail, Newspaper, Plus, ShieldCheck, Trash2, Users, X } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -58,6 +58,7 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
   const [editorOpen, setEditorOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [newsletterBusy, setNewsletterBusy] = useState<string | null>(null);
   const visible = useMemo(() => records.filter((item) => item.type === type), [records, type]);
   const counts = (kind: AdminRecord["type"]) => ({ published: records.filter((item) => item.type === kind && item.status === "published").length, drafts: records.filter((item) => item.type === kind && item.status === "draft").length });
   const canPublish = role !== "writer";
@@ -210,11 +211,24 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
     setBusy(false);
   }
 
+  async function sendNewsletter(record: AdminRecord) {
+    if (newsletterBusy || record.type !== "news" || record.status !== "published") return;
+    setNewsletterBusy(record.id); setMessage("");
+    const response = await fetch("/api/newsletter/send", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ newsId: record.id }) }).catch(() => null);
+    const payload = await response?.json().catch(() => ({})) as { sent?: number; failed?: number; error?: string } | undefined;
+    if (response?.ok) setMessage(lang === "uz" ? `Yangilik ${payload?.sent ?? 0} obunachiga yuborildi. ${payload?.failed ?? 0} ta xat yuborilmadi.` : `News sent to ${payload?.sent ?? 0} subscribers. ${payload?.failed ?? 0} deliveries failed.`);
+    else if (response?.status === 409) setMessage(lang === "uz" ? "Bu yangilik avval obunachilarga yuborilgan." : "This news item has already been sent to subscribers.");
+    else if (response?.status === 403) setMessage(lang === "uz" ? "Faqat MFA bilan kirgan egasi yoki administrator xat yubora oladi." : "Only an MFA-verified owner or administrator may send newsletters.");
+    else setMessage(lang === "uz" ? "Yangilik xati yuborilmadi. Newsletter sozlamalarini tekshiring." : "The newsletter was not sent. Check the newsletter configuration.");
+    setNewsletterBusy(null);
+  }
+
   return <section className="cms-console">
     <div className="cms-summary">{(["teacher", "news", "achievement"] as const).map((kind) => { const Icon = kind === "teacher" ? Users : kind === "news" ? Newspaper : GraduationCap; const count = counts(kind); return <article key={kind}><Icon /><span>{typeLabel(kind, lang)}</span><strong>{count.published} {lang === "uz" ? "nashrda" : "published"} · {count.drafts} {lang === "uz" ? "qoralama" : "drafts"}</strong></article>; })}</div>
     <div className="cms-tabs">{(["teacher", "news", "achievement"] as const).map((kind) => <button key={kind} className={`filter-chip ${type === kind ? "active" : ""}`} onClick={() => { setType(kind); setEditing(null); setEditorOpen(false); }}>{kind === "teacher" ? (lang === "uz" ? "O‘qituvchilar" : "Teachers") : kind === "news" ? (lang === "uz" ? "Yangiliklar" : "News") : (lang === "uz" ? "Yutuq va sertifikatlar" : "Achievements & certificates")}</button>)}</div>
     <div className={`cms-layout ${editorOpen ? "editor-open" : ""}`}><div className="cms-list"><div className="cms-list-heading"><div><p className="cms-kicker">{typeLabel(type, lang)}</p><h2>{lang === "uz" ? "Barcha yozuvlar" : "All records"}</h2></div><button className="button button-primary" onClick={() => { setEditing(null); setEditorOpen(true); }}><Plus size={16} />{newLabel(type, lang)}</button></div>
       {visible.length ? visible.map((record) => <article key={record.id}><div><span className={`status-pill ${record.status === "published" ? "published" : ""}`}>{record.status === "published" ? (lang === "uz" ? "Nashrda" : "Published") : (lang === "uz" ? "Qoralama" : "Draft")}</span><h3>{record.title_uz}</h3><small>/{record.slug}</small></div><div>
+        {record.type === "news" && record.status === "published" && (role === "owner" || role === "administrator") && <AlertDialog><AlertDialogTrigger asChild><button aria-label={lang === "uz" ? "Obunachilarga yuborish" : "Send to subscribers"} disabled={Boolean(newsletterBusy)}><Mail /></button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{lang === "uz" ? "Bu yangilikni email orqali yuborasizmi?" : "Send this news item by email?"}</AlertDialogTitle><AlertDialogDescription>{lang === "uz" ? "Xat barcha tasdiqlangan obunachilarga yuboriladi. Bir yangilikni faqat bir marta yuborish mumkin." : "The message will go to every confirmed subscriber. Each news item can be sent only once."}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{lang === "uz" ? "Bekor qilish" : "Cancel"}</AlertDialogCancel><AlertDialogAction onClick={() => void sendNewsletter(record)}>{lang === "uz" ? "Yuborish" : "Send newsletter"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
         {canEdit(record) && <button aria-label={lang === "uz" ? "Tahrirlash" : "Edit"} onClick={() => { setEditing(record); setEditorOpen(true); }}><FilePenLine /></button>}
         {canDelete(record) && <AlertDialog><AlertDialogTrigger asChild><button aria-label={lang === "uz" ? "O‘chirish" : "Delete"}><Trash2 /></button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{lang === "uz" ? "Yozuvni butunlay o‘chirasizmi?" : "Permanently delete this record?"}</AlertDialogTitle><AlertDialogDescription>{lang === "uz" ? "Bu amalni ortga qaytarib bo‘lmaydi. Avval qoralama yoki nashr holatini tekshiring." : "This action cannot be undone. Check the draft or publication state first."}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{lang === "uz" ? "Bekor qilish" : "Cancel"}</AlertDialogCancel><AlertDialogAction variant="destructive" onClick={() => void remove(record)}>{lang === "uz" ? "O‘chirish" : "Delete"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
       </div></article>) : <div className="cms-empty"><Plus size={26} /><strong>{emptyLabel(type, lang)}</strong><span>{lang === "uz" ? "Birinchi ma’lumotni qo‘shish uchun yuqoridagi tugmani bosing." : "Use the button above when you are ready to add the first record."}</span></div>}</div>

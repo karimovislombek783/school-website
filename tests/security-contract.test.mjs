@@ -14,6 +14,10 @@ const proxy = readFileSync("proxy.ts", "utf8");
 const publicPage = readFileSync("app/[lang]/[[...slug]]/page.tsx", "utf8");
 const repository = readFileSync("lib/content-repository.ts", "utf8");
 const photoGallery = readFileSync("components/news-photo-gallery.tsx", "utf8");
+const newsletterServer = readFileSync("lib/newsletter/server.ts", "utf8");
+const newsletterSubscribe = readFileSync("app/api/newsletter/subscribe/route.ts", "utf8");
+const newsletterSend = readFileSync("app/api/newsletter/send/route.ts", "utf8");
+const newsletterUi = readFileSync("components/newsletter-signup.tsx", "utf8");
 
 test("database defines separated staff roles", () => {
   for (const role of ["owner", "administrator", "editor", "writer"]) {
@@ -117,4 +121,23 @@ test("confirmed legal identity replaces the public-name placeholder", () => {
   assert.match(siteContent, /IZZATBEK-EDU-GROUP/);
   assert.match(siteContent, /license: "531978"/);
   assert.doesNotMatch(siteContent, /publicName:/);
+});
+
+test("newsletter is double-opt-in, private and safely rate limited", () => {
+  assert.match(schema, /newsletter_subscribers/);
+  assert.match(schema, /confirmation_token_hash/);
+  assert.match(schema, /unsubscribe_token_hash/);
+  assert.match(schema, /revoke all on public\.newsletter_subscribers/);
+  assert.match(newsletterServer, /createHash\("sha256"\)/);
+  assert.match(newsletterSubscribe, /newsletter_rate_limits/);
+  assert.match(newsletterSubscribe, /status: "pending"/);
+  assert.match(newsletterUi, /newsletter-honeypot/);
+});
+
+test("newsletter campaigns require MFA and prevent duplicate article sends", () => {
+  assert.match(schema, /news_id uuid not null unique/);
+  assert.match(newsletterSend, /currentLevel !== "aal2"/);
+  assert.match(newsletterSend, /\["owner", "administrator"\]/);
+  assert.match(newsletterSend, /status", "published"/);
+  assert.match(newsletterSend, /campaignError\?\.code === "23505"/);
 });

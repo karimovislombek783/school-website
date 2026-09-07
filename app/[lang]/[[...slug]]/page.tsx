@@ -10,6 +10,7 @@ import {
 import { AdminGateway } from "@/components/admin-gateway";
 import { AchievementDirectory, NewsDirectory, TeacherDirectory } from "@/components/content-directory";
 import { NewsPhotoGallery } from "@/components/news-photo-gallery";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import { SiteFooter, SiteHeader } from "@/components/site-shell";
 import { copy, isLang, Lang, pillars, siteIdentity } from "@/lib/site-content";
 import { loadPublishedContent, PublishedContent } from "@/lib/content-repository";
@@ -69,6 +70,7 @@ export default async function SchoolPage({ params }: { params: Promise<{ lang: s
       <div id="main-content" tabIndex={-1}>
         {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} content={content} /> : page === "home" ? <HomePage lang={lang} news={content.news} /> : page === "admin" ? <AdminPage lang={lang} /> : <InnerPage lang={lang} page={page} content={content} />}
       </div>
+      {page !== "admin" && <NewsletterSignup lang={lang} />}
       <SiteFooter lang={lang} />
     </div>
   );
