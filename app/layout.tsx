@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { Analytics } from "@vercel/analytics/next";
 import { siteIdentity } from "@/lib/site-content";
 import "./globals.css";
 
@@ -40,6 +41,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body>
         <script type="application/ld+json">{JSON.stringify(schoolSchema)}</script>
         {children}
+        <Analytics />
       </body>
     </html>
   );
