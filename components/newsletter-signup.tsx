@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { CheckCircle2, Mail } from "lucide-react";
+import { AlertCircle, CheckCircle2, Mail } from "lucide-react";
 import { Lang } from "@/lib/site-content";
 
 export function NewsletterSignup({ lang, compact = false }: { lang: Lang; compact?: boolean }) {
@@ -29,7 +29,7 @@ export function NewsletterSignup({ lang, compact = false }: { lang: Lang; compac
       <label className="newsletter-honeypot" aria-hidden="true" hidden>Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
       <button className="button button-primary" disabled={state === "busy"}>{state === "busy" ? (lang === "uz" ? "Yuborilmoqda…" : "Sending…") : (lang === "uz" ? "Obuna bo‘lish" : "Subscribe")}</button>
       <small>{lang === "uz" ? "Obunani tasdiqlash talab qilinadi. Istalgan vaqtda bekor qilishingiz mumkin." : "Email confirmation is required. You may unsubscribe at any time."}</small>
-      {(state === "error" || state === "limited") && <p className="newsletter-feedback error" role="alert">{state === "limited" ? (lang === "uz" ? "Juda ko‘p urinish. Bir soatdan keyin qayta urinib ko‘ring." : "Too many attempts. Please try again in one hour.") : (lang === "uz" ? "Hozir obuna qilib bo‘lmadi. Keyinroq qayta urinib ko‘ring." : "We could not subscribe you right now. Please try again later.")}</p>}
+      {(state === "error" || state === "limited") && <p className="newsletter-feedback error" role="alert"><AlertCircle aria-hidden="true" />{state === "limited" ? (lang === "uz" ? "Juda ko‘p urinish. Bir soatdan keyin qayta urinib ko‘ring." : "Too many attempts. Please try again in one hour.") : (lang === "uz" ? "Hozir obuna qilib bo‘lmadi. Keyinroq qayta urinib ko‘ring." : "We could not subscribe you right now. Please try again later.")}</p>}
     </form>}
   </section>;
 }

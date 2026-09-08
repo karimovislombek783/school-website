@@ -896,6 +896,35 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 }
 .newsletter-subscribe-form small { grid-column: 1 / -1; }
 .newsletter-honeypot, .newsletter-honeypot[hidden] { display: none !important; }
+.newsletter-signup .newsletter-feedback {
+  width: 100%;
+  min-height: 54px;
+  margin: 0;
+  padding: 14px 16px;
+  gap: 10px;
+  border-radius: 10px;
+  font-size: .9rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.newsletter-signup .newsletter-feedback.success {
+  border: 1px solid rgba(126, 235, 179, .72);
+  background: rgba(18, 91, 64, .9);
+  color: #f0fff7;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.newsletter-signup .newsletter-feedback.error {
+  grid-column: 1 / -1;
+  border: 1px solid rgba(255, 167, 153, .76);
+  background: rgba(113, 35, 30, .92);
+  color: #fff5f3;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+}
+.newsletter-signup .newsletter-feedback svg {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
 
 @media (max-width: 900px) {
   .newsletter-signup { grid-template-columns: 1fr; gap: 24px; }
