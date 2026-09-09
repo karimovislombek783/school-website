@@ -12,6 +12,7 @@ import {
   NewsRecord,
   TeacherRecord,
 } from "@/lib/site-content";
+import { publicationCategories, publicationCategoryLabel, publicationFormatLabel } from "@/lib/publications";
 
 export function TeacherDirectory({ lang, items }: { lang: Lang; items: TeacherRecord[] }) {
   const [department, setDepartment] = useState("all");
@@ -61,14 +62,14 @@ export function NewsDirectory({ lang, items, limit }: { lang: Lang; items: NewsR
   return (
     <>
       {!limit && <div className="directory-toolbar">
-        {[["all", lang === "uz" ? "Barchasi" : "All"], ["news", lang === "uz" ? "Yangiliklar" : "News"], ["announcement", lang === "uz" ? "E’lonlar" : "Announcements"]].map(([value, label]) => (
+        {[["all", lang === "uz" ? "Barchasi" : "All"], ...publicationCategories.map(([value, uz, en]) => [value, lang === "uz" ? uz : en])].map(([value, label]) => (
           <button key={value} type="button" className={`filter-chip ${category === value ? "active" : ""}`} aria-pressed={category === value} onClick={() => setCategory(value)}>{label}</button>
         ))}
       </div>}
       {visible.length ? <div className="news-grid">{visible.map((item) => (
         <article className="news-card" key={item.slug}>
           <div className="news-art">{item.imageUrl ? <img src={item.imageUrl} alt={item.title[lang]} /> : <Newspaper size={38} aria-hidden="true" />}</div>
-          <div className="news-body"><div className="news-meta"><span>{item.category === "announcement" ? (lang === "uz" ? "E’lon" : "Announcement") : copy[lang].nav.news}</span><time dateTime={item.date}>{item.date}</time></div><h3>{item.title[lang]}</h3><p>{item.excerpt[lang]}</p><Link className="text-link" href={`/${lang}/news/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div>
+          <div className="news-body"><div className="news-meta"><span>{publicationCategoryLabel(item.category, lang)}</span><time dateTime={item.date}>{item.date}</time></div><p className="publication-format">{publicationFormatLabel(item.format, lang)}</p><h3>{item.title[lang]}</h3><p>{item.excerpt[lang]}</p>{item.author && <p className="publication-byline">{lang === "uz" ? "Muallif" : "By"}: <strong>{item.author.name}</strong></p>}<Link className="text-link" href={`/${lang}/news/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div>
         </article>
       ))}</div> : <EmptyState lang={lang} kind="news" filtered={items.length > 0} />}
     </>

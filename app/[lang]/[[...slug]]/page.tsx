@@ -14,6 +14,7 @@ import { NewsletterSignup } from "@/components/newsletter-signup";
 import { SiteFooter, SiteHeader } from "@/components/site-shell";
 import { copy, isLang, Lang, pillars, siteIdentity } from "@/lib/site-content";
 import { loadPublishedContent, PublishedContent } from "@/lib/content-repository";
+import { publicationCategoryLabel, publicationFormatLabel } from "@/lib/publications";
 
 // A short cache removes repeated database and signed-image work while keeping updates timely.
 export const revalidate = 120;
@@ -255,7 +256,7 @@ function DetailPage({ lang, page, slug, content }: { lang: Lang; page: string; s
   if (page === "news") {
     const item = content.news.find((record) => record.slug === slug);
     if (!item) notFound();
-    return <main><article className="article-detail"><p className="eyebrow">{item.date}</p><h1>{item.title[lang]}</h1>{item.imageUrl && <img className="article-cover-image" src={item.imageUrl} alt={item.title[lang]} />}<p className="article-lead">{item.excerpt[lang]}</p>{item.body[lang].map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{item.galleryUrls.length > 0 && <NewsPhotoGallery lang={lang} title={item.title[lang]} images={item.galleryUrls} />}<Link className="text-link back-link" href={`/${lang}/news`}>← {lang === "uz" ? "Yangiliklarga qaytish" : "Back to news"}</Link></article></main>;
+    return <main><article className="article-detail publication-detail"><div className="publication-detail-meta"><span>{publicationCategoryLabel(item.category, lang)}</span><span>{publicationFormatLabel(item.format, lang)}</span><time>{item.date}</time></div><h1>{item.title[lang]}</h1>{item.author && <div className="article-byline"><span>{lang === "uz" ? "Muallif" : "Written by"}</span><strong>{item.author.name}</strong><small>{item.author.role[lang]}</small></div>}{item.imageUrl && <img className="article-cover-image" src={item.imageUrl} alt={item.title[lang]} />}<p className="article-lead">{item.excerpt[lang]}</p>{item.body[lang].map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{item.galleryUrls.length > 0 && <NewsPhotoGallery lang={lang} title={item.title[lang]} images={item.galleryUrls} />}<Link className="text-link back-link" href={`/${lang}/news`}>← {lang === "uz" ? "Nashrlarga qaytish" : "Back to publications"}</Link></article></main>;
   }
   if (page === "achievements") {
     const item = content.achievements.find((record) => record.slug === slug);

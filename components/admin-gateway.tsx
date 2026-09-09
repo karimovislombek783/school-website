@@ -5,6 +5,7 @@ import { LanguageSwitch } from "@/components/language-switch";
 import { Lang } from "@/lib/site-content";
 import { createServerSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 import { connection } from "next/server";
+import { PublicationAuthor } from "@/components/writer-manager";
 
 export async function AdminGateway({ lang }: { lang: Lang }) {
   if (!isSupabaseConfigured()) return <section className="admin-setup"><h2>{lang === "uz" ? "Xavfsiz CMS ulanishga tayyor" : "Secure CMS ready to connect"}</h2><p>{lang === "uz" ? "Maktab uchun alohida Supabase loyihasi hali ulanmagan. Shu sababli tizim hech qanday ma’lumot saqlamaydi va soxta administrator kirishini ko‘rsatmaydi." : "A separate school Supabase project has not been connected, so the system stores nothing and does not pretend that administrator access is active."}</p><ol><li>{lang === "uz" ? "Alohida maktab Supabase loyihasini yarating." : "Create a separate school Supabase project."}</li><li>{lang === "uz" ? "supabase/schema.sql faylini ishga tushiring." : "Run supabase/schema.sql."}</li><li>{lang === "uz" ? "docs/SUPABASE-SETUP.md ko‘rsatmalariga amal qiling." : "Follow docs/SUPABASE-SETUP.md."}</li></ol></section>;
@@ -21,7 +22,8 @@ export async function AdminGateway({ lang }: { lang: Lang }) {
   const { data: audit } = membership.role === "owner" || membership.role === "administrator"
     ? await client.from("audit_log").select("id,actor_id,action,record_id,record_type,occurred_at").order("occurred_at", { ascending: false }).limit(25)
     : { data: [] };
-  return <><AdminSession lang={lang} email={user.email ?? ""} role={membership.role} /><AdminConsole lang={lang} initialRecords={(data ?? []) as AdminRecord[]} initialAudit={(audit ?? []) as AuditRecord[]} role={membership.role} currentUserId={user.id} /></>;
+  const { data: authors } = await client.from("publication_authors").select("id,name,role_uz,role_en,bio_uz,bio_en,profile_published,active").order("name");
+  return <><AdminSession lang={lang} email={user.email ?? ""} role={membership.role} /><AdminConsole lang={lang} initialRecords={(data ?? []) as AdminRecord[]} initialAudit={(audit ?? []) as AuditRecord[]} initialAuthors={(authors ?? []) as PublicationAuthor[]} role={membership.role} currentUserId={user.id} /></>;
 }
 
 function AdminSession({ lang, email, role }: { lang: Lang; email: string; role: string }) {

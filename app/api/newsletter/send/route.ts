@@ -5,7 +5,8 @@ import { escapeHtml, issueToken, newsletterConfigured, newsletterDatabase, sendN
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-type NewsRow = { id: string; slug: string; title_uz: string; title_en: string; summary_uz: string; summary_en: string; body_uz: string | null; body_en: string | null };
+type AuthorRow = { name: string; role_uz: string; role_en: string };
+type NewsRow = { id: string; slug: string; title_uz: string; title_en: string; summary_uz: string; summary_en: string; body_uz: string | null; body_en: string | null; publication_authors: AuthorRow | AuthorRow[] | null };
 type SubscriberRow = { id: string; email: string; preferred_language: "uz" | "en" };
 
 export async function POST(request: Request) {
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   if (!membership?.active || !["owner", "administrator"].includes(membership.role)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
   const database = newsletterDatabase();
-  const { data: news } = await database.from("content_items").select("id,slug,title_uz,title_en,summary_uz,summary_en,body_uz,body_en").eq("id", newsId).eq("type", "news").eq("status", "published").maybeSingle();
+  const { data: news } = await database.from("content_items").select("id,slug,title_uz,title_en,summary_uz,summary_en,body_uz,body_en,publication_authors(name,role_uz,role_en)").eq("id", newsId).eq("type", "news").eq("status", "published").maybeSingle();
   if (!news) return NextResponse.json({ error: "not-published" }, { status: 404 });
 
   const { data: campaign, error: campaignError } = await database.from("newsletter_campaigns").insert({ news_id: newsId, initiated_by: userData.user.id, status: "sending" }).select("id").single();
@@ -62,6 +63,8 @@ async function deliver(news: NewsRow, subscriber: SubscriberRow, unsubscribeToke
   const articleUrl = `${siteUrl()}/${lang}/news/${encodeURIComponent(news.slug)}`;
   const unsubscribeUrl = `${siteUrl()}/${lang}/newsletter/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`;
   const paragraphs = body.split(/\n\s*\n/).map((value) => value.trim()).filter(Boolean).slice(0, 3);
-  const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#12223d"><p style="color:#195489;font-weight:700">IZZATBEK-EDU-GROUP</p><h1>${escapeHtml(title)}</h1><p>${escapeHtml(summary)}</p>${paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}<p><a href="${articleUrl}">${lang === "uz" ? "Yangilikni saytda o‘qish" : "Read the full story on our website"}</a></p><hr><p style="font-size:12px;color:#607087">${lang === "uz" ? "Bu xatni maktab yangiliklariga obuna bo‘lganingiz uchun oldingiz." : "You received this email because you subscribed to school news."} <a href="${unsubscribeUrl}">${lang === "uz" ? "Obunani bekor qilish" : "Unsubscribe"}</a></p></div>`;
+  const author = Array.isArray(news.publication_authors) ? news.publication_authors[0] : news.publication_authors;
+  const byline = author ? `<p style="font-size:13px;color:#607087">${lang === "uz" ? "Muallif" : "Written by"}: <strong>${escapeHtml(author.name)}</strong> · ${escapeHtml(lang === "uz" ? author.role_uz : author.role_en)}</p>` : "";
+  const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#12223d"><p style="color:#195489;font-weight:700">IZZATBEK-EDU-GROUP</p><h1>${escapeHtml(title)}</h1>${byline}<p>${escapeHtml(summary)}</p>${paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}<p><a href="${articleUrl}">${lang === "uz" ? "Nashrni saytda o‘qish" : "Read the full publication on our website"}</a></p><hr><p style="font-size:12px;color:#607087">${lang === "uz" ? "Bu xatni maktab nashrlariga obuna bo‘lganingiz uchun oldingiz." : "You received this email because you subscribed to school publications."} <a href="${unsubscribeUrl}">${lang === "uz" ? "Obunani bekor qilish" : "Unsubscribe"}</a></p></div>`;
   return sendNewsletterEmail({ to: subscriber.email, subject: title, html });
 }

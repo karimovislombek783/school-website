@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- local object URLs preview images before upload. */
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, FilePenLine, GraduationCap, ImagePlus, Link2, Mail, Newspaper, Plus, ShieldCheck, Trash2, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, FilePenLine, GraduationCap, ImagePlus, Link2, Mail, Newspaper, Plus, Search, ShieldCheck, Trash2, Users, X } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -11,6 +11,8 @@ import {
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 import { Lang } from "@/lib/site-content";
 import { NewsletterDashboard } from "@/components/newsletter-dashboard";
+import { PublicationAuthor, WriterManager } from "@/components/writer-manager";
+import { publicationCategories, publicationCategoryLabel, publicationFormats } from "@/lib/publications";
 
 export type StaffRole = "owner" | "administrator" | "editor" | "writer";
 export type AuditRecord = { id: number; actor_id: string | null; action: string; record_id: string | null; record_type: string | null; occurred_at: string };
@@ -25,6 +27,7 @@ export type AdminRecord = {
   achievement_category: "international" | "national" | "olympiad" | null;
   achievement_type: string | null; achievement_result: string | null;
   achievement_subject_uz: string | null; achievement_subject_en: string | null; academic_year: string | null;
+  publication_format: string | null; author_id: string | null;
 };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -52,7 +55,7 @@ async function normalizeImage(file: File): Promise<File> {
   return new File([blob], "approved-image.webp", { type: "image/webp", lastModified: Date.now() });
 }
 
-export function AdminConsole({ lang, initialRecords, initialAudit, role, currentUserId }: { lang: Lang; initialRecords: AdminRecord[]; initialAudit: AuditRecord[]; role: StaffRole; currentUserId: string }) {
+export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthors, role, currentUserId }: { lang: Lang; initialRecords: AdminRecord[]; initialAudit: AuditRecord[]; initialAuthors: PublicationAuthor[]; role: StaffRole; currentUserId: string }) {
   const [records, setRecords] = useState(initialRecords);
   const [type, setType] = useState<AdminRecord["type"]>("teacher");
   const [editing, setEditing] = useState<AdminRecord | null>(null);
@@ -60,7 +63,14 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [newsletterBusy, setNewsletterBusy] = useState<string | null>(null);
-  const visible = useMemo(() => records.filter((item) => item.type === type), [records, type]);
+  const [authors, setAuthors] = useState(initialAuthors);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const filtered = useMemo(() => records.filter((item) => item.type === type && (statusFilter === "all" || item.status === statusFilter) && `${item.title_uz} ${item.title_en} ${item.slug}`.toLowerCase().includes(query.trim().toLowerCase())), [records, type, query, statusFilter]);
+  const pageSize = 10;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const visible = filtered.slice((page - 1) * pageSize, page * pageSize);
   const counts = (kind: AdminRecord["type"]) => ({ published: records.filter((item) => item.type === kind && item.status === "published").length, drafts: records.filter((item) => item.type === kind && item.status === "draft").length });
   const canPublish = role !== "writer";
   const canEdit = (record: AdminRecord) => role !== "writer" || (record.created_by === currentUserId && record.status === "draft");
@@ -182,6 +192,8 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
       achievement_subject_uz: type === "achievement" ? String(data.get("achievement_subject_uz") || "").trim() || null : null,
       achievement_subject_en: type === "achievement" ? String(data.get("achievement_subject_en") || "").trim() || null : null,
       academic_year: type === "achievement" ? academicYear : null,
+      publication_format: type === "news" ? String(data.get("publication_format") || "news-report") : null,
+      author_id: type === "news" ? String(data.get("author_id") || "") || null : null,
     };
 
     const result = editing
@@ -226,14 +238,18 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
 
   return <section className="cms-console">
     <div className="cms-summary">{(["teacher", "news", "achievement"] as const).map((kind) => { const Icon = kind === "teacher" ? Users : kind === "news" ? Newspaper : GraduationCap; const count = counts(kind); return <article key={kind}><Icon /><span>{typeLabel(kind, lang)}</span><strong>{count.published} {lang === "uz" ? "nashrda" : "published"} · {count.drafts} {lang === "uz" ? "qoralama" : "drafts"}</strong></article>; })}</div>
-    <div className="cms-tabs">{(["teacher", "news", "achievement"] as const).map((kind) => <button key={kind} className={`filter-chip ${type === kind ? "active" : ""}`} onClick={() => { setType(kind); setEditing(null); setEditorOpen(false); }}>{kind === "teacher" ? (lang === "uz" ? "O‘qituvchilar" : "Teachers") : kind === "news" ? (lang === "uz" ? "Yangiliklar" : "News") : (lang === "uz" ? "Yutuq va sertifikatlar" : "Achievements & certificates")}</button>)}</div>
+    <div className="cms-tabs">{(["teacher", "news", "achievement"] as const).map((kind) => <button key={kind} className={`filter-chip ${type === kind ? "active" : ""}`} onClick={() => { setType(kind); setPage(1); setQuery(""); setEditing(null); setEditorOpen(false); }}>{kind === "teacher" ? (lang === "uz" ? "O‘qituvchilar" : "Teachers") : kind === "news" ? (lang === "uz" ? "Nashrlar" : "Publications") : (lang === "uz" ? "Yutuq va sertifikatlar" : "Achievements & certificates")}</button>)}</div>
+    {type === "news" && (role === "owner" || role === "administrator" || role === "editor") && <WriterManager lang={lang} authors={authors} onChange={setAuthors} />}
     <div className={`cms-layout ${editorOpen ? "editor-open" : ""}`}><div className="cms-list"><div className="cms-list-heading"><div><p className="cms-kicker">{typeLabel(type, lang)}</p><h2>{lang === "uz" ? "Barcha yozuvlar" : "All records"}</h2></div><button className="button button-primary" onClick={() => { setEditing(null); setEditorOpen(true); }}><Plus size={16} />{newLabel(type, lang)}</button></div>
-      {visible.length ? visible.map((record) => <article key={record.id}><div><span className={`status-pill ${record.status === "published" ? "published" : ""}`}>{record.status === "published" ? (lang === "uz" ? "Nashrda" : "Published") : (lang === "uz" ? "Qoralama" : "Draft")}</span><h3>{record.title_uz}</h3><small>/{record.slug}</small></div><div>
+      <div className="cms-list-tools"><label><Search /><input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder={lang === "uz" ? "Nom yoki URL bo‘yicha qidirish" : "Search by name or URL"} /></label><select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}><option value="all">{lang === "uz" ? "Barcha holatlar" : "All statuses"}</option><option value="published">{lang === "uz" ? "Nashrda" : "Published"}</option><option value="draft">{lang === "uz" ? "Qoralama" : "Draft"}</option></select></div>
+      {visible.length ? visible.map((record) => <article className={`cms-record cms-record-${record.type} category-${record.category ?? "default"}`} key={record.id}><div><div className="cms-record-meta"><span className={`status-pill ${record.status === "published" ? "published" : ""}`}>{record.status === "published" ? (lang === "uz" ? "Nashrda" : "Published") : (lang === "uz" ? "Qoralama" : "Draft")}</span>{record.type === "news" && <span className="category-label">{publicationCategoryLabel(record.category ?? "school-news", lang)}</span>}</div><h3>{record.title_uz}</h3><small>/{record.slug}</small></div><div className="cms-record-actions">
         {record.type === "news" && record.status === "published" && (role === "owner" || role === "administrator") && <AlertDialog><AlertDialogTrigger asChild><button aria-label={lang === "uz" ? "Obunachilarga yuborish" : "Send to subscribers"} disabled={Boolean(newsletterBusy)}><Mail /></button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{lang === "uz" ? "Bu yangilikni email orqali yuborasizmi?" : "Send this news item by email?"}</AlertDialogTitle><AlertDialogDescription>{lang === "uz" ? "Xat barcha tasdiqlangan obunachilarga yuboriladi. Bir yangilikni faqat bir marta yuborish mumkin." : "The message will go to every confirmed subscriber. Each news item can be sent only once."}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{lang === "uz" ? "Bekor qilish" : "Cancel"}</AlertDialogCancel><AlertDialogAction onClick={() => void sendNewsletter(record)}>{lang === "uz" ? "Yuborish" : "Send newsletter"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
-        {canEdit(record) && <button aria-label={lang === "uz" ? "Tahrirlash" : "Edit"} onClick={() => { setEditing(record); setEditorOpen(true); }}><FilePenLine /></button>}
+        {record.status === "published" && <a className="cms-action-button" aria-label={lang === "uz" ? "Ko‘rish" : "Preview"} href={`/${lang}/${record.type === "teacher" ? "teachers" : record.type === "news" ? "news" : "achievements"}/${record.slug}`} target="_blank"><Eye /></a>}
+        {canEdit(record) && <button aria-label={lang === "uz" ? "Tahrirlash" : "Edit"} title={lang === "uz" ? "Tahrirlash" : "Edit"} onClick={() => { setEditing(record); setEditorOpen(true); }}><FilePenLine /></button>}
         {canDelete(record) && <AlertDialog><AlertDialogTrigger asChild><button aria-label={lang === "uz" ? "O‘chirish" : "Delete"}><Trash2 /></button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{lang === "uz" ? "Yozuvni butunlay o‘chirasizmi?" : "Permanently delete this record?"}</AlertDialogTitle><AlertDialogDescription>{lang === "uz" ? "Bu amalni ortga qaytarib bo‘lmaydi. Avval qoralama yoki nashr holatini tekshiring." : "This action cannot be undone. Check the draft or publication state first."}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{lang === "uz" ? "Bekor qilish" : "Cancel"}</AlertDialogCancel><AlertDialogAction variant="destructive" onClick={() => void remove(record)}>{lang === "uz" ? "O‘chirish" : "Delete"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
-      </div></article>) : <div className="cms-empty"><Plus size={26} /><strong>{emptyLabel(type, lang)}</strong><span>{lang === "uz" ? "Birinchi ma’lumotni qo‘shish uchun yuqoridagi tugmani bosing." : "Use the button above when you are ready to add the first record."}</span></div>}</div>
-      {editorOpen && <RecordForm key={editing?.id ?? `new-${type}`} lang={lang} type={type} record={editing} role={role} busy={busy} onSubmit={save} onCancel={() => { setEditing(null); setEditorOpen(false); }} />}
+      </div></article>) : <div className="cms-empty"><Plus size={26} /><strong>{emptyLabel(type, lang)}</strong><span>{lang === "uz" ? "Mos yozuv topilmadi." : "No matching records found."}</span></div>}
+      {pageCount > 1 && <div className="cms-pagination"><button disabled={page === 1} onClick={() => setPage((value) => value - 1)}>← {lang === "uz" ? "Oldingi" : "Previous"}</button><span>{page} / {pageCount}</span><button disabled={page === pageCount} onClick={() => setPage((value) => value + 1)}>{lang === "uz" ? "Keyingi" : "Next"} →</button></div>}</div>
+      {editorOpen && <RecordForm key={editing?.id ?? `new-${type}`} lang={lang} type={type} record={editing} authors={authors} role={role} busy={busy} onSubmit={save} onCancel={() => { setEditing(null); setEditorOpen(false); }} />}
     </div>
     {message && <p className="cms-message" role="status">{message}</p>}
     <div className="admin-notice"><ShieldCheck /><span>{lang === "uz" ? "Ommaviy saytda faqat “Nashr qilingan” holatidagi yozuvlar ko‘rinadi. Yozuvchi faqat o‘z qoralamalarini boshqaradi; nashr va o‘chirish vakolatlari rolga qarab cheklangan." : "Only published records appear publicly. Writers manage only their own drafts; publishing and deletion are restricted by role."}</span></div>
@@ -241,7 +257,7 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
   </section>;
 }
 
-function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { lang: Lang; type: AdminRecord["type"]; record: AdminRecord | null; role: StaffRole; busy: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onCancel: () => void }) {
+function RecordForm({ lang, type, record, authors, role, busy, onSubmit, onCancel }: { lang: Lang; type: AdminRecord["type"]; record: AdminRecord | null; authors: PublicationAuthor[]; role: StaffRole; busy: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onCancel: () => void }) {
   const canPublish = role !== "writer";
   const [relatedLinks, setRelatedLinks] = useState(record?.related_links ?? []);
   const [achievementCategory, setAchievementCategory] = useState(record?.achievement_category ?? "international");
@@ -292,7 +308,7 @@ function RecordForm({ lang, type, record, role, busy, onSubmit, onCancel }: { la
         </fieldset>
       </>}
       {type === "news" && <label>{lang === "uz" ? "Sana" : "Date"}<input name="event_date" type="date" defaultValue={record?.event_date ?? ""} /></label>}
-      {type === "news" && <label>{lang === "uz" ? "Tur" : "Category"}<select name="category" defaultValue={record?.category ?? "news"}><option value="news">{lang === "uz" ? "Yangilik" : "News"}</option><option value="announcement">{lang === "uz" ? "E’lon" : "Announcement"}</option></select></label>}
+      {type === "news" && <><label>{lang === "uz" ? "Mavzu" : "Category"}<select name="category" defaultValue={record?.category ?? "school-news"}>{publicationCategories.map(([value, uz, en]) => <option value={value} key={value}>{lang === "uz" ? uz : en}</option>)}</select></label><label>{lang === "uz" ? "Maqola turi" : "Format"}<select name="publication_format" defaultValue={record?.publication_format ?? "news-report"}>{publicationFormats.map(([value, uz, en]) => <option value={value} key={value}>{lang === "uz" ? uz : en}</option>)}</select></label><label>{lang === "uz" ? "Muallif (ixtiyoriy)" : "Writer (optional)"}<select name="author_id" defaultValue={record?.author_id ?? ""}><option value="">{lang === "uz" ? "Maktab tahririyati" : "School editorial team"}</option>{authors.filter((author) => author.active || author.id === record?.author_id).map((author) => <option value={author.id} key={author.id}>{author.name}</option>)}</select></label></>}
       <CoverImagePicker lang={lang} type={type} hasCurrentImage={Boolean(record?.image_path)} />
       {type === "news" && <GalleryEditor lang={lang} existingPaths={record?.gallery_paths ?? []} />}
       {record?.image_path && <label className="full-field consent cms-remove-image"><input name="remove_image" type="checkbox" />{lang === "uz" ? "Joriy rasmni yozuvdan olib tashlash" : "Remove the current image from this record"}</label>}
@@ -347,19 +363,19 @@ function GalleryEditor({ lang, existingPaths }: { lang: Lang; existingPaths: str
 
 function typeLabel(type: AdminRecord["type"], lang: Lang) {
   if (type === "teacher") return lang === "uz" ? "O‘qituvchilar" : "Teachers";
-  if (type === "news") return lang === "uz" ? "Yangiliklar va e’lonlar" : "News & announcements";
+  if (type === "news") return lang === "uz" ? "Maktab nashrlari" : "School publications";
   return lang === "uz" ? "Yutuq va sertifikatlar" : "Achievements & certificates";
 }
 
 function newLabel(type: AdminRecord["type"], lang: Lang) {
   if (type === "teacher") return lang === "uz" ? "O‘qituvchi qo‘shish" : "Add teacher";
-  if (type === "news") return lang === "uz" ? "Yangilik yozish" : "Write news";
+  if (type === "news") return lang === "uz" ? "Nashr yozish" : "Write publication";
   return lang === "uz" ? "Yutuq qo‘shish" : "Add achievement";
 }
 
 function emptyLabel(type: AdminRecord["type"], lang: Lang) {
   if (type === "teacher") return lang === "uz" ? "Hali o‘qituvchi qo‘shilmagan" : "No teachers added yet";
-  if (type === "news") return lang === "uz" ? "Hali yangilik yozilmagan" : "No news written yet";
+  if (type === "news") return lang === "uz" ? "Hali nashr yozilmagan" : "No publications written yet";
   return lang === "uz" ? "Hali yutuq yoki sertifikat qo‘shilmagan" : "No achievements or certificates yet";
 }
 

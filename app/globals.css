@@ -627,6 +627,54 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .cms-list, .cms-form { padding: 24px; border: 1px solid var(--line); border-radius: 11px; background: white; }
 .cms-list-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
 .cms-list-heading h2, .cms-form h2 { margin: 0; font-size: 1.55rem; }
+.cms-list-tools { display: grid; grid-template-columns: 1fr 190px; gap: 10px; margin-bottom: 10px; padding: 12px; border: 1px solid #dce5ef; border-radius: 10px; background: #f8fafc; }
+.cms-list-tools label { position: relative; }
+.cms-list-tools label svg { position: absolute; top: 50%; left: 12px; width: 17px; color: var(--muted); transform: translateY(-50%); }
+.cms-list-tools input { padding-left: 40px; }
+.cms-record { min-height: 94px; margin-top: 9px; padding: 14px 14px 14px 18px !important; border: 1px solid #dbe4ee !important; border-left: 5px solid #5c7898 !important; border-radius: 10px; background: white; }
+.cms-record-teacher { border-left-color: #276d8d !important; }
+.cms-record-achievement { border-left-color: #be8a21 !important; }
+.cms-record.category-school-news { border-left-color: #245b91 !important; }
+.cms-record.category-announcements { border-left-color: #c58a1d !important; }
+.cms-record.category-student-life { border-left-color: #2b887b !important; }
+.cms-record.category-student-voices { border-left-color: #7656a5 !important; }
+.cms-record.category-academic-corner { border-left-color: #376fba !important; }
+.cms-record.category-achievements { border-left-color: #ac7a19 !important; }
+.cms-record.category-community { border-left-color: #417c55 !important; }
+.cms-record.category-arts-culture { border-left-color: #a94f73 !important; }
+.cms-record.category-sports { border-left-color: #287649 !important; }
+.cms-record.category-editorial { border-left-color: #8d4d3e !important; }
+.cms-record-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.category-label { padding: 4px 8px; border-radius: 999px; background: #eef3f8; color: #405872; font-size: .7rem; font-weight: 750; }
+.cms-record-actions { align-items: center; }
+.cms-action-button, .cms-record-actions button { border: 1px solid #d5e0ea; background: #f9fbfd; }
+.cms-action-button { display: grid; width: 35px; height: 35px; place-items: center; border-radius: 7px; color: var(--navy); }
+.cms-action-button svg { width: 17px; }
+.cms-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; padding-top: 18px; }
+.cms-pagination button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--navy); }
+.cms-pagination button:disabled { opacity: .4; }
+.writer-manager { display: grid; gap: 16px; padding: 22px; border: 1px solid #d8e3ed; border-left: 5px solid #7459a6; border-radius: 12px; background: white; }
+.writer-manager-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.writer-manager-heading h3 { margin: 0 0 5px; font-size: 1.35rem; }
+.writer-manager-heading p:last-child { max-width: 650px; margin: 0; color: var(--muted); font-size: .82rem; }
+.writer-chips { display: flex; flex-wrap: wrap; gap: 9px; }
+.writer-chips > button { display: grid; grid-template-columns: 28px 1fr 16px; align-items: center; gap: 8px; min-width: 210px; padding: 10px 12px; border: 1px solid #d9e2ec; border-radius: 9px; color: var(--navy); text-align: left; }
+.writer-chips > button.active { border-color: #b9acd5; background: #f7f4fb; }
+.writer-chips svg { width: 17px; }
+.writer-chips span { display: grid; }
+.writer-chips small { color: var(--muted); }
+.writer-form { display: grid; gap: 15px; padding: 17px; border: 1px solid #ded6ec; border-radius: 10px; background: #fbfaff; }
+.writer-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.writer-form-grid label { display: grid; gap: 6px; font-size: .8rem; font-weight: 700; }
+.writer-form-grid .full-field { grid-column: 1 / -1; }
+.writer-form-grid .consent { display: flex; align-items: center; }
+.writer-form-grid .consent input { width: 17px; min-height: 17px; }
+.publication-format { margin: -7px 0 8px !important; color: #73568f !important; font-size: .72rem !important; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.publication-byline { min-height: 0 !important; margin: -8px 0 16px !important; color: var(--muted); font-size: .78rem !important; }
+.publication-detail-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.publication-detail-meta span, .publication-detail-meta time { padding: 6px 10px; border: 1px solid #d7e2ed; border-radius: 999px; color: var(--navy); font-size: .75rem; font-weight: 750; }
+.article-byline { display: grid; grid-template-columns: auto auto 1fr; align-items: baseline; gap: 7px; margin: -10px 0 28px; color: var(--muted); font-size: .82rem; }
+.article-byline strong { color: var(--ink); }
 .cms-kicker { margin: 0 0 4px; color: var(--muted); font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .cms-list > article { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); }
 .cms-list article h3 { margin: 7px 0 2px; font-size: 1rem; }
@@ -725,6 +773,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .newsletter-admin-heading > div:last-child { flex-wrap: wrap; }
   .newsletter-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .newsletter-tools select { width: 100%; }
+  .cms-list-tools, .writer-form-grid { grid-template-columns: 1fr; }
+  .writer-manager-heading { flex-direction: column; }
+  .cms-record { align-items: flex-start !important; }
 }
 .admin-shell { display: grid; grid-template-columns: 250px 1fr; min-height: 680px; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: 0 24px 70px rgba(23,63,115,.1); }
 .admin-sidebar { padding: 24px 15px; background: var(--navy-deep); color: white; }
