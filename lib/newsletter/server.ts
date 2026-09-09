@@ -108,3 +108,23 @@ export async function sendNewsletterEmail({
 
   return payload.id;
 }
+
+export type NewsletterEmail = { to: string; subject: string; html: string };
+
+export async function sendNewsletterBatch(messages: NewsletterEmail[]) {
+  if (!messages.length || messages.length > 100) throw new Error("A newsletter batch must contain 1–100 messages.");
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("Newsletter email is not configured.");
+  const from = process.env.NEWSLETTER_FROM_EMAIL || process.env.NEWSLETTER_FROM || "IZZATBEK-EDU-GROUP <news@izzatbek-edu-group.uz>";
+  const response = await fetch("https://api.resend.com/emails/batch", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify(messages.map((message) => ({ from, to: [message.to], subject: message.subject, html: message.html }))),
+    cache: "no-store",
+  });
+  const payload = await response.json().catch(() => ({})) as { data?: Array<{ id?: string }>; message?: string };
+  if (!response.ok || !Array.isArray(payload.data) || payload.data.length !== messages.length) {
+    throw new Error(payload.message || `Email provider returned ${response.status}.`);
+  }
+  return payload.data.map((item) => item.id ?? null);
+}

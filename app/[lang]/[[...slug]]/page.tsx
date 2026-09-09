@@ -19,7 +19,7 @@ import { publicationCategoryLabel, publicationFormatLabel } from "@/lib/publicat
 // A short cache removes repeated database and signed-image work while keeping updates timely.
 export const revalidate = 120;
 
-const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "admin"];
+const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "policies", "admin"];
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string; slug?: string[] }> }): Promise<Metadata> {
   const { lang: rawLang, slug } = await params;
@@ -157,6 +157,7 @@ function InnerPage({ lang, page, content }: { lang: Lang; page: string; content:
       {page === "contact" && <ContactContent lang={lang} />}
       {page === "legal" && <LegalContent lang={lang} />}
       {page === "privacy" && <PrivacyContent lang={lang} />}
+      {page === "policies" && <PoliciesContent lang={lang} />}
     </main>
   );
 }
@@ -221,7 +222,27 @@ function ContactContent({ lang }: { lang: Lang }) {
 function LegalContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
   const rows = [[isUz ? "Yuridik nom" : "Legal name", siteIdentity.legalName], [isUz ? "Tashkilot turi" : "Institution type", isUz ? "Nodavlat ta’lim muassasasi" : "Non-state educational institution"], [isUz ? "Litsenziya raqami" : "Licence number", siteIdentity.license], [isUz ? "Reyestr tartib raqami" : "Registry order number", siteIdentity.licenseOrder], [isUz ? "Amal qilish muddati" : "Validity", `${siteIdentity.licenseEffectiveFrom} — ${isUz ? "cheksiz" : "unlimited"}`], [isUz ? "Faoliyat turi" : "Licensed activity", siteIdentity.licensedActivity], [isUz ? "Litsenziyalangan sinflar" : "Licensed grades", siteIdentity.licensedGrades], [isUz ? "Vakolatli organ" : "Issuing authority", siteIdentity.licenseAuthority], [isUz ? "Yuridik manzil" : "Legal address", siteIdentity.legalAddress], [isUz ? "Ta’lim faoliyati manzillari" : "Licensed activity addresses", siteIdentity.activityAddresses.join("; ")], [isUz ? "Domen" : "Domain", siteIdentity.domain]];
-  return <section className="content-section page-content"><div className="legal-warning"><ShieldCheck /><div><h2>{isUz ? "Rasmiy ma’lumotlar tekshirilgandan so‘ng e’lon qilinadi" : "Official information is published after verification"}</h2><p>{isUz ? "Ma’lumotlar maktab ma’muriyati tomonidan tasdiqlanadi. To‘liq litsenziya nusxasi imzo va shaxsiy ma’lumotlarni himoya qilish uchun ommaga chiqarilmaydi." : "Information is approved by the school administration. The complete licence scan is not published in order to protect signatures and personal information."}</p><small>{isUz ? "So‘nggi yangilanish: 31.08.2026" : "Last updated: 31 August 2026"}</small></div></div><dl className="legal-list">{rows.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl></section>;
+  return <section className="content-section page-content"><div className="legal-warning"><ShieldCheck /><div><h2>{isUz ? "Rasmiy ma’lumot va to‘liq litsenziya" : "Official information and complete licence"}</h2><p>{isUz ? "Quyidagi ma’lumotlar maktab litsenziyasiga asoslangan. To‘liq ikki sahifali litsenziyani ko‘rish yoki yuklab olish mumkin." : "The information below is based on the school licence. The complete two-page licence may be viewed or downloaded."}</p><a className="button button-primary" href="/documents/izzatbek-edu-group-license-531978.pdf" target="_blank" rel="noreferrer"><FileText />{isUz ? "Litsenziya PDF-ni ochish" : "Open licence PDF"}</a><small>{isUz ? "So‘nggi yangilanish: 10.09.2026" : "Last updated: 10 September 2026"}</small></div></div><dl className="legal-list">{rows.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl></section>;
+}
+
+function PoliciesContent({ lang }: { lang: Lang }) {
+  const isUz = lang === "uz";
+  const policies = isUz ? [
+    ["Bolalarni himoya qilish", "Bola xavfsizligi birinchi o‘rinda turadi. Xavf yoki noo‘rin xatti-harakat haqidagi xabar darhol maktab rahbariyatiga yuboriladi; favqulodda vaziyatda vakolatli xizmatlarga murojaat qilinadi."],
+    ["Fotosurat va rozilik", "Voyaga yetmagan o‘quvchining aniqlanishi mumkin bo‘lgan surati faqat ota-ona yoki qonuniy vakilning tegishli roziligi va maktab tasdig‘i bilan e’lon qilinadi. Rozilik qaytarib olinsa, material imkon qadar tez olib tashlanadi."],
+    ["Tahririyat siyosati", "Maqolalar aniqlik, hurmat va maktab hamjamiyatiga foyda mezonlari bo‘yicha tahrir qilinadi. Mualliflik ko‘rsatiladi; shaxsiy hujum, kamsitish, plagiat va maxfiy ma’lumotga yo‘l qo‘yilmaydi."],
+    ["Shikoyat va tuzatish", `Xato, maxfiylik yoki nashr bo‘yicha shikoyatni ${siteIdentity.email} manziliga yuboring. Maktab murojaatni ko‘rib chiqadi, zarur bo‘lsa materialni tuzatadi, yangilaydi yoki olib tashlaydi.`],
+    ["Accessibility", "Sayt klaviatura navigatsiyasi, mazmunli sarlavhalar, alternativ rasm matni, tushunarli rang kontrasti va mobil qurilmalarda o‘qishni qo‘llab-quvvatlashga intiladi. To‘siq topsangiz, bizga xabar bering."],
+    ["Ma’lumotlarni saqlash", "Newsletter ma’lumotlari obuna davomida va qonuniy yoki operatsion zarurat bo‘lgan muddatgacha saqlanadi. Obunani bekor qilgan manzil qayta yuborishni oldini olish uchun cheklangan rad etish yozuvi sifatida saqlanishi mumkin."],
+  ] : [
+    ["Child safeguarding", "A child’s safety comes first. Concerns about risk or inappropriate conduct are referred promptly to school leadership and, in an emergency, to the appropriate authorities."],
+    ["Photography and consent", "An identifiable image of a minor is published only with appropriate parent or legal-guardian consent and school approval. If consent is withdrawn, the material will be removed as soon as reasonably possible."],
+    ["Editorial policy", "Stories are edited for accuracy, respect and value to the school community. Authorship is credited; personal attacks, discrimination, plagiarism and confidential information are not accepted."],
+    ["Complaints and corrections", `Report an error, privacy concern or publishing complaint to ${siteIdentity.email}. The school will review it and, where appropriate, correct, update or remove the material.`],
+    ["Accessibility", "The site aims to support keyboard navigation, meaningful headings, alternative image text, readable contrast and mobile use. Please contact us if you encounter a barrier."],
+    ["Data retention", "Newsletter data is retained while a subscription is active and for as long as there is a lawful or operational need. After unsubscribe, a limited suppression record may be retained to prevent further delivery."],
+  ];
+  return <section className="content-section page-content"><div className="policy-grid">{policies.map(([title, body]) => <article key={title}><ShieldCheck /><div><h2>{title}</h2><p>{body}</p></div></article>)}</div><div className="policy-note"><strong>{isUz ? "Qo‘llanish doirasi" : "Scope"}</strong><p>{isUz ? "Ushbu qoidalar maktabning veb-sayti va tahririyat faoliyatiga taalluqli. Ular O‘zbekiston qonunchiligi va maktab rahbariyatining tasdiqlangan tartiblarini almashtirmaydi." : "These rules apply to the school website and editorial activity. They do not replace applicable Uzbek law or formally approved school procedures."}</p><small>{isUz ? "Ko‘rib chiqilgan sana: 10.09.2026" : "Reviewed: 10 September 2026"}</small></div></section>;
 }
 
 function PrivacyContent({ lang }: { lang: Lang }) {

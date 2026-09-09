@@ -1,8 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { AchievementRecord, NewsRecord, publishedAchievements, publishedNews, publishedTeachers, TeacherDepartment, TeacherRecord, TeacherRelatedLink } from "@/lib/site-content";
+import { publicationIsVisible } from "@/lib/editorial-scheduling";
 
 type ContentRow = {
-  id: string; type: "teacher" | "news" | "achievement"; slug: string; status: "draft" | "published";
+  id: string; type: "teacher" | "news" | "achievement"; slug: string; status: "draft" | "scheduled" | "published";
   title_uz: string; title_en: string; summary_uz: string; summary_en: string; body_uz: string | null; body_en: string | null;
   category: string | null; departments: string[] | null; subjects_uz: string[] | null; subjects_en: string[] | null; is_leadership: boolean | null; event_date: string | null; recipient_uz: string | null; recipient_en: string | null; source_url: string | null; image_path: string | null;
   teacher_email: string | null; show_teacher_email: boolean | null; cv_url: string | null; related_links: unknown;
@@ -10,6 +11,7 @@ type ContentRow = {
   achievement_category: string | null; achievement_type: string | null; achievement_result: string | null;
   achievement_subject_uz: string | null; achievement_subject_en: string | null; academic_year: string | null;
   publication_format: string | null; author_id: string | null;
+  scheduled_publish_at: string | null; newsletter_scheduled_at: string | null;
   publication_authors: { name: string; role_uz: string; role_en: string; profile_published: boolean } | null;
 };
 
@@ -23,10 +25,11 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return { teachers: publishedTeachers, news: publishedNews, achievements: publishedAchievements };
   const client = createClient(url, key, { auth: { persistSession: false } });
-  const baseFields = "id,type,slug,status,title_uz,title_en,summary_uz,summary_en,body_uz,body_en,category,departments,subjects_uz,subjects_en,is_leadership,event_date,recipient_uz,recipient_en,source_url,image_path";
+  const legacyBaseFields = "id,type,slug,status,title_uz,title_en,summary_uz,summary_en,body_uz,body_en,category,departments,subjects_uz,subjects_en,is_leadership,event_date,recipient_uz,recipient_en,source_url,image_path";
+  const baseFields = `${legacyBaseFields},scheduled_publish_at,newsletter_scheduled_at`;
   const achievementFields = "achievement_category,achievement_type,achievement_result,achievement_subject_uz,achievement_subject_en,academic_year";
   const establishedFields = `${baseFields},teacher_email,show_teacher_email,cv_url,related_links,gallery_paths,${achievementFields}`;
-  const enrichedQuery = await client.from("content_items").select(`${establishedFields},publication_format,author_id,publication_authors(name,role_uz,role_en,profile_published)`).eq("status", "published").order("published_at", { ascending: false });
+  const enrichedQuery = await client.from("content_items").select(`${establishedFields},publication_format,author_id,publication_authors(name,role_uz,role_en,profile_published)`).in("status", ["published", "scheduled"]).order("published_at", { ascending: false });
   let data: unknown[] | null = enrichedQuery.data;
   let error = enrichedQuery.error;
   // Publications and author metadata are additive. If those optional fields or
@@ -34,20 +37,21 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
   // PostgREST refreshes its schema cache), retry the stable core query so one
   // enrichment failure never empties the teachers, news and achievements pages.
   if (error) {
-    const establishedQuery = await client.from("content_items").select(establishedFields).eq("status", "published").order("published_at", { ascending: false });
+    const establishedQuery = await client.from("content_items").select(establishedFields).in("status", ["published", "scheduled"]).order("published_at", { ascending: false });
     data = establishedQuery.data;
     error = establishedQuery.error;
   }
   // Support installations that have not yet applied the older profile/gallery
   // migrations, without weakening the normal fallback used in production.
   if (error?.code === "42703") {
-    const legacyQuery = await client.from("content_items").select(baseFields).eq("status", "published").order("published_at", { ascending: false });
+    const legacyQuery = await client.from("content_items").select(legacyBaseFields).eq("status", "published").order("published_at", { ascending: false });
     data = legacyQuery.data;
     error = legacyQuery.error;
   }
   if (error || !data) return { teachers: [], news: [], achievements: [] };
-  const rows = await Promise.all((data as Partial<ContentRow>[]).map(async (partial) => {
-    const row = { teacher_email: null, show_teacher_email: false, cv_url: null, related_links: [], gallery_paths: [], achievement_category: null, achievement_type: null, achievement_result: null, achievement_subject_uz: null, achievement_subject_en: null, academic_year: null, publication_format: null, author_id: null, publication_authors: null, ...partial } as ContentRow;
+  const visibleRows = (data as Partial<ContentRow>[]).filter((row) => publicationIsVisible(row.status ?? "draft", row.scheduled_publish_at ?? null));
+  const rows = await Promise.all(visibleRows.map(async (partial) => {
+    const row = { teacher_email: null, show_teacher_email: false, cv_url: null, related_links: [], gallery_paths: [], achievement_category: null, achievement_type: null, achievement_result: null, achievement_subject_uz: null, achievement_subject_en: null, academic_year: null, publication_format: null, author_id: null, scheduled_publish_at: null, newsletter_scheduled_at: null, publication_authors: null, ...partial } as ContentRow;
     const paths = [row.image_path, ...(row.gallery_paths ?? []).slice(0, 8)].filter((path): path is string => Boolean(path));
     const signedUrls = paths.length ? (await client.storage.from("school-media").createSignedUrls(paths, 86400)).data ?? [] : [];
     // Supabase preserves request order, while `path` can be absent from an

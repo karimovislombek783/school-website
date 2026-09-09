@@ -1,4 +1,4 @@
-import { AdminConsole, AdminRecord, AuditRecord } from "@/components/admin-console";
+import { AdminConsole, AdminHealth, AdminRecord, AuditRecord, RevisionRecord } from "@/components/admin-console";
 import { AdminLogin, AdminSignOut } from "@/components/admin-auth";
 import { AdminMfa } from "@/components/admin-mfa";
 import { LanguageSwitch } from "@/components/language-switch";
@@ -22,8 +22,17 @@ export async function AdminGateway({ lang }: { lang: Lang }) {
   const { data: audit } = membership.role === "owner" || membership.role === "administrator"
     ? await client.from("audit_log").select("id,actor_id,action,record_id,record_type,occurred_at").order("occurred_at", { ascending: false }).limit(25)
     : { data: [] };
-  const { data: authors } = await client.from("publication_authors").select("id,name,role_uz,role_en,bio_uz,bio_en,profile_published,active").order("name");
-  return <><AdminSession lang={lang} email={user.email ?? ""} role={membership.role} /><AdminConsole lang={lang} initialRecords={(data ?? []) as AdminRecord[]} initialAudit={(audit ?? []) as AuditRecord[]} initialAuthors={(authors ?? []) as PublicationAuthor[]} role={membership.role} currentUserId={user.id} /></>;
+  const { data: authors, error: authorsError } = await client.from("publication_authors").select("id,name,role_uz,role_en,bio_uz,bio_en,profile_published,active").order("name");
+  const { data: revisions, error: revisionsError } = membership.role !== "writer"
+    ? await client.from("content_revisions").select("id,content_item_id,version,snapshot,changed_by,changed_at").order("changed_at", { ascending: false }).limit(300)
+    : { data: [], error: null };
+  const health: AdminHealth[] = [];
+  if (authorsError) health.push({ level: "error", messageUz: "Mualliflar ro‘yxatini yuklab bo‘lmadi.", messageEn: "The writer directory could not be loaded." });
+  if (revisionsError) health.push({ level: "warning", messageUz: "Tahrir tarixi ishlamayapti. Editorial operations migratsiyasini tekshiring.", messageEn: "Revision history is unavailable. Check the editorial operations migration." });
+  if (!process.env["SUPABASE_" + "SERVICE" + "_ROLE_KEY"]) health.push({ level: "error", messageUz: "Server Supabase kaliti sozlanmagan; newsletter va rejalashtirish ishlamaydi.", messageEn: "The server Supabase key is missing; newsletters and scheduling will not work." });
+  if (!process.env.RESEND_API_KEY) health.push({ level: "error", messageUz: "Resend kaliti sozlanmagan; email yuborilmaydi.", messageEn: "The Resend key is missing; email delivery will not work." });
+  if (!process.env.SCHEDULER_SECRET) health.push({ level: "warning", messageUz: "Rejalashtirilgan nashrlar uchun SCHEDULER_SECRET sozlanmagan.", messageEn: "SCHEDULER_SECRET is missing, so scheduled publishing cannot run." });
+  return <><AdminSession lang={lang} email={user.email ?? ""} role={membership.role} /><AdminConsole lang={lang} initialRecords={(data ?? []) as AdminRecord[]} initialAudit={(audit ?? []) as AuditRecord[]} initialAuthors={(authors ?? []) as PublicationAuthor[]} initialRevisions={(revisions ?? []) as RevisionRecord[]} health={health} role={membership.role} currentUserId={user.id} /></>;
 }
 
 function AdminSession({ lang, email, role }: { lang: Lang; email: string; role: string }) {

@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- local object URLs preview images before upload. */
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Award, BookOpen, ChevronRight, Clock3, Eye, FilePenLine, GraduationCap, ImagePlus, LayoutDashboard, Link2, Mail, Newspaper, PenTool, Plus, Search, ShieldCheck, Trash2, UserRound, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, Award, BookOpen, ChevronRight, Clock3, Eye, FilePenLine, GraduationCap, History, ImagePlus, LayoutDashboard, Link2, Mail, Newspaper, PenTool, Plus, RotateCcw, Search, ShieldCheck, Trash2, UserRound, Users, X } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -13,11 +13,14 @@ import { Lang } from "@/lib/site-content";
 import { NewsletterDashboard } from "@/components/newsletter-dashboard";
 import { PublicationAuthor, WriterManager } from "@/components/writer-manager";
 import { publicationCategories, publicationCategoryLabel, publicationFormats } from "@/lib/publications";
+import { scheduledIso } from "@/lib/editorial-scheduling";
 
 export type StaffRole = "owner" | "administrator" | "editor" | "writer";
 export type AuditRecord = { id: number; actor_id: string | null; action: string; record_id: string | null; record_type: string | null; occurred_at: string };
+export type RevisionRecord = { id: number; content_item_id: string; version: number; snapshot: Record<string, unknown>; changed_by: string | null; changed_at: string };
+export type AdminHealth = { level: "warning" | "error"; messageUz: string; messageEn: string };
 export type AdminRecord = {
-  id: string; type: "teacher" | "news" | "achievement"; slug: string; status: "draft" | "published";
+  id: string; type: "teacher" | "news" | "achievement"; slug: string; status: "draft" | "scheduled" | "published";
   title_uz: string; title_en: string; summary_uz: string; summary_en: string; body_uz: string | null; body_en: string | null;
   category: string | null; departments: string[]; subjects_uz: string[]; subjects_en: string[]; is_leadership: boolean; event_date: string | null; recipient_uz: string | null; recipient_en: string | null;
   source_url: string | null; image_path: string | null; created_by: string;
@@ -28,6 +31,7 @@ export type AdminRecord = {
   achievement_type: string | null; achievement_result: string | null;
   achievement_subject_uz: string | null; achievement_subject_en: string | null; academic_year: string | null;
   publication_format: string | null; author_id: string | null;
+  scheduled_publish_at: string | null; newsletter_scheduled_at: string | null;
 };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -55,7 +59,7 @@ async function normalizeImage(file: File): Promise<File> {
   return new File([blob], "approved-image.webp", { type: "image/webp", lastModified: Date.now() });
 }
 
-export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthors, role, currentUserId }: { lang: Lang; initialRecords: AdminRecord[]; initialAudit: AuditRecord[]; initialAuthors: PublicationAuthor[]; role: StaffRole; currentUserId: string }) {
+export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthors, initialRevisions, health, role, currentUserId }: { lang: Lang; initialRecords: AdminRecord[]; initialAudit: AuditRecord[]; initialAuthors: PublicationAuthor[]; initialRevisions: RevisionRecord[]; health: AdminHealth[]; role: StaffRole; currentUserId: string }) {
   const [records, setRecords] = useState(initialRecords);
   const [activeView, setActiveView] = useState<"overview" | "teachers" | "publications" | "writers" | "achievements" | "newsletter" | "activity">("overview");
   const [type, setType] = useState<AdminRecord["type"]>("teacher");
@@ -72,7 +76,7 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
   const pageSize = type === "teacher" ? 12 : 10;
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const visible = filtered.slice((page - 1) * pageSize, page * pageSize);
-  const counts = (kind: AdminRecord["type"]) => ({ published: records.filter((item) => item.type === kind && item.status === "published").length, drafts: records.filter((item) => item.type === kind && item.status === "draft").length });
+  const counts = (kind: AdminRecord["type"]) => ({ published: records.filter((item) => item.type === kind && item.status === "published").length, scheduled: records.filter((item) => item.type === kind && item.status === "scheduled").length, drafts: records.filter((item) => item.type === kind && item.status === "draft").length });
   const canPublish = role !== "writer";
   const canEdit = (record: AdminRecord) => role !== "writer" || (record.created_by === currentUserId && record.status === "draft");
   const canDelete = (record: AdminRecord) => role === "owner" || role === "administrator" || (role === "writer" && record.created_by === currentUserId && record.status === "draft");
@@ -162,10 +166,17 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
     const generatedSlug = type === "achievement" && !editing
       ? uniqueAchievementSlug(studentName, achievementType, academicYear, records)
       : editing?.slug ?? String(data.get("slug") || "").trim().toLowerCase();
+    const requestedStatus = canPublish ? String(data.get("status")) as AdminRecord["status"] : "draft";
+    const publishAt = requestedStatus === "scheduled" ? scheduledIso(data.get("scheduled_publish_at")) : null;
+    if (requestedStatus === "scheduled" && !publishAt) {
+      await client.storage.from("school-media").remove([...(uploadedPath ? [uploadedPath] : []), ...uploadedGalleryPaths]);
+      setBusy(false); setMessage(lang === "uz" ? "Rejalashtirilgan nashr uchun sana va vaqtni tanlang." : "Choose a date and time for a scheduled publication."); return;
+    }
+    const newsletterAt = type === "news" ? scheduledIso(data.get("newsletter_scheduled_at")) : null;
     const payload = {
       type,
       slug: generatedSlug,
-      status: canPublish ? String(data.get("status")) : "draft",
+      status: requestedStatus,
       title_uz: type === "achievement" ? studentName : String(data.get("title_uz")).trim(),
       title_en: type === "achievement" ? studentName : String(data.get("title_en")).trim(),
       summary_uz: type === "achievement" ? achievementResult : String(data.get("summary_uz")).trim(),
@@ -195,6 +206,8 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
       academic_year: type === "achievement" ? academicYear : null,
       publication_format: type === "news" ? String(data.get("publication_format") || "news-report") : null,
       author_id: type === "news" ? String(data.get("author_id") || "") || null : null,
+      scheduled_publish_at: publishAt,
+      newsletter_scheduled_at: newsletterAt,
     };
 
     const result = editing
@@ -218,6 +231,8 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
     const { error } = await client.from("content_items").delete().eq("id", record.id);
     if (error) setMessage(friendlyError(error, lang));
     else {
+      const mediaPaths = [record.image_path, ...(record.gallery_paths ?? [])].filter((path): path is string => Boolean(path));
+      if (mediaPaths.length) await client.storage.from("school-media").remove(mediaPaths);
       setRecords((current) => current.filter((item) => item.id !== record.id));
       if (editing?.id === record.id) { setEditing(null); setEditorOpen(false); }
       setMessage(lang === "uz" ? "Yozuv o‘chirildi." : "Record deleted.");
@@ -235,6 +250,17 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
     else if (response?.status === 403) setMessage(lang === "uz" ? "Faqat MFA bilan kirgan egasi yoki administrator xat yubora oladi." : "Only an MFA-verified owner or administrator may send newsletters.");
     else setMessage(lang === "uz" ? "Yangilik xati yuborilmadi. Newsletter sozlamalarini tekshiring." : "The newsletter was not sent. Check the newsletter configuration.");
     setNewsletterBusy(null);
+  }
+
+  async function restoreRevision(revision: RevisionRecord) {
+    if (busy || !editing || role === "writer") return;
+    const keys = ["slug", "status", "title_uz", "title_en", "summary_uz", "summary_en", "body_uz", "body_en", "category", "departments", "subjects_uz", "subjects_en", "is_leadership", "event_date", "recipient_uz", "recipient_en", "source_url", "image_path", "teacher_email", "show_teacher_email", "cv_url", "related_links", "gallery_paths", "achievement_category", "achievement_type", "achievement_result", "achievement_subject_uz", "achievement_subject_en", "academic_year", "publication_format", "author_id", "scheduled_publish_at", "newsletter_scheduled_at"];
+    const payload = Object.fromEntries(keys.filter((key) => key in revision.snapshot).map((key) => [key, revision.snapshot[key]]));
+    setBusy(true); setMessage("");
+    const result = await createBrowserSupabase().from("content_items").update(payload).eq("id", editing.id).select().single();
+    if (result.error) setMessage(friendlyError(result.error, lang));
+    else { const restored = result.data as AdminRecord; setEditing(restored); setRecords((items) => items.map((item) => item.id === restored.id ? restored : item)); setMessage(lang === "uz" ? `№${revision.version} versiya tiklandi.` : `Version ${revision.version} restored.`); }
+    setBusy(false);
   }
 
   const authorById = new Map(authors.map((author) => [author.id, author.name]));
@@ -256,12 +282,13 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
     ["overview", LayoutDashboard, lang === "uz" ? "Bosh sahifa" : "Overview"], ["teachers", Users, lang === "uz" ? "O‘qituvchilar" : "Teachers"], ["publications", Newspaper, lang === "uz" ? "Nashrlar" : "Publications"], ["writers", PenTool, lang === "uz" ? "Mualliflar" : "Writers"], ["achievements", Award, lang === "uz" ? "Yutuqlar" : "Achievements"],
     ...((role === "owner" || role === "administrator") ? [["newsletter", Mail, "Newsletter"], ["activity", Clock3, lang === "uz" ? "Faoliyat tarixi" : "Activity log"]] : []),
   ] as Array<[typeof activeView, typeof LayoutDashboard, string]>;
-  const editorForm = editorOpen && <RecordForm key={editing?.id ?? `new-${type}`} lang={lang} type={type} record={editing} authors={authors} role={role} busy={busy} onSubmit={save} onCancel={() => { setEditing(null); setEditorOpen(false); }} />;
+  const editorForm = editorOpen && <RecordForm key={editing?.id ?? `new-${type}`} lang={lang} type={type} record={editing} authors={authors} revisions={editing ? initialRevisions.filter((revision) => revision.content_item_id === editing.id) : []} role={role} busy={busy} onRestore={restoreRevision} onSubmit={save} onCancel={() => { setEditing(null); setEditorOpen(false); }} />;
 
   return <section className="admin-workspace">
     <aside className="admin-workspace-sidebar"><div className="admin-sidebar-brand"><span>IEG</span><div><strong>{lang === "uz" ? "Boshqaruv markazi" : "Management hub"}</strong><small>{role}</small></div></div><nav aria-label={lang === "uz" ? "Boshqaruv bo‘limlari" : "Admin sections"}>{navigation.map(([view, Icon, label]) => <button key={view} className={activeView === view ? "active" : ""} onClick={() => setWorkspace(view, view === "teachers" ? "teacher" : view === "publications" ? "news" : view === "achievements" ? "achievement" : undefined)}><Icon /><span>{label}</span><ChevronRight /></button>)}</nav><div className="admin-sidebar-note"><ShieldCheck /><span>{lang === "uz" ? "Nashr huquqlari rol va MFA orqali himoyalangan." : "Publishing rights are protected by role and MFA."}</span></div></aside>
     <main className="admin-workspace-main">
       {message && <p className="cms-message" role="status">{message}<button onClick={() => setMessage("")} aria-label={lang === "uz" ? "Yopish" : "Dismiss"}><X /></button></p>}
+      {activeView === "overview" && health.length > 0 && <div className="admin-health" role="alert"><AlertTriangle /><div><strong>{lang === "uz" ? "Tizim e’tibor talab qiladi" : "System attention required"}</strong>{health.map((item, index) => <p key={index} className={item.level}>{lang === "uz" ? item.messageUz : item.messageEn}</p>)}</div></div>}
       {activeView === "overview" && <div className="overview-workspace"><div className="workspace-heading"><div><p className="cms-kicker">{lang === "uz" ? "Bugungi holat" : "Today at a glance"}</p><h1>{lang === "uz" ? "Boshqaruv markazi" : "Management overview"}</h1><p>{lang === "uz" ? "Maktab sayti, nashrlar va auditoriyani bir joydan boshqaring." : "Manage the school website, editorial work and audience from one place."}</p></div></div><div className="overview-stats">{(["teacher", "news", "achievement"] as const).map((kind) => { const Icon = kind === "teacher" ? Users : kind === "news" ? Newspaper : GraduationCap; const count = counts(kind); return <button key={kind} onClick={() => setWorkspace(kind === "teacher" ? "teachers" : kind === "news" ? "publications" : "achievements", kind)}><span className={`overview-stat-icon stat-${kind}`}><Icon /></span><span>{typeLabel(kind, lang)}</span><strong>{count.published + count.drafts}</strong><small>{count.published} {lang === "uz" ? "nashrda" : "published"} · {count.drafts} {lang === "uz" ? "qoralama" : "drafts"}</small><ChevronRight /></button> })}<button onClick={() => setWorkspace("writers")}><span className="overview-stat-icon stat-writer"><UserRound /></span><span>{lang === "uz" ? "Faol mualliflar" : "Active writers"}</span><strong>{authors.filter((author) => author.active).length}</strong><small>{lang === "uz" ? "Tahririyat profillari" : "Editorial profiles"}</small><ChevronRight /></button></div><div className="overview-grid"><section className="overview-panel"><div className="panel-heading"><div><p className="cms-kicker">{lang === "uz" ? "Tezkor ishlar" : "Quick actions"}</p><h2>{lang === "uz" ? "Yangi yozuv yarating" : "Create something new"}</h2></div></div><div className="quick-actions"><button onClick={() => { setWorkspace("publications", "news"); window.setTimeout(() => openNew("news"), 0); }}><Newspaper /><span><strong>{lang === "uz" ? "Nashr yozish" : "Write publication"}</strong><small>{lang === "uz" ? "Maqola, e’lon yoki intervyu" : "Article, announcement or interview"}</small></span><ChevronRight /></button><button onClick={() => { setWorkspace("teachers", "teacher"); window.setTimeout(() => openNew("teacher"), 0); }}><Users /><span><strong>{lang === "uz" ? "O‘qituvchi qo‘shish" : "Add teacher"}</strong><small>{lang === "uz" ? "Yangi profil yarating" : "Create a new profile"}</small></span><ChevronRight /></button><button onClick={() => { setWorkspace("achievements", "achievement"); window.setTimeout(() => openNew("achievement"), 0); }}><Award /><span><strong>{lang === "uz" ? "Yutuq qo‘shish" : "Add achievement"}</strong><small>{lang === "uz" ? "Natija yoki sertifikat" : "Result or certificate"}</small></span><ChevronRight /></button></div></section><section className="overview-panel"><div className="panel-heading"><div><p className="cms-kicker">{lang === "uz" ? "So‘nggi kontent" : "Recent content"}</p><h2>{lang === "uz" ? "Yaqinda yangilangan" : "Recently updated"}</h2></div></div><div className="recent-content">{records.slice(0, 5).map((record) => <button key={record.id} onClick={() => { setWorkspace(record.type === "teacher" ? "teachers" : record.type === "news" ? "publications" : "achievements", record.type); setEditing(record); setEditorOpen(true); }}><span className={`recent-icon recent-${record.type}`}>{record.type === "teacher" ? <Users /> : record.type === "news" ? <BookOpen /> : <Award />}</span><span><strong>{record.title_uz}</strong><small>{typeLabel(record.type, lang)}</small></span><span className={`status-pill ${record.status === "published" ? "published" : ""}`}>{record.status}</span></button>)}</div></section></div></div>}
       {activeView === "teachers" && <section>{listHeader("teacher", lang === "uz" ? "O‘qituvchilar jamoasi" : "Teaching team", lang === "uz" ? "Profil, fan va bo‘limlarni ixcham ko‘rinishda boshqaring." : "Manage profiles, subjects and departments in a compact view.")}<div className="teacher-card-grid">{visible.length ? visible.map((record) => <article className="teacher-admin-card" key={record.id}><div className="teacher-card-top"><span className="teacher-initials">{initials(record.title_uz)}</span><span className={`status-pill ${record.status === "published" ? "published" : ""}`}>{record.status === "published" ? (lang === "uz" ? "Nashrda" : "Published") : (lang === "uz" ? "Qoralama" : "Draft")}</span></div><h3>{record.title_uz}</h3><p>{(lang === "uz" ? record.recipient_uz : record.recipient_en) || (lang === "uz" ? "Lavozim kiritilmagan" : "Role not added")}</p><div className="teacher-tags">{((lang === "uz" ? record.subjects_uz : record.subjects_en).length ? (lang === "uz" ? record.subjects_uz : record.subjects_en) : record.departments).slice(0, 3).map((item) => <span key={item}>{item}</span>)}</div><footer><small>/{record.slug}</small>{recordActions(record)}</footer></article>) : <div className="cms-empty"><Users /><strong>{emptyLabel("teacher", lang)}</strong></div>}</div>{pagination}</section>}
       {activeView === "publications" && <section>{listHeader("news", lang === "uz" ? "Tahririyat nashrlari" : "Editorial publications", lang === "uz" ? "Barcha maqola, xabar va ruknlarni bir ko‘rinishda kuzating." : "See every story, announcement and column in one editorial view.")}<div className="publication-card-grid">{visible.length ? visible.map((record) => <article className={`publication-admin-card category-${record.category ?? "school-news"}`} key={record.id}><div className="publication-card-visual"><Newspaper /><span>{publicationCategoryLabel(record.category ?? "school-news", lang)}</span></div><div className="publication-card-body"><div className="cms-record-meta"><span className={`status-pill ${record.status === "published" ? "published" : ""}`}>{record.status === "published" ? (lang === "uz" ? "Nashrda" : "Published") : (lang === "uz" ? "Qoralama" : "Draft")}</span><span>{record.publication_format ?? "news-report"}</span></div><h3>{lang === "uz" ? record.title_uz : record.title_en || record.title_uz}</h3><p>{lang === "uz" ? record.summary_uz : record.summary_en || record.summary_uz}</p><div className="publication-byline"><UserRound /><span>{record.author_id ? authorById.get(record.author_id) ?? (lang === "uz" ? "Noma’lum muallif" : "Unknown writer") : (lang === "uz" ? "Maktab tahririyati" : "School editorial team")}</span>{record.event_date && <><span>·</span><time>{new Date(`${record.event_date}T00:00:00`).toLocaleDateString(lang === "uz" ? "uz-UZ" : "en-GB")}</time></>}</div><footer><small>/{record.slug}</small>{recordActions(record)}</footer></div></article>) : <div className="cms-empty"><Newspaper /><strong>{emptyLabel("news", lang)}</strong></div>}</div>{pagination}</section>}
@@ -274,8 +301,9 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
   </section>;
 }
 
-function RecordForm({ lang, type, record, authors, role, busy, onSubmit, onCancel }: { lang: Lang; type: AdminRecord["type"]; record: AdminRecord | null; authors: PublicationAuthor[]; role: StaffRole; busy: boolean; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onCancel: () => void }) {
+function RecordForm({ lang, type, record, authors, revisions, role, busy, onRestore, onSubmit, onCancel }: { lang: Lang; type: AdminRecord["type"]; record: AdminRecord | null; authors: PublicationAuthor[]; revisions: RevisionRecord[]; role: StaffRole; busy: boolean; onRestore: (revision: RevisionRecord) => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onCancel: () => void }) {
   const canPublish = role !== "writer";
+  const [publicationStatus, setPublicationStatus] = useState(record?.status ?? "draft");
   const [relatedLinks, setRelatedLinks] = useState(record?.related_links ?? []);
   const [achievementCategory, setAchievementCategory] = useState(record?.achievement_category ?? "international");
   return <form className="cms-form" onSubmit={onSubmit}>
@@ -283,7 +311,9 @@ function RecordForm({ lang, type, record, authors, role, busy, onSubmit, onCance
     <div className="editor-grid">
       {type !== "achievement" && <label>{lang === "uz" ? "URL nomi (slug)" : "URL slug"}<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={record?.slug} /></label>}
       {type === "achievement" && <p className="role-note full-field">{lang === "uz" ? "URL nomi o‘quvchi ismi, sertifikat turi va o‘quv yilidan avtomatik yaratiladi." : "The URL is generated automatically from the student name, certificate type and academic year."}</p>}
-      {canPublish ? <label>{lang === "uz" ? "Nashr holati" : "Publication status"}<select name="status" defaultValue={record?.status ?? "draft"}><option value="draft">{lang === "uz" ? "Qoralama" : "Draft"}</option><option value="published">{lang === "uz" ? "Nashr qilingan" : "Published"}</option></select></label> : <><input type="hidden" name="status" value="draft" /><p className="role-note">{lang === "uz" ? "Yozuvchi yozuvlarni faqat qoralama sifatida saqlaydi." : "Writers can save records only as drafts."}</p></>}
+      {canPublish ? <label>{lang === "uz" ? "Nashr holati" : "Publication status"}<select name="status" value={publicationStatus} onChange={(event) => setPublicationStatus(event.target.value as AdminRecord["status"])}><option value="draft">{lang === "uz" ? "Qoralama" : "Draft"}</option><option value="scheduled">{lang === "uz" ? "Rejalashtirilgan" : "Scheduled"}</option><option value="published">{lang === "uz" ? "Nashr qilingan" : "Published"}</option></select></label> : <><input type="hidden" name="status" value="draft" /><p className="role-note">{lang === "uz" ? "Yozuvchi yozuvlarni faqat qoralama sifatida saqlaydi." : "Writers can save records only as drafts."}</p></>}
+      {canPublish && publicationStatus === "scheduled" && <label>{lang === "uz" ? "Nashr sanasi va vaqti" : "Publication date and time"}<input name="scheduled_publish_at" type="datetime-local" required defaultValue={toLocalInput(record?.scheduled_publish_at)} /></label>}
+      {canPublish && type === "news" && <label>{lang === "uz" ? "Newsletterni yuborish vaqti (ixtiyoriy)" : "Newsletter send time (optional)"}<input name="newsletter_scheduled_at" type="datetime-local" defaultValue={toLocalInput(record?.newsletter_scheduled_at)} /><small>{lang === "uz" ? "Maqola ommaga chiqqanidan keyingi vaqtni tanlang." : "Choose a time after the article becomes public."}</small></label>}
       {type !== "achievement" && <>
         <label>{fieldLabel(type, "title", "uz", lang)}<input name="title_uz" required defaultValue={record?.title_uz} /></label>
         <label>{fieldLabel(type, "title", "en", lang)}<input name="title_en" required defaultValue={record?.title_en} /></label>
@@ -329,6 +359,7 @@ function RecordForm({ lang, type, record, authors, role, busy, onSubmit, onCance
       <CoverImagePicker lang={lang} type={type} hasCurrentImage={Boolean(record?.image_path)} />
       {type === "news" && <GalleryEditor lang={lang} existingPaths={record?.gallery_paths ?? []} />}
       {record?.image_path && <label className="full-field consent cms-remove-image"><input name="remove_image" type="checkbox" />{lang === "uz" ? "Joriy rasmni yozuvdan olib tashlash" : "Remove the current image from this record"}</label>}
+      {record && revisions.length > 0 && <section className="revision-history full-field"><div><History /><strong>{lang === "uz" ? "Versiyalar tarixi" : "Revision history"}</strong></div>{revisions.slice(0, 8).map((revision) => <article key={revision.id}><span><b>v{revision.version}</b><small>{new Date(revision.changed_at).toLocaleString(lang === "uz" ? "uz-UZ" : "en-GB")}</small></span><button type="button" disabled={busy || role === "writer"} onClick={() => onRestore(revision)}><RotateCcw />{lang === "uz" ? "Tiklash" : "Restore"}</button></article>)}</section>}
       <div className="cms-form-actions full-field"><button className="button button-secondary" type="button" onClick={onCancel}>{lang === "uz" ? "Bekor qilish" : "Cancel"}</button><button className="button button-primary" type="submit" disabled={busy}>{busy ? (lang === "uz" ? "Saqlanmoqda…" : "Saving…") : (lang === "uz" ? "Saqlash" : "Save record")}</button></div>
     </div>
   </form>;
@@ -420,6 +451,14 @@ function auditType(type: string | null, lang: Lang) {
 
 function parseList(value: string) { return value.split(/[,\n]/).map((item) => item.trim()).filter(Boolean); }
 
+function toLocalInput(value: string | null | undefined) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
 function initials(value: string) {
   return value.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toLocaleUpperCase("uz") ?? "").join("") || "IE";
 }
@@ -464,5 +503,6 @@ function friendlyError(error: { code?: string; message?: string }, lang: Lang) {
   if (error.code === "23505") return lang === "uz" ? "Bu turdagi yozuv uchun ushbu slug allaqachon ishlatilgan." : "That slug is already used for this content type.";
   if (error.code === "23514") return lang === "uz" ? "Nashr qilish uchun majburiy ikki tilli maydonlar, sana va tasdiqlash ma’lumotlarini to‘ldiring." : "Complete the required bilingual fields, date and verification information before publishing.";
   if (error.code === "42501") return lang === "uz" ? "Bu amal sizning rolingiz yoki MFA holatingiz uchun ruxsat etilmagan." : "Your role or MFA status does not permit this action.";
+  if (error.code === "23503") return lang === "uz" ? "Bu yozuv boshqa tarixiy ma’lumot bilan bog‘langan. Yangi editorial operations migratsiyasini ishga tushiring." : "This record is linked to historical data. Run the new editorial operations migration.";
   return lang === "uz" ? "Amal bajarilmadi. Qayta urinib ko‘ring yoki tizim egasiga xabar bering." : "The action could not be completed. Try again or notify the system owner.";
 }

@@ -101,6 +101,7 @@ export function SiteFooter({ lang }: { lang: Lang }) {
           <a href="#newsletter">{lang === "uz" ? "Email yangiliklariga obuna" : "Subscribe to email news"}</a>
           <Link href={`/${lang}/legal`}>{t.footer.legal}</Link>
           <Link href={`/${lang}/privacy`}>{t.footer.privacy}</Link>
+          <Link href={`/${lang}/policies`}>{lang === "uz" ? "Maktab siyosatlari" : "School policies"}</Link>
           <Link href={`/${lang}/admin`}>{t.footer.admin}</Link>
         </div>
       </div>

@@ -87,6 +87,23 @@
 .overview-stats > button:nth-child(3) { border-top-color: #bd8a23; }
 .overview-stats > button:nth-child(4) { border-top-color: #7256a2; }
 .overview-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 16px; margin-top: 18px; }
+.admin-health { display: flex; gap: 12px; margin-bottom: 18px; padding: 16px; border: 1px solid #e7b44e; border-left: 5px solid #b87908; border-radius: 12px; background: #fff8e8; color: #604406; }
+.admin-health > svg { flex: 0 0 auto; }
+.admin-health p { margin: 5px 0 0; font-size: .86rem; }
+.admin-health p.error { color: #922f2f; }
+.revision-history { padding: 15px; border: 1px solid #cddbea; border-left: 4px solid #7256a2; border-radius: 10px; background: #f8f7fc; }
+.revision-history > div { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #49376d; }
+.revision-history article { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid #e0dceb; }
+.revision-history article span { display: flex; gap: 10px; align-items: center; }
+.revision-history button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid #b6a8cf; border-radius: 7px; background: white; color: #49376d; }
+.revision-history button svg { width: 14px; }
+.policy-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.policy-grid article { display: flex; gap: 14px; padding: 22px; border: 1px solid #cfddea; border-top: 4px solid #2f6c94; border-radius: 13px; background: #fff; box-shadow: 0 8px 24px rgba(24,57,91,.06); }
+.policy-grid article:nth-child(2n) { border-top-color: #bd8a23; }
+.policy-grid svg { flex: 0 0 auto; color: #21577c; }
+.policy-grid h2 { margin: 0 0 8px; }
+.policy-grid p { margin: 0; }
+.policy-note { margin-top: 20px; padding: 20px; border: 1px solid #d8c58d; border-radius: 12px; background: #fff9e9; }
 .overview-panel { padding: 21px; border: 1px solid #d4e0eb; border-radius: 12px; background: white; }
 .panel-heading h2 { margin: 0; color: #17324f; font-size: 1.2rem; }
 .quick-actions, .recent-content { display: grid; gap: 8px; margin-top: 16px; }

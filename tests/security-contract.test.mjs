@@ -17,6 +17,7 @@ const photoGallery = readFileSync("components/news-photo-gallery.tsx", "utf8");
 const newsletterServer = readFileSync("lib/newsletter/server.ts", "utf8");
 const newsletterSubscribe = readFileSync("app/api/newsletter/subscribe/route.ts", "utf8");
 const newsletterSend = readFileSync("app/api/newsletter/send/route.ts", "utf8");
+const newsletterCampaign = readFileSync("lib/newsletter/campaign.ts", "utf8");
 const newsletterUi = readFileSync("components/newsletter-signup.tsx", "utf8");
 
 test("database defines separated staff roles", () => {
@@ -134,10 +135,10 @@ test("newsletter is double-opt-in, private and safely rate limited", () => {
   assert.match(newsletterUi, /newsletter-honeypot/);
 });
 
-test("newsletter campaigns require MFA and prevent duplicate article sends", () => {
+test("newsletter campaigns require MFA, published content and duplicate protection", () => {
   assert.match(schema, /news_id uuid not null unique/);
   assert.match(newsletterSend, /currentLevel !== "aal2"/);
   assert.match(newsletterSend, /\["owner", "administrator"\]/);
-  assert.match(newsletterSend, /status", "published"/);
-  assert.match(newsletterSend, /campaignError\?\.code === "23505"/);
+  assert.match(newsletterCampaign, /status", "published"/);
+  assert.match(newsletterCampaign, /campaignError\?\.code === "23505"/);
 });

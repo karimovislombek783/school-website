@@ -16,6 +16,9 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async rewrites() {
+    return { beforeFiles: [{ source: "/sitemap.xml", destination: "/api/sitemap" }], afterFiles: [], fallback: [] };
+  },
   async headers() {
     return [{
       source: "/(.*)",
