@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 import { Lang } from "@/lib/site-content";
+import { NewsletterDashboard } from "@/components/newsletter-dashboard";
 
 export type StaffRole = "owner" | "administrator" | "editor" | "writer";
 export type AuditRecord = { id: number; actor_id: string | null; action: string; record_id: string | null; record_type: string | null; occurred_at: string };
@@ -236,7 +237,7 @@ export function AdminConsole({ lang, initialRecords, initialAudit, role, current
     </div>
     {message && <p className="cms-message" role="status">{message}</p>}
     <div className="admin-notice"><ShieldCheck /><span>{lang === "uz" ? "Ommaviy saytda faqat “Nashr qilingan” holatidagi yozuvlar ko‘rinadi. Yozuvchi faqat o‘z qoralamalarini boshqaradi; nashr va o‘chirish vakolatlari rolga qarab cheklangan." : "Only published records appear publicly. Writers manage only their own drafts; publishing and deletion are restricted by role."}</span></div>
-    {(role === "owner" || role === "administrator") && <section className="audit-panel"><h2>{lang === "uz" ? "So‘nggi faoliyat" : "Recent activity"}</h2>{initialAudit.length ? <div className="audit-list">{initialAudit.map((entry) => <div key={entry.id}><strong>{auditAction(entry.action, lang)}</strong><span>{auditType(entry.record_type, lang)} · {new Date(entry.occurred_at).toLocaleString(lang === "uz" ? "uz-UZ" : "en-GB")}</span><small>{entry.actor_id ?? (lang === "uz" ? "tizim" : "system")}</small></div>)}</div> : <p>{lang === "uz" ? "Hali qayd etilgan o‘zgarish yo‘q." : "No recorded changes yet."}</p>}</section>}
+    {(role === "owner" || role === "administrator") && <><NewsletterDashboard lang={lang} /><section className="audit-panel"><h2>{lang === "uz" ? "So‘nggi faoliyat" : "Recent activity"}</h2>{initialAudit.length ? <div className="audit-list">{initialAudit.map((entry) => <div key={entry.id}><strong>{auditAction(entry.action, lang)}</strong><span>{auditType(entry.record_type, lang)} · {new Date(entry.occurred_at).toLocaleString(lang === "uz" ? "uz-UZ" : "en-GB")}</span><small>{entry.actor_id ?? (lang === "uz" ? "tizim" : "system")}</small></div>)}</div> : <p>{lang === "uz" ? "Hali qayd etilgan o‘zgarish yo‘q." : "No recorded changes yet."}</p>}</section></>}
   </section>;
 }
 
