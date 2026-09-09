@@ -19,6 +19,8 @@ const newsletterSubscribe = readFileSync("app/api/newsletter/subscribe/route.ts"
 const newsletterSend = readFileSync("app/api/newsletter/send/route.ts", "utf8");
 const newsletterCampaign = readFileSync("lib/newsletter/campaign.ts", "utf8");
 const newsletterUi = readFileSync("components/newsletter-signup.tsx", "utf8");
+const securityMigration = readFileSync("supabase/migrations/20260910_security_hardening.sql", "utf8");
+const schedulerRoute = readFileSync("app/api/scheduler/run/route.ts", "utf8");
 
 test("database defines separated staff roles", () => {
   for (const role of ["owner", "administrator", "editor", "writer"]) {
@@ -72,7 +74,23 @@ test("CMS editor is on-demand and fully language-aware", () => {
   assert.match(consoleSource, /editorOpen && <RecordForm/);
   assert.match(consoleSource, /Qoralama/);
   assert.match(consoleSource, /Nashr qilingan/);
+  assert.match(consoleSource, /Rejalashtirilgan/);
+  assert.match(consoleSource, /statusLabel\(record\.status, lang\)/);
   assert.match(gateway, /<LanguageSwitch/);
+});
+
+test("MFA protects direct access to drafts, audit records, private media and unpublished writer profiles", () => {
+  assert.match(securityMigration, /Public reads published content[\s\S]*has_school_mfa/);
+  assert.match(securityMigration, /Authorized staff read audit log[\s\S]*has_school_mfa/);
+  assert.match(securityMigration, /Published media is readable[\s\S]*has_school_mfa/);
+  assert.match(securityMigration, /active and profile_published/);
+  assert.match(repository, /import "server-only"/);
+});
+
+test("internet-facing automation validates secrets and bounds webhook input", () => {
+  assert.match(schedulerRoute, /timingSafeEqual/);
+  assert.match(newsletterSubscribe, /payload-too-large/);
+  assert.match(nextConfig, /Cross-Origin-Resource-Policy/);
 });
 
 test("teacher identity supports leadership, multiple departments, and multiple subjects", () => {

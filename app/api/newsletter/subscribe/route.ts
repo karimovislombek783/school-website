@@ -23,6 +23,8 @@ export async function POST(request: Request) {
   }
 
   try {
+    const declaredSize = Number(request.headers.get("content-length") ?? "0");
+    if (!Number.isFinite(declaredSize) || declaredSize > 16_384) return NextResponse.json({ error: "payload-too-large" }, { status: 413 });
     const body = await request.json().catch(() => null) as SubscribeBody | null;
 
     // Honeypot: silently accept bot submissions without doing any work.
@@ -42,6 +44,7 @@ export async function POST(request: Request) {
     }
 
     const database = newsletterDatabase();
+    await database.from("newsletter_rate_limits").delete().lt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
     const fingerprint = requestFingerprint(request);
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 

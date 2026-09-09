@@ -7,15 +7,21 @@ export const runtime = "nodejs";
 type WebhookPayload = { type?: string; created_at?: string; data?: { email_id?: string; click?: { link?: string } } };
 
 export async function POST(request: Request) {
+  const declaredSize = Number(request.headers.get("content-length") ?? "0");
+  if (!Number.isFinite(declaredSize) || declaredSize > 1_000_000) return NextResponse.json({ error: "payload-too-large" }, { status: 413 });
   const raw = await request.text();
+  if (raw.length > 1_000_000) return NextResponse.json({ error: "payload-too-large" }, { status: 413 });
   if (!verify(request.headers, raw)) return NextResponse.json({ error: "invalid-signature" }, { status: 401 });
-  const payload = JSON.parse(raw) as WebhookPayload;
+  const payload = safePayload(raw);
+  if (!payload) return NextResponse.json({ error: "invalid-payload" }, { status: 400 });
   const messageId = payload.data?.email_id;
   const eventId = request.headers.get("svix-id");
   if (!eventId || !messageId || !payload.type) return NextResponse.json({ error: "invalid-payload" }, { status: 400 });
   const db = newsletterDatabase();
   const occurredAt = payload.created_at && !Number.isNaN(Date.parse(payload.created_at)) ? payload.created_at : new Date().toISOString();
-  const { error: eventError } = await db.from("newsletter_events").insert({ provider_event_id: eventId, provider_message_id: messageId, event_type: payload.type, occurred_at: occurredAt, clicked_url: payload.data?.click?.link ?? null });
+  const allowedEvents = new Set(["email.delivered", "email.opened", "email.clicked", "email.bounced", "email.complained"]);
+  if (!allowedEvents.has(payload.type)) return NextResponse.json({ ok: true, ignored: true });
+  const { error: eventError } = await db.from("newsletter_events").insert({ provider_event_id: eventId.slice(0, 255), provider_message_id: messageId.slice(0, 255), event_type: payload.type, occurred_at: occurredAt, clicked_url: payload.data?.click?.link?.slice(0, 2048) ?? null });
   if (eventError?.code === "23505") return NextResponse.json({ ok: true, duplicate: true });
   if (eventError) return NextResponse.json({ error: "database" }, { status: 500 });
   const update: Record<string, string> = { last_event_at: occurredAt };
@@ -26,6 +32,11 @@ export async function POST(request: Request) {
   if (payload.type === "email.complained") update.complained_at = occurredAt;
   await db.from("newsletter_deliveries").update(update).eq("provider_message_id", messageId);
   return NextResponse.json({ ok: true });
+}
+
+function safePayload(raw: string): WebhookPayload | null {
+  try { const value = JSON.parse(raw); return value && typeof value === "object" ? value as WebhookPayload : null; }
+  catch { return null; }
 }
 
 function verify(headers: Headers, body: string) {

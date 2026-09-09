@@ -3,6 +3,7 @@ import { requireNewsletterAdmin } from "@/lib/newsletter/admin";
 import { newsletterConfigured, newsletterDatabase, sendNewsletterEmail, siteUrl } from "@/lib/newsletter/server";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   if (!newsletterConfigured()) return NextResponse.json({ error: "unavailable" }, { status: 503 });
@@ -35,6 +36,7 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const auth = await requireNewsletterAdmin();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (tooLarge(request)) return NextResponse.json({ error: "payload-too-large" }, { status: 413 });
   const body = await request.json().catch(() => null) as { id?: unknown; preferredLanguage?: unknown } | null;
   if (typeof body?.id !== "string" || !["uz", "en"].includes(String(body.preferredLanguage))) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const db = newsletterDatabase();
@@ -47,6 +49,7 @@ export async function PATCH(request: Request) {
 export async function POST(request: Request) {
   const auth = await requireNewsletterAdmin();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (tooLarge(request)) return NextResponse.json({ error: "payload-too-large" }, { status: 413 });
   const body = await request.json().catch(() => null) as { action?: unknown; language?: unknown } | null;
   if (body?.action !== "send-test" || !auth.user.email) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const lang = body.language === "en" ? "en" : "uz";
@@ -54,4 +57,9 @@ export async function POST(request: Request) {
   const text = lang === "uz" ? "Newsletter yuborish sozlamalari ishlayapti. Bu faqat administratorga yuborilgan sinov xati." : "Your newsletter sending configuration works. This test was sent only to the administrator.";
   await sendNewsletterEmail({ to: auth.user.email, subject, html: `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#12223d"><h1>${subject}</h1><p>${text}</p><p><a href="${siteUrl()}/${lang}">IZZATBEK-EDU-GROUP</a></p></div>` });
   return NextResponse.json({ ok: true });
+}
+
+function tooLarge(request: Request) {
+  const size = Number(request.headers.get("content-length") ?? "0");
+  return !Number.isFinite(size) || size > 16_384;
 }

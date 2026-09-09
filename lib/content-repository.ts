@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createClient } from "@supabase/supabase-js";
 import { AchievementRecord, NewsRecord, publishedAchievements, publishedNews, publishedTeachers, TeacherDepartment, TeacherRecord, TeacherRelatedLink } from "@/lib/site-content";
 import { publicationIsVisible } from "@/lib/editorial-scheduling";

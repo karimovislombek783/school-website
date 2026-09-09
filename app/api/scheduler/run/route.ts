@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { newsletterDatabase } from "@/lib/newsletter/server";
 import { sendCampaign } from "@/lib/newsletter/campaign";
@@ -7,7 +8,7 @@ export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const secret = process.env.SCHEDULER_SECRET;
-  if (!secret || request.headers.get("x-scheduler-secret") !== secret) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!secret || !sameSecret(request.headers.get("x-scheduler-secret"), secret)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const database = newsletterDatabase();
   const now = new Date().toISOString();
 
@@ -24,4 +25,11 @@ export async function POST(request: Request) {
   const results = [];
   for (const item of dueNewsletters ?? []) results.push({ id: item.id, ...(await sendCampaign(item.id, null)) });
   return NextResponse.json({ ok: true, published: publicationIds.length, newsletters: results });
+}
+
+function sameSecret(provided: string | null, expected: string) {
+  if (!provided) return false;
+  const actualBytes = Buffer.from(provided);
+  const expectedBytes = Buffer.from(expected);
+  return actualBytes.length === expectedBytes.length && timingSafeEqual(actualBytes, expectedBytes);
 }
