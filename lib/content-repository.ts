@@ -25,8 +25,11 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
   const enrichedQuery = await client.from("content_items").select(`${baseFields},teacher_email,show_teacher_email,cv_url,related_links,gallery_paths,${achievementFields},publication_format,author_id,publication_authors(name,role_uz,role_en,profile_published)`).eq("status", "published").order("published_at", { ascending: false });
   let data: unknown[] | null = enrichedQuery.data;
   let error = enrichedQuery.error;
-  // Keep the current public site working while the additive migration is being applied.
-  if (error?.code === "42703") {
+  // Publications and author metadata are additive. If those optional fields or
+  // their relationship are temporarily unavailable (for example while
+  // PostgREST refreshes its schema cache), retry the stable core query so one
+  // enrichment failure never empties the teachers, news and achievements pages.
+  if (error) {
     const legacyQuery = await client.from("content_items").select(baseFields).eq("status", "published").order("published_at", { ascending: false });
     data = legacyQuery.data;
     error = legacyQuery.error;
