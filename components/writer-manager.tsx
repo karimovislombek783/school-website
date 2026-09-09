@@ -1,13 +1,13 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { PenLine, Plus, UserRound } from "lucide-react";
+import { PenLine, Plus } from "lucide-react";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 import { Lang } from "@/lib/site-content";
 
 export type PublicationAuthor = { id: string; name: string; role_uz: string; role_en: string; bio_uz: string | null; bio_en: string | null; profile_published: boolean; active: boolean };
 
-export function WriterManager({ lang, authors, onChange }: { lang: Lang; authors: PublicationAuthor[]; onChange: (authors: PublicationAuthor[]) => void }) {
+export function WriterManager({ lang, authors, onChange, articleCounts = {} }: { lang: Lang; authors: PublicationAuthor[]; onChange: (authors: PublicationAuthor[]) => void; articleCounts?: Record<string, number> }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<PublicationAuthor | null>(null);
   const [busy, setBusy] = useState(false);
@@ -25,8 +25,8 @@ export function WriterManager({ lang, authors, onChange }: { lang: Lang; authors
   }
 
   return <section className="writer-manager">
-    <div className="writer-manager-heading"><div><p className="cms-kicker">{lang === "uz" ? "Tahririyat" : "Editorial team"}</p><h3>{lang === "uz" ? "Mualliflar ro‘yxati" : "Writers list"}</h3><p>{lang === "uz" ? "Bir martalik muallif uchun faqat ism yetarli. Doimiy muallif tayyor bo‘lganda profilini yoqing." : "A name is enough for an occasional contributor. Publish a profile only when a recurring writer is ready."}</p></div><button className="button button-secondary" onClick={() => { setEditing(null); setOpen(true); }}><Plus size={16} />{lang === "uz" ? "Muallif qo‘shish" : "Add writer"}</button></div>
-    <div className="writer-chips">{authors.map((author) => <button key={author.id} className={author.active ? "active" : ""} onClick={() => { setEditing(author); setOpen(true); }}><UserRound /><span><strong>{author.name}</strong><small>{author.profile_published ? (lang === "uz" ? "Ommaviy profil" : "Public profile") : (lang === "uz" ? "Faqat imzo" : "Byline only")}</small></span><PenLine /></button>)}</div>
+    <div className="writer-manager-heading"><div><p className="cms-kicker">{lang === "uz" ? "Mualliflar ro‘yxati" : "Writer directory"}</p><h3>{lang === "uz" ? "Doimiy mualliflar" : "Recurring writers"}</h3><p>{lang === "uz" ? "Profilni tahrirlash uchun muallif kartasini tanlang." : "Select a writer card to edit the profile."}</p></div><button className="button button-primary" onClick={() => { setEditing(null); setOpen(true); }}><Plus size={16} />{lang === "uz" ? "Muallif qo‘shish" : "Add writer"}</button></div>
+    <div className="writer-chips">{authors.map((author) => <button key={author.id} className={author.active ? "active" : ""} onClick={() => { setEditing(author); setOpen(true); }}><span className="writer-avatar">{author.name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span><span><strong>{author.name}</strong><small>{author.role_uz || author.role_en || (lang === "uz" ? "Muallif" : "Writer")}</small><em>{articleCounts[author.id] ?? 0} {lang === "uz" ? "ta nashr" : "publications"}</em></span><span className={`writer-state ${author.active ? "active" : ""}`}>{author.active ? (lang === "uz" ? "Faol" : "Active") : (lang === "uz" ? "Yashirin" : "Hidden")}</span><PenLine /></button>)}</div>
     {message && <p className="cms-message">{message}</p>}
     {open && <form className="writer-form" onSubmit={save}><div className="writer-form-grid"><label>{lang === "uz" ? "To‘liq ism" : "Full name"}<input name="name" required defaultValue={editing?.name ?? ""} /></label><label>{lang === "uz" ? "Lavozim (o‘zbekcha)" : "Role (Uzbek)"}<input name="role_uz" required defaultValue={editing?.role_uz ?? "Muallif"} /></label><label>{lang === "uz" ? "Lavozim (inglizcha)" : "Role (English)"}<input name="role_en" required defaultValue={editing?.role_en ?? "Writer"} /></label><label className="full-field">{lang === "uz" ? "Qisqa bio (o‘zbekcha, ixtiyoriy)" : "Short bio (Uzbek, optional)"}<textarea name="bio_uz" rows={2} defaultValue={editing?.bio_uz ?? ""} /></label><label className="full-field">{lang === "uz" ? "Qisqa bio (inglizcha, ixtiyoriy)" : "Short bio (English, optional)"}<textarea name="bio_en" rows={2} defaultValue={editing?.bio_en ?? ""} /></label><label className="consent"><input type="checkbox" name="active" defaultChecked={editing?.active ?? true} />{lang === "uz" ? "Maqolalarda tanlash mumkin" : "Available for articles"}</label><label className="consent"><input type="checkbox" name="profile_published" defaultChecked={editing?.profile_published ?? false} />{lang === "uz" ? "Ommaviy profilga tayyor" : "Ready for a public profile"}</label></div><div className="cms-form-actions"><button type="button" className="button button-secondary" onClick={() => setOpen(false)}>{lang === "uz" ? "Bekor qilish" : "Cancel"}</button><button className="button button-primary" disabled={busy}>{lang === "uz" ? "Saqlash" : "Save writer"}</button></div></form>}
   </section>;
