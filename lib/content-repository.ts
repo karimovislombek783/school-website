@@ -17,12 +17,16 @@ export type PublishedContent = { teachers: TeacherRecord[]; news: NewsRecord[]; 
 
 export async function loadPublishedContent(): Promise<PublishedContent> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // This loader runs only in server-rendered pages. Prefer the server-only key
+  // so private media can be converted into short-lived signed URLs regardless
+  // of public Storage policy state; never expose this client to browser code.
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return { teachers: publishedTeachers, news: publishedNews, achievements: publishedAchievements };
   const client = createClient(url, key, { auth: { persistSession: false } });
   const baseFields = "id,type,slug,status,title_uz,title_en,summary_uz,summary_en,body_uz,body_en,category,departments,subjects_uz,subjects_en,is_leadership,event_date,recipient_uz,recipient_en,source_url,image_path";
   const achievementFields = "achievement_category,achievement_type,achievement_result,achievement_subject_uz,achievement_subject_en,academic_year";
-  const enrichedQuery = await client.from("content_items").select(`${baseFields},teacher_email,show_teacher_email,cv_url,related_links,gallery_paths,${achievementFields},publication_format,author_id,publication_authors(name,role_uz,role_en,profile_published)`).eq("status", "published").order("published_at", { ascending: false });
+  const establishedFields = `${baseFields},teacher_email,show_teacher_email,cv_url,related_links,gallery_paths,${achievementFields}`;
+  const enrichedQuery = await client.from("content_items").select(`${establishedFields},publication_format,author_id,publication_authors(name,role_uz,role_en,profile_published)`).eq("status", "published").order("published_at", { ascending: false });
   let data: unknown[] | null = enrichedQuery.data;
   let error = enrichedQuery.error;
   // Publications and author metadata are additive. If those optional fields or
@@ -30,6 +34,13 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
   // PostgREST refreshes its schema cache), retry the stable core query so one
   // enrichment failure never empties the teachers, news and achievements pages.
   if (error) {
+    const establishedQuery = await client.from("content_items").select(establishedFields).eq("status", "published").order("published_at", { ascending: false });
+    data = establishedQuery.data;
+    error = establishedQuery.error;
+  }
+  // Support installations that have not yet applied the older profile/gallery
+  // migrations, without weakening the normal fallback used in production.
+  if (error?.code === "42703") {
     const legacyQuery = await client.from("content_items").select(baseFields).eq("status", "published").order("published_at", { ascending: false });
     data = legacyQuery.data;
     error = legacyQuery.error;
