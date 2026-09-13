@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 import { AchievementRecord, NewsRecord, publishedAchievements, publishedNews, publishedTeachers, TeacherDepartment, TeacherRecord, TeacherRelatedLink } from "@/lib/site-content";
 import { publicationIsVisible } from "@/lib/editorial-scheduling";
@@ -19,7 +20,7 @@ type ContentRow = {
 
 export type PublishedContent = { teachers: TeacherRecord[]; news: NewsRecord[]; achievements: AchievementRecord[] };
 
-export async function loadPublishedContent(): Promise<PublishedContent> {
+async function fetchPublishedContent(): Promise<PublishedContent> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   // This loader runs only in server-rendered pages. Prefer the server-only key
   // so private media can be converted into short-lived signed URLs regardless
@@ -52,18 +53,19 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
   }
   if (error || !data) return { teachers: [], news: [], achievements: [] };
   const visibleRows = (data as Partial<ContentRow>[]).filter((row) => publicationIsVisible(row.status ?? "draft", row.scheduled_publish_at ?? null));
-  const rows = await Promise.all(visibleRows.map(async (partial) => {
+  const paths = [...new Set(visibleRows.flatMap((row) =>
+    [row.image_path, ...(row.gallery_paths ?? []).slice(0, 8)].filter((path): path is string => Boolean(path))
+  ))];
+  const signedMedia = paths.length
+    ? (await client.storage.from("school-media").createSignedUrls(paths, 86400)).data ?? []
+    : [];
+  const urlByPath = new Map<string, string>();
+  signedMedia.forEach((item, index) => {
+    if (item.signedUrl && paths[index]) urlByPath.set(paths[index], item.signedUrl);
+    if (item.signedUrl && item.path) urlByPath.set(item.path, item.signedUrl);
+  });
+  const rows = visibleRows.map((partial) => {
     const row = { teacher_email: null, show_teacher_email: false, cv_url: null, related_links: [], gallery_paths: [], achievement_category: null, achievement_type: null, achievement_result: null, achievement_subject_uz: null, achievement_subject_en: null, academic_year: null, publication_format: null, author_id: null, scheduled_publish_at: null, newsletter_scheduled_at: null, publication_authors: null, ...partial } as ContentRow;
-    const paths = [row.image_path, ...(row.gallery_paths ?? []).slice(0, 8)].filter((path): path is string => Boolean(path));
-    const signedUrls = paths.length ? (await client.storage.from("school-media").createSignedUrls(paths, 86400)).data ?? [] : [];
-    // Supabase preserves request order, while `path` can be absent from an
-    // individual response. Indexing first prevents a valid cover from being
-    // lost just because response metadata is incomplete.
-    const urlByPath = new Map<string, string>();
-    signedUrls.forEach((item, index) => {
-      if (item.signedUrl && paths[index]) urlByPath.set(paths[index], item.signedUrl);
-      if (item.signedUrl && item.path) urlByPath.set(item.path, item.signedUrl);
-    });
     const galleryPaths = (row.gallery_paths ?? []).slice(0, 8);
     const storedCoverUrl = row.image_path ? urlByPath.get(row.image_path) : undefined;
     const fallbackCoverPath = row.type === "news" && !storedCoverUrl
@@ -79,7 +81,7 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
         return signedUrl ? [signedUrl] : [];
       }),
     };
-  }));
+  });
   return {
     teachers: rows.filter((row) => row.type === "teacher").map((row) => ({ slug: row.slug, status: "published", departments: validDepartments(row.departments), isLeadership: Boolean(row.is_leadership), subjects: { uz: cleanList(row.subjects_uz), en: cleanList(row.subjects_en) }, name: { uz: row.title_uz, en: row.title_en }, role: { uz: row.recipient_uz ?? "", en: row.recipient_en ?? "" }, biography: { uz: row.summary_uz, en: row.summary_en }, qualifications: { uz: splitBody(row.body_uz), en: splitBody(row.body_en) }, initials: initials(row.title_uz), imageUrl: row.image_url, email: row.show_teacher_email ? cleanEmail(row.teacher_email) : undefined, cvUrl: cleanHttpsUrl(row.cv_url), relatedLinks: cleanRelatedLinks(row.related_links) })),
     news: rows.filter((row) => row.type === "news").map((row) => ({ slug: row.slug, status: "published", category: validPublicationCategory(row.category), format: validPublicationFormat(row.publication_format), author: row.publication_authors ? { name: row.publication_authors.name, role: { uz: row.publication_authors.role_uz, en: row.publication_authors.role_en }, profilePublished: row.publication_authors.profile_published } : undefined, date: row.event_date ?? "", title: { uz: row.title_uz, en: row.title_en }, excerpt: { uz: row.summary_uz, en: row.summary_en }, body: { uz: splitBody(row.body_uz), en: splitBody(row.body_en) }, imageUrl: row.image_url, galleryUrls: row.gallery_urls ?? [] })),
@@ -99,6 +101,14 @@ export async function loadPublishedContent(): Promise<PublishedContent> {
     })),
   };
 }
+
+// One shared result serves the page, metadata and sitemap. The signed media
+// URLs last 24 hours, so a two-minute content cache remains safely below that.
+export const loadPublishedContent = unstable_cache(
+  fetchPublishedContent,
+  ["published-school-content-v1"],
+  { revalidate: 120, tags: ["published-school-content"] },
+);
 
 function splitBody(value: string | null) { return value ? value.split(/\n\s*\n/).map((item) => item.trim()).filter(Boolean) : []; }
 function initials(value: string) { return value.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase(); }

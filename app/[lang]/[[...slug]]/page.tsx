@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Supabase returns short-lived signed image URLs. */
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
@@ -110,7 +111,7 @@ function HomePage({ lang, news }: { lang: Lang; news: PublishedContent["news"] }
       </section>
 
       <section className="school-photo-feature home-school-photo">
-        <img src="/images/school/school-entrance.webp" alt={lang === "uz" ? "IZZATBEK-EDU-GROUP maktabining asosiy kirish qismi" : "Main entrance of IZZATBEK-EDU-GROUP school"} />
+        <Image src="/images/school/school-entrance.webp" width={2200} height={1650} sizes="(max-width: 768px) 100vw, 68vw" alt={lang === "uz" ? "IZZATBEK-EDU-GROUP maktabining asosiy kirish qismi" : "Main entrance of IZZATBEK-EDU-GROUP school"} />
         <div><p className="eyebrow">{lang === "uz" ? "Bizning maktab" : "Our school"}</p><h2>{lang === "uz" ? "Hazoraspda ta’lim uchun yaratilgan muhit" : "A learning environment in Hazorasp"}</h2><p>{lang === "uz" ? "Maktabning ta’lim faoliyati olib boriladigan rasmiy manzillaridan biri." : "One of the school’s official locations for educational activity."}</p><Link className="text-link" href={`/${lang}/about`}>{lang === "uz" ? "Maktab haqida" : "About the school"}<ArrowRight size={17} /></Link></div>
       </section>
 
@@ -216,7 +217,7 @@ function AdmissionsContent({ lang }: { lang: Lang }) {
 }
 
 function SchoolPhoto({ src, alt, caption, className = "" }: { src: string; alt: string; caption?: string; className?: string }) {
-  return <figure className={`school-photo ${className}`.trim()}><img src={src} alt={alt} loading="lazy" />{caption && <figcaption>{caption}</figcaption>}</figure>;
+  return <figure className={`school-photo ${className}`.trim()}><Image src={src} alt={alt} width={2200} height={1650} sizes="(max-width: 768px) 100vw, 50vw" />{caption && <figcaption>{caption}</figcaption>}</figure>;
 }
 
 function ContactContent({ lang }: { lang: Lang }) {
