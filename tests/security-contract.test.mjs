@@ -10,7 +10,6 @@ const siteContent = readFileSync("lib/site-content.ts", "utf8");
 const directory = readFileSync("components/content-directory.tsx", "utf8");
 const nextConfig = readFileSync("next.config.ts", "utf8");
 const layout = readFileSync("app/layout.tsx", "utf8");
-const proxy = readFileSync("proxy.ts", "utf8");
 const publicPage = readFileSync("app/[lang]/[[...slug]]/page.tsx", "utf8");
 const repository = readFileSync("lib/content-repository.ts", "utf8");
 const photoGallery = readFileSync("components/news-photo-gallery.tsx", "utf8");
@@ -57,8 +56,9 @@ test("deployment defines defensive browser headers", () => {
 });
 
 test("localized pages expose language and structured school identity", () => {
-  assert.match(proxy, /x-school-lang/);
-  assert.match(layout, /requestHeaders\.get\("x-school-lang"\)/);
+  assert.doesNotMatch(layout, /next\/headers/);
+  assert.match(layout, /languageBootstrap/);
+  assert.match(publicPage, /className="site-page" lang=\{lang\}/);
   assert.match(layout, /"@type": "School"/);
   assert.match(directory, /Portrait of/);
 });
@@ -117,7 +117,7 @@ test("teacher contact details are optional, consent-gated, and safe", () => {
 });
 
 test("public content uses a short response cache and longer-lived signed images", () => {
-  assert.match(publicPage, /revalidate = 120/);
+  assert.match(publicPage, /revalidate = 300/);
   assert.doesNotMatch(publicPage, /dynamic = "force-dynamic"/);
   assert.match(repository, /createSignedUrls\(paths, 86400\)/);
 });

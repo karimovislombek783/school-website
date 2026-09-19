@@ -103,11 +103,12 @@ async function fetchPublishedContent(): Promise<PublishedContent> {
 }
 
 // One shared result serves the page, metadata and sitemap. The signed media
-// URLs last 24 hours, so a two-minute content cache remains safely below that.
+// URLs last 24 hours, so a five-minute cache stays fresh while sharply reducing
+// repeated Supabase queries and signed-URL work on public requests.
 export const loadPublishedContent = unstable_cache(
   fetchPublishedContent,
   ["published-school-content-v1"],
-  { revalidate: 120, tags: ["published-school-content"] },
+  { revalidate: 300, tags: ["published-school-content"] },
 );
 
 function splitBody(value: string | null) { return value ? value.split(/\n\s*\n/).map((item) => item.trim()).filter(Boolean) : []; }

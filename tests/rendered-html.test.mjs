@@ -40,7 +40,7 @@ test("declares the correct document language and school schema", async () => {
   for (const [pathname, lang] of [["/uz", "uz"], ["/en", "en"]]) {
     const response = await render(pathname);
     const html = await response.text();
-    assert.match(html, new RegExp(`<html[^>]+lang="${lang}"`));
+    assert.match(html, new RegExp(`class="site-page" lang="${lang}"`));
     assert.match(html, /application\/ld\+json/);
     assert.match(html, /"@type":"School"/);
   }

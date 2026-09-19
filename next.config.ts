@@ -16,6 +16,11 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  compress: true,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
+  },
   async rewrites() {
     return { beforeFiles: [{ source: "/sitemap.xml", destination: "/api/sitemap" }], afterFiles: [], fallback: [] };
   },

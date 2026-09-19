@@ -17,8 +17,9 @@ import { copy, isLang, Lang, pillars, siteIdentity } from "@/lib/site-content";
 import { loadPublishedContent, PublishedContent } from "@/lib/content-repository";
 import { publicationCategoryLabel, publicationFormatLabel } from "@/lib/publications";
 
-// A short cache removes repeated database and signed-image work while keeping updates timely.
-export const revalidate = 120;
+// Public pages are served through ISR. Five minutes keeps editorial updates
+// timely without putting every visitor on the database-backed render path.
+export const revalidate = 300;
 
 const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "policies", "admin"];
 
@@ -65,9 +66,12 @@ export default async function SchoolPage({ params }: { params: Promise<{ lang: s
   if (!validPages.includes(page) || (slug && slug.length > 2)) notFound();
   const detailSlug = slug?.[1];
   if (detailSlug && !["teachers", "news", "achievements"].includes(page)) notFound();
-  const content = await loadPublishedContent();
+  const contentPages = new Set(["home", "teachers", "news", "achievements"]);
+  const content = contentPages.has(page)
+    ? await loadPublishedContent()
+    : { teachers: [], news: [], achievements: [] };
   return (
-    <div className="site-page">
+    <div className="site-page" lang={lang}>
       <SiteHeader lang={lang} current={slug?.join("/") ?? page} />
       <div id="main-content" tabIndex={-1}>
         {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} content={content} /> : page === "home" ? <HomePage lang={lang} news={content.news} /> : page === "admin" ? <AdminPage lang={lang} /> : <InnerPage lang={lang} page={page} content={content} />}
@@ -111,7 +115,7 @@ function HomePage({ lang, news }: { lang: Lang; news: PublishedContent["news"] }
       </section>
 
       <section className="school-photo-feature home-school-photo">
-        <Image src="/images/school/school-entrance.webp" width={2200} height={1650} sizes="(max-width: 768px) 100vw, 68vw" alt={lang === "uz" ? "IZZATBEK-EDU-GROUP maktabining asosiy kirish qismi" : "Main entrance of IZZATBEK-EDU-GROUP school"} />
+        <Image src="/images/school/school-entrance.webp" width={1600} height={1200} sizes="(max-width: 768px) 100vw, 68vw" loading="lazy" alt={lang === "uz" ? "IZZATBEK-EDU-GROUP maktabining asosiy kirish qismi" : "Main entrance of IZZATBEK-EDU-GROUP school"} />
         <div><p className="eyebrow">{lang === "uz" ? "Bizning maktab" : "Our school"}</p><h2>{lang === "uz" ? "Hazoraspda ta’lim uchun yaratilgan muhit" : "A learning environment in Hazorasp"}</h2><p>{lang === "uz" ? "Maktabning ta’lim faoliyati olib boriladigan rasmiy manzillaridan biri." : "One of the school’s official locations for educational activity."}</p><Link className="text-link" href={`/${lang}/about`}>{lang === "uz" ? "Maktab haqida" : "About the school"}<ArrowRight size={17} /></Link></div>
       </section>
 
@@ -217,7 +221,7 @@ function AdmissionsContent({ lang }: { lang: Lang }) {
 }
 
 function SchoolPhoto({ src, alt, caption, className = "" }: { src: string; alt: string; caption?: string; className?: string }) {
-  return <figure className={`school-photo ${className}`.trim()}><Image src={src} alt={alt} width={2200} height={1650} sizes="(max-width: 768px) 100vw, 50vw" />{caption && <figcaption>{caption}</figcaption>}</figure>;
+  return <figure className={`school-photo ${className}`.trim()}><Image src={src} alt={alt} width={1600} height={1200} sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" />{caption && <figcaption>{caption}</figcaption>}</figure>;
 }
 
 function ContactContent({ lang }: { lang: Lang }) {
@@ -345,4 +349,19 @@ function AdminPage({ lang }: { lang: Lang }) {
   return <main><section className="page-hero compact"><p className="eyebrow">{lang === "uz" ? "Kontent boshqaruvi" : "Content management"}</p><h1>{lang === "uz" ? "Maktab kontentini xavfsiz boshqarish" : "Manage school content safely"}</h1><p>{lang === "uz" ? "Qoralamalar ommaga ko‘rinmaydi; faqat tasdiqlangan yozuvlar nashr qilinadi." : "Drafts remain private; only approved records are published."}</p></section><div className="admin-wrap"><AdminGateway lang={lang} /></div></main>;
 }
 
-export function generateStaticParams() { return [{ lang: "uz", slug: [] }, { lang: "en", slug: [] }]; }
+export async function generateStaticParams() {
+  const staticSlugs = [
+    [], ["about"], ["academics"], ["teachers"], ["news"],
+    ["achievements"], ["admissions"], ["contact"], ["legal"],
+    ["privacy"], ["policies"],
+  ];
+  const content = await loadPublishedContent();
+  const contentSlugs = [
+    ...content.teachers.map((item) => ["teachers", item.slug]),
+    ...content.news.map((item) => ["news", item.slug]),
+    ...content.achievements.map((item) => ["achievements", item.slug]),
+  ];
+  return (["uz", "en"] as const).flatMap((lang) =>
+    [...staticSlugs, ...contentSlugs].map((slug) => ({ lang, slug })),
+  );
+}

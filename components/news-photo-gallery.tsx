@@ -30,7 +30,7 @@ export function NewsPhotoGallery({ lang, title, images }: { lang: Lang; title: s
     </div>
     <div className="article-gallery-grid">
       {images.map((url, index) => <button type="button" onClick={() => setActive(index)} key={url} aria-label={lang === "uz" ? `${index + 1}-rasmni kattalashtirish` : `Enlarge image ${index + 1}`}>
-        <img src={url} loading="lazy" alt={lang === "uz" ? `${title} — ${index + 1}-rasm` : `${title} — image ${index + 1}`} />
+        <img src={url} loading="lazy" decoding="async" alt={lang === "uz" ? `${title} — ${index + 1}-rasm` : `${title} — image ${index + 1}`} />
       </button>)}
     </div>
     {active !== null && <div className="gallery-lightbox" role="dialog" aria-modal="true" aria-label={lang === "uz" ? "Rasm ko‘rinishi" : "Image viewer"} onClick={() => setActive(null)}>

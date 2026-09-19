@@ -43,7 +43,7 @@ export function TeacherDirectory({ lang, items }: { lang: Lang; items: TeacherRe
         <div className="teacher-grid">
           {visible.map((teacher) => (
             <Link className="teacher-card teacher-link" href={`/${lang}/teachers/${teacher.slug}`} key={teacher.slug}>
-              <div className="teacher-avatar">{teacher.imageUrl ? <img src={teacher.imageUrl} alt={lang === "uz" ? `${teacher.name[lang]}, ${teacher.role[lang]}` : `Portrait of ${teacher.name[lang]}, ${teacher.role[lang]}`} /> : teacher.initials}</div>
+              <div className="teacher-avatar">{teacher.imageUrl ? <img src={teacher.imageUrl} loading="lazy" decoding="async" alt={lang === "uz" ? `${teacher.name[lang]}, ${teacher.role[lang]}` : `Portrait of ${teacher.name[lang]}, ${teacher.role[lang]}`} /> : teacher.initials}</div>
               <div className="teacher-tags">{teacher.isLeadership && <span>{lang === "uz" ? "Rahbariyat" : "Leadership"}</span>}{teacher.departments.map((item) => <span key={item}>{departmentLabel(item, lang)}</span>)}</div>
               <h2>{teacher.name[lang]}</h2>
               <p>{teacher.role[lang]}</p>
@@ -68,7 +68,7 @@ export function NewsDirectory({ lang, items, limit }: { lang: Lang; items: NewsR
       </div>}
       {visible.length ? <div className="news-grid">{visible.map((item) => (
         <article className="news-card" key={item.slug}>
-          <div className="news-art">{item.imageUrl ? <img src={item.imageUrl} alt={item.title[lang]} /> : <Newspaper size={38} aria-hidden="true" />}</div>
+          <div className="news-art">{item.imageUrl ? <img src={item.imageUrl} loading="lazy" decoding="async" alt={item.title[lang]} /> : <Newspaper size={38} aria-hidden="true" />}</div>
           <div className="news-body"><div className="news-meta"><span>{publicationCategoryLabel(item.category, lang)}</span><time dateTime={item.date}>{item.date}</time></div><p className="publication-format">{publicationFormatLabel(item.format, lang)}</p><h3>{item.title[lang]}</h3><p>{item.excerpt[lang]}</p>{item.author && <p className="publication-byline">{lang === "uz" ? "Muallif" : "By"}: <strong>{item.author.name}</strong></p>}<Link className="text-link" href={`/${lang}/news/${item.slug}`}>{copy[lang].sections.learnMore}<ArrowRight size={16} /></Link></div>
         </article>
       ))}</div> : <EmptyState lang={lang} kind="news" filtered={items.length > 0} />}
@@ -132,7 +132,7 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
       {item.subject[lang] && <div className={`achievement-dialog-fact achievement-dialog-subject ${subjectTone}`}><AchievementSubjectIcon subject={item.subject[lang]} /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
       <div className="achievement-dialog-fact"><span>{lang === "uz" ? "O‘quv yili" : "Academic year"}</span><strong>{item.academicYear}</strong></div>
     </div>
-    {item.imageUrl && <figure className="achievement-document"><img src={item.imageUrl} alt={lang === "uz" ? `${item.studentName} sertifikati` : `Certificate for ${item.studentName}`} /><figcaption>{lang === "uz" ? "Sertifikat nusxasi" : "Certificate copy"}</figcaption></figure>}
+    {item.imageUrl && <figure className="achievement-document"><img src={item.imageUrl} loading="lazy" decoding="async" alt={lang === "uz" ? `${item.studentName} sertifikati` : `Certificate for ${item.studentName}`} /><figcaption>{lang === "uz" ? "Sertifikat nusxasi" : "Certificate copy"}</figcaption></figure>}
     <div className="achievement-confirmation"><CheckCircle2 /><span>{lang === "uz" ? "Natija maktab tomonidan tekshirilgan va tasdiqlangan." : "This result has been reviewed and verified by the school."}</span></div>
     {item.source && <a className="text-link" href={item.source} target="_blank" rel="noreferrer">{lang === "uz" ? "Tasdiqlash manbasini ochish" : "Open verification source"}<ArrowRight /></a>}
   </DialogContent></Dialog>;

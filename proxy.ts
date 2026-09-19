@@ -2,9 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
-  const requestHeaders = new Headers(request.headers);
-  const lang = request.nextUrl.pathname.split("/")[1];
-  requestHeaders.set("x-school-lang", lang === "en" ? "en" : "uz");
   const pathname = request.nextUrl.pathname;
   const needsSessionRefresh =
     /^\/(?:uz|en)\/admin(?:\/|$)/.test(pathname) ||
@@ -12,18 +9,18 @@ export async function proxy(request: NextRequest) {
   // Public pages do not need a session. Avoid making every visitor wait for a
   // remote Supabase auth lookup before Next.js can render cached content.
   if (!needsSessionRefresh) {
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    return NextResponse.next();
   }
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return NextResponse.next({ request: { headers: requestHeaders } });
-  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  if (!url || !key) return NextResponse.next();
+  let response = NextResponse.next();
   const client = createServerClient(url, key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (items) => {
         items.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request: { headers: requestHeaders } });
+        response = NextResponse.next();
         items.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       },
     },

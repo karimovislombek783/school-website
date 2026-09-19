@@ -4,6 +4,7 @@ export const siteIdentity = {
   legalName: '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi',
   shortName: "IEG",
   domain: "izzatbek-edu-group.uz",
+  siteUrl: "https://www.izzatbek-edu-group.uz",
   established: "Tasdiqlanmoqda / To be confirmed",
   director: "Izzatbek Jumaniyozov",
   phone: "+998 95 875 03 66",

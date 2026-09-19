@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import { siteIdentity } from "@/lib/site-content";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://izzatbek-edu-group.uz"),
+  metadataBase: new URL(siteIdentity.siteUrl),
   title: {
     default: '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi',
     template: '%s | "IZZATBEK-EDU-GROUP"',
@@ -16,15 +15,15 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const requestHeaders = await headers();
-  const lang = requestHeaders.get("x-school-lang") === "en" ? "en" : "uz";
+const languageBootstrap = `document.documentElement.lang=location.pathname==='/en'||location.pathname.startsWith('/en/')?'en':'uz'`;
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const schoolSchema = {
     "@context": "https://schema.org",
     "@type": "School",
     name: siteIdentity.legalName,
     alternateName: "IZZATBEK-EDU-GROUP",
-    url: `https://${siteIdentity.domain}`,
+    url: siteIdentity.siteUrl,
     email: siteIdentity.email,
     telephone: siteIdentity.phoneHref,
     address: {
@@ -37,7 +36,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     sameAs: [siteIdentity.telegramUrl, siteIdentity.schoolInstagramUrl],
   };
   return (
-    <html lang={lang}>
+    <html lang="uz" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: languageBootstrap }} /></head>
       <body>
         <script type="application/ld+json">{JSON.stringify(schoolSchema)}</script>
         {children}
