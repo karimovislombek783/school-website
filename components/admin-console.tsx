@@ -37,6 +37,15 @@ export type AdminRecord = {
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGE_DIMENSION = 2400;
 
+async function refreshPublicContent(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/content/revalidate", { method: "POST", credentials: "same-origin" });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 async function normalizeImage(file: File): Promise<File> {
   if (file.size > MAX_IMAGE_BYTES) throw new Error("invalid-image");
   const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
@@ -219,9 +228,15 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
     }
 
     const saved = result.data as AdminRecord;
+    const needsRefresh = saved.status === "published" || editing?.status === "published";
+    const refreshed = !needsRefresh || await refreshPublicContent();
     setRecords((current) => editing ? current.map((item) => item.id === saved.id ? saved : item) : [saved, ...current]);
     setEditing(null); setEditorOpen(false); formElement.reset(); setBusy(false);
-    setMessage(lang === "uz" ? "Yozuv xavfsiz saqlandi." : "Record saved securely.");
+    setMessage(!needsRefresh
+      ? (lang === "uz" ? "Yozuv xavfsiz saqlandi." : "Record saved securely.")
+      : refreshed
+        ? (lang === "uz" ? "Yozuv saqlandi. Ommaviy sahifa yangilandi." : "Record saved. Public page refreshed.")
+        : (lang === "uz" ? "Yozuv saqlandi, ammo ommaviy sahifa bir necha daqiqadan keyin yangilanishi mumkin." : "Record saved, but the public page may take a few minutes to update."));
   }
 
   async function remove(record: AdminRecord) {
@@ -233,9 +248,12 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
     else {
       const mediaPaths = [record.image_path, ...(record.gallery_paths ?? [])].filter((path): path is string => Boolean(path));
       if (mediaPaths.length) await client.storage.from("school-media").remove(mediaPaths);
+      const refreshed = record.status !== "published" || await refreshPublicContent();
       setRecords((current) => current.filter((item) => item.id !== record.id));
       if (editing?.id === record.id) { setEditing(null); setEditorOpen(false); }
-      setMessage(lang === "uz" ? "Yozuv o‘chirildi." : "Record deleted.");
+      setMessage(refreshed
+        ? (lang === "uz" ? "Yozuv o‘chirildi." : "Record deleted.")
+        : (lang === "uz" ? "Yozuv o‘chirildi, ammo ommaviy sahifa bir necha daqiqadan keyin yangilanishi mumkin." : "Record deleted, but the public page may take a few minutes to update."));
     }
     setBusy(false);
   }
@@ -259,7 +277,15 @@ export function AdminConsole({ lang, initialRecords, initialAudit, initialAuthor
     setBusy(true); setMessage("");
     const result = await createBrowserSupabase().from("content_items").update(payload).eq("id", editing.id).select().single();
     if (result.error) setMessage(friendlyError(result.error, lang));
-    else { const restored = result.data as AdminRecord; setEditing(restored); setRecords((items) => items.map((item) => item.id === restored.id ? restored : item)); setMessage(lang === "uz" ? `№${revision.version} versiya tiklandi.` : `Version ${revision.version} restored.`); }
+    else {
+      const restored = result.data as AdminRecord;
+      const needsRefresh = restored.status === "published" || editing.status === "published";
+      const refreshed = !needsRefresh || await refreshPublicContent();
+      setEditing(restored); setRecords((items) => items.map((item) => item.id === restored.id ? restored : item));
+      setMessage(refreshed
+        ? (lang === "uz" ? `№${revision.version} versiya tiklandi.` : `Version ${revision.version} restored.`)
+        : (lang === "uz" ? `№${revision.version} versiya tiklandi, ammo ommaviy sahifa kechroq yangilanishi mumkin.` : `Version ${revision.version} restored, but the public page may update later.`));
+    }
     setBusy(false);
   }
 
