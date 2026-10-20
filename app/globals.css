@@ -1232,3 +1232,44 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   .newsletter-subscribe-form { grid-template-columns: 1fr; }
   .newsletter-subscribe-form small { grid-column: auto; }
 }
+
+
+/* Author forms use light surfaces; do not inherit the newsletter's pale consent text. */
+.writer-manager .writer-form {
+  color: #172b45;
+  background: #fbfaff;
+  color-scheme: light;
+}
+.writer-manager .writer-form-grid label,
+.writer-manager .writer-form-grid .consent {
+  color: #172b45;
+}
+.writer-manager .writer-form-grid input:not([type="checkbox"]),
+.writer-manager .writer-form-grid textarea {
+  color: #172b45;
+  background: #ffffff;
+  border: 1px solid #8796aa;
+}
+.writer-manager .writer-form-grid input::placeholder,
+.writer-manager .writer-form-grid textarea::placeholder {
+  color: #526176;
+  opacity: 1;
+}
+.writer-manager .writer-form-grid .consent {
+  padding: 12px;
+  border: 1px solid #8796aa;
+  border-radius: 8px;
+  background: #ffffff;
+  line-height: 1.5;
+}
+.writer-manager .writer-form-grid input[type="checkbox"] {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  accent-color: #174879;
+}
+.writer-manager .writer-form-grid input:focus-visible,
+.writer-manager .writer-form-grid textarea:focus-visible {
+  outline: 3px solid #174879;
+  outline-offset: 3px;
+}
