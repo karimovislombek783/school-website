@@ -1273,3 +1273,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
   outline: 3px solid #174879;
   outline-offset: 3px;
 }
+
+/* Public, localized hierarchical navigation. */
+.school-breadcrumbs{max-width:1280px;margin:0 auto;padding:24px clamp(20px,4vw,64px) 0;font-size:13px;color:#66736b;}
+.school-breadcrumbs ol{list-style:none;display:flex;flex-wrap:wrap;gap:8px 12px;padding:0;margin:0;}
+.school-breadcrumbs li{display:flex;gap:12px;align-items:baseline;overflow-wrap:anywhere;}
+.school-breadcrumbs li+li::before{content:"/";opacity:.6;}
+.school-breadcrumbs a{text-decoration:underline;text-underline-offset:3px;}

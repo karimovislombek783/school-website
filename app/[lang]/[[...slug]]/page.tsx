@@ -8,7 +8,7 @@ import {
   BriefcaseBusiness, Camera, Code2, ExternalLink, FileText, Globe2, GraduationCap, HeartHandshake,
   Mail, MapPin, Phone, Play, Scale, Send, ShieldCheck, Sparkles, Target, Users,
 } from "lucide-react";
-import { AdminGateway } from "@/components/admin-gateway";
+import { SchoolBreadcrumbs } from "@/components/school-breadcrumbs";
 import { AchievementDirectory, NewsDirectory, TeacherDirectory } from "@/components/content-directory";
 import { NewsPhotoGallery } from "@/components/news-photo-gallery";
 import { NewsletterSignup } from "@/components/newsletter-signup";
@@ -21,9 +21,9 @@ import { publicationCategoryLabel, publicationFormatLabel } from "@/lib/publicat
 // timely without putting every visitor on the database-backed render path.
 export const revalidate = 300;
 
-const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "policies", "admin"];
+const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "policies"];
 
-export async function generateMetadata({ params }: { params: Promise<{ lang: string; slug?: string[] }> }): Promise<Metadata> {
+async function pageMetadata({ params }: { params: Promise<{ lang: string; slug?: string[] }> }): Promise<Metadata> {
   const { lang: rawLang, slug } = await params;
   if (!isLang(rawLang)) return {};
   const lang = rawLang as Lang;
@@ -37,6 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     languages: {
       uz: `/uz${languagePath}`,
       en: `/en${languagePath}`,
+      "x-default": `/uz${languagePath}`,
     },
   };
   const content = detail ? await loadPublishedContent() : null;
@@ -58,6 +59,22 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   return pageCopy ? { title: pageCopy.title, description: pageCopy.intro, alternates } : {};
 }
 
+export async function generateMetadata(input: { params: Promise<{ lang: string; slug?: string[] }> }): Promise<Metadata> {
+  const metadata = await pageMetadata(input);
+  const { lang, slug } = await input.params;
+  if (!isLang(lang) || !metadata.title) return { robots: { index: false, follow: false } };
+  const path = `/${lang}${slug?.length ? `/${slug.join("/")}` : ""}`;
+  const title = typeof metadata.title === "string" ? metadata.title : "Izzatbek Edu Group";
+  const description = metadata.description || copy[lang].home.intro;
+  return {
+    ...metadata,
+    openGraph: { type: "website", siteName: "Izzatbek Edu Group", title, description, url: path,
+      locale: lang === "uz" ? "uz_UZ" : "en_US", alternateLocale: lang === "uz" ? ["en_US"] : ["uz_UZ"],
+      images: [{ url: "/images/social-school.jpg", width: 1200, height: 630, alt: "Izzatbek Edu Group — Hazorasp, Uzbekistan" }] },
+    twitter: { card: "summary_large_image", title, description, images: ["/images/social-school.jpg"] },
+  };
+}
+
 export default async function SchoolPage({ params }: { params: Promise<{ lang: string; slug?: string[] }> }) {
   const { lang: rawLang, slug } = await params;
   if (!isLang(rawLang)) notFound();
@@ -70,11 +87,16 @@ export default async function SchoolPage({ params }: { params: Promise<{ lang: s
   const content = contentPages.has(page)
     ? await loadPublishedContent()
     : { teachers: [], news: [], achievements: [] };
+  const breadcrumbLabel = page === "home" ? "" : (copy[lang].nav[page as keyof typeof copy[typeof lang]["nav"]] || copy[lang].pages[page as keyof typeof copy[typeof lang]["pages"]]?.title || page);
+  const detailLabel = page === "teachers" ? content.teachers.find(item => item.slug === detailSlug)?.name[lang]
+    : page === "news" ? content.news.find(item => item.slug === detailSlug)?.title[lang]
+    : content.achievements.find(item => item.slug === detailSlug)?.studentName;
   return (
     <div className="site-page" lang={lang}>
       <SiteHeader lang={lang} current={slug?.join("/") ?? page} />
       <div id="main-content" tabIndex={-1}>
-        {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} content={content} /> : page === "home" ? <HomePage lang={lang} news={content.news} /> : page === "admin" ? <AdminPage lang={lang} /> : <InnerPage lang={lang} page={page} content={content} />}
+        {page !== "home" && <SchoolBreadcrumbs lang={lang} page={page} label={breadcrumbLabel} detail={detailSlug && detailLabel ? { slug: detailSlug, label: detailLabel } : undefined} />}
+        {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} content={content} /> : page === "home" ? <HomePage lang={lang} news={content.news} /> : <InnerPage lang={lang} page={page} content={content} />}
       </div>
       {page !== "admin" && <NewsletterSignup lang={lang} />}
       <SiteFooter lang={lang} />
@@ -343,10 +365,6 @@ function linkService(value: string) {
     if (url.pathname.toLowerCase().endsWith(".pdf")) return "PDF";
     return host;
   } catch { return "Website"; }
-}
-
-function AdminPage({ lang }: { lang: Lang }) {
-  return <main><section className="page-hero compact"><p className="eyebrow">{lang === "uz" ? "Kontent boshqaruvi" : "Content management"}</p><h1>{lang === "uz" ? "Maktab kontentini xavfsiz boshqarish" : "Manage school content safely"}</h1><p>{lang === "uz" ? "Qoralamalar ommaga ko‘rinmaydi; faqat tasdiqlangan yozuvlar nashr qilinadi." : "Drafts remain private; only approved records are published."}</p></section><div className="admin-wrap"><AdminGateway lang={lang} /></div></main>;
 }
 
 export async function generateStaticParams() {

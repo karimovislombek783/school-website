@@ -21,9 +21,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const schoolSchema = {
     "@context": "https://schema.org",
     "@type": "School",
+    "@id": `${siteIdentity.siteUrl}/#school`,
     name: siteIdentity.legalName,
     alternateName: "IZZATBEK-EDU-GROUP",
     url: siteIdentity.siteUrl,
+    image: `${siteIdentity.siteUrl}/images/social-school.jpg`,
     email: siteIdentity.email,
     telephone: siteIdentity.phoneHref,
     address: {

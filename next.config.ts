@@ -17,6 +17,13 @@ const contentSecurityPolicy = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
+  productionBrowserSourceMaps: false,
+  async redirects() {
+    return [
+      { source: "/LLM.txt", destination: "/llms.txt", permanent: true },
+      { source: "/llm.txt", destination: "/llms.txt", permanent: true },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,

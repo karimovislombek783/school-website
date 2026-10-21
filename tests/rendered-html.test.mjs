@@ -52,6 +52,30 @@ test("defaults the root route to Uzbek", async () => {
   assert.equal(new URL(response.headers.get("location"), "http://localhost").pathname, "/uz");
 });
 
+test("public pages expose localized canonical, alternate and sharing metadata", async () => {
+  for (const lang of ["uz", "en"]) {
+    const response = await render(`/${lang}/about`);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, new RegExp(`rel="canonical" href="https://www\\.izzatbek-edu-group\\.uz/${lang}/about"`));
+    assert.match(html, /hrefLang="x-default"|hreflang="x-default"/);
+    assert.match(html, /property="og:image"/);
+    assert.match(html, /social-school\.jpg/);
+    assert.match(html, /name="twitter:card" content="summary_large_image"/);
+    assert.equal((html.match(/<h1\b/g) || []).length, 1);
+    assert.match(html, /"@type":"BreadcrumbList"/);
+    assert.match(html, new RegExp(`aria-label="${lang === 'uz' ? 'Sahifa yo‘li' : 'Breadcrumb'}"`));
+    assert.match(html, /aria-current="page"/);
+  }
+});
+
+test("homepages keep sharing metadata without a redundant breadcrumb trail", async () => {
+  const response = await render('/en');
+  const html = await response.text();
+  assert.match(html, /property="og:title"/);
+  assert.doesNotMatch(html, /"@type":"BreadcrumbList"/);
+});
+
 test("does not expose unpublished detail pages", async () => {
   for (const pathname of ["/uz/teachers/not-published", "/en/news/not-published", "/uz/achievements/not-published"]) {
     const response = await render(pathname);

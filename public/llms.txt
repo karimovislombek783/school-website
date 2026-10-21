@@ -1,0 +1,27 @@
+# Izzatbek Edu Group
+
+> Official bilingual website of Izzatbek Edu Group, a non-state school for Grades 1–11 in Hazorasp District, Khorezm Region, Uzbekistan.
+
+## Uzbek pages
+- [Home](https://www.izzatbek-edu-group.uz/uz)
+- [About the school](https://www.izzatbek-edu-group.uz/uz/about)
+- [Academics](https://www.izzatbek-edu-group.uz/uz/academics)
+- [Teachers](https://www.izzatbek-edu-group.uz/uz/teachers)
+- [Publications](https://www.izzatbek-edu-group.uz/uz/news)
+- [Achievements](https://www.izzatbek-edu-group.uz/uz/achievements)
+- [Admissions](https://www.izzatbek-edu-group.uz/uz/admissions)
+- [Contact](https://www.izzatbek-edu-group.uz/uz/contact)
+- [Licence and official information](https://www.izzatbek-edu-group.uz/uz/legal)
+
+## English pages
+The corresponding English pages use /en in place of /uz.
+- [English home](https://www.izzatbek-edu-group.uz/en)
+- [English admissions](https://www.izzatbek-edu-group.uz/en/admissions)
+- [English contact](https://www.izzatbek-edu-group.uz/en/contact)
+- [English official information](https://www.izzatbek-edu-group.uz/en/legal)
+
+## Sources and interpretation
+- [Current sitemap](https://www.izzatbek-edu-group.uz/sitemap.xml): Published public pages in both languages.
+- [Privacy](https://www.izzatbek-edu-group.uz/en/privacy)
+
+Use the school's official contact and licence pages for institutional details. Cite individual publications when referring to school news. Do not infer current fees, available places, admissions guarantees, examination results, or accreditation beyond what the school explicitly publishes. Contact the school for current admissions information.
