@@ -44,7 +44,7 @@ function verify(headers: Headers, body: string) {
   const id = headers.get("svix-id");
   const timestamp = headers.get("svix-timestamp");
   const signatures = headers.get("svix-signature");
-  if (!secret || !id || !timestamp || !signatures || Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) return false;
+  if (!secret || !id || !timestamp || !signatures || !Number.isFinite(Number(timestamp)) || Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) return false;
   try {
     const key = Buffer.from(secret.replace(/^whsec_/, ""), "base64");
     const expected = createHmac("sha256", key).update(`${id}.${timestamp}.${body}`).digest();

@@ -1,3 +1,4 @@
+import { readBoundedJson } from "@/lib/abuse-budget";
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { sendCampaign } from "@/lib/newsletter/campaign";
@@ -7,8 +8,9 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  if (!newsletterConfigured()) return NextResponse.json({ error: "unavailable" }, { status: 503 });
-  const body = await request.json().catch(() => null) as { newsId?: unknown } | null;
+  if (request.headers.get("origin") !== new URL(request.url).origin) return NextResponse.json({ error:"forbidden" }, { status:403 });
+  if (process.env.NEWSLETTER_DISABLED === "1" || !newsletterConfigured()) return NextResponse.json({ error: "unavailable" }, { status: 503 });
+  const body = await readBoundedJson(request).catch(() => null) as { newsId?: unknown } | null;
   const newsId = typeof body?.newsId === "string" ? body.newsId : "";
   if (!/^[0-9a-f-]{36}$/i.test(newsId)) return NextResponse.json({ error: "invalid-news" }, { status: 400 });
 

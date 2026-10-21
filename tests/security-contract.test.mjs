@@ -148,7 +148,8 @@ test("newsletter is double-opt-in, private and safely rate limited", () => {
   assert.match(schema, /unsubscribe_token_hash/);
   assert.match(schema, /revoke all on public\.newsletter_subscribers/);
   assert.match(newsletterServer, /createHash\("sha256"\)/);
-  assert.match(newsletterSubscribe, /newsletter_rate_limits/);
+  assert.match(newsletterSubscribe, /consumeBudget/);
+  assert.doesNotMatch(newsletterSubscribe, /requestFingerprint|count: "exact"/);
   assert.match(newsletterSubscribe, /status: "pending"/);
   assert.match(newsletterUi, /newsletter-honeypot/);
 });

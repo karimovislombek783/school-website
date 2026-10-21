@@ -1,3 +1,4 @@
+import { readBoundedJson } from "@/lib/abuse-budget";
 import { NextResponse } from "next/server";
 import { requireNewsletterAdmin } from "@/lib/newsletter/admin";
 import { newsletterConfigured, newsletterDatabase, sendNewsletterEmail, siteUrl } from "@/lib/newsletter/server";
@@ -34,10 +35,11 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  if (request.headers.get("origin") !== new URL(request.url).origin) return NextResponse.json({ error:"forbidden" }, { status:403 });
   const auth = await requireNewsletterAdmin();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
   if (tooLarge(request)) return NextResponse.json({ error: "payload-too-large" }, { status: 413 });
-  const body = await request.json().catch(() => null) as { id?: unknown; preferredLanguage?: unknown } | null;
+  const body = await readBoundedJson(request).catch(() => null) as { id?: unknown; preferredLanguage?: unknown } | null;
   if (typeof body?.id !== "string" || !["uz", "en"].includes(String(body.preferredLanguage))) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const db = newsletterDatabase();
   const { error } = await db.from("newsletter_subscribers").update({ preferred_language: body.preferredLanguage, updated_at: new Date().toISOString() }).eq("id", body.id);
@@ -47,10 +49,11 @@ export async function PATCH(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (request.headers.get("origin") !== new URL(request.url).origin) return NextResponse.json({ error:"forbidden" }, { status:403 });
   const auth = await requireNewsletterAdmin();
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
   if (tooLarge(request)) return NextResponse.json({ error: "payload-too-large" }, { status: 413 });
-  const body = await request.json().catch(() => null) as { action?: unknown; language?: unknown } | null;
+  const body = await readBoundedJson(request).catch(() => null) as { action?: unknown; language?: unknown } | null;
   if (body?.action !== "send-test" || !auth.user.email) return NextResponse.json({ error: "invalid" }, { status: 400 });
   const lang = body.language === "en" ? "en" : "uz";
   const subject = lang === "uz" ? "Newsletter sinov xati" : "Newsletter test email";

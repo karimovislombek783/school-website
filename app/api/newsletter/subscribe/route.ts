@@ -1,10 +1,10 @@
+import { consumeBudget, requestAddress, readBoundedJson } from "@/lib/abuse-budget";
 import { NextResponse } from "next/server";
 import {
   escapeHtml,
   issueToken,
   newsletterConfigured,
   newsletterDatabase,
-  requestFingerprint,
   sendNewsletterEmail,
   siteUrl,
 } from "@/lib/newsletter/server";
@@ -18,14 +18,12 @@ type SubscribeBody = {
 };
 
 export async function POST(request: Request) {
-  if (!newsletterConfigured()) {
+  if (process.env.NEWSLETTER_DISABLED === "1" || !newsletterConfigured()) {
     return NextResponse.json({ error: "unavailable" }, { status: 503 });
   }
 
   try {
-    const declaredSize = Number(request.headers.get("content-length") ?? "0");
-    if (!Number.isFinite(declaredSize) || declaredSize > 16_384) return NextResponse.json({ error: "payload-too-large" }, { status: 413 });
-    const body = await request.json().catch(() => null) as SubscribeBody | null;
+    const body = await readBoundedJson(request) as SubscribeBody | null;
 
     // Honeypot: silently accept bot submissions without doing any work.
     if (body?.website) return NextResponse.json({ ok: true });
@@ -44,32 +42,11 @@ export async function POST(request: Request) {
     }
 
     const database = newsletterDatabase();
-    await database.from("newsletter_rate_limits").delete().lt("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-    const fingerprint = requestFingerprint(request);
-    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-
-    const rateLimitResult = await database
-      .from("newsletter_rate_limits")
-      .select("id", { count: "exact", head: true })
-      .eq("fingerprint", fingerprint)
-      .gte("created_at", since);
-
-    if (rateLimitResult.error) {
-      console.error("[newsletter/subscribe] rate-limit lookup failed", rateLimitResult.error);
-      return NextResponse.json({ error: "database" }, { status: 500 });
-    }
-
-    if ((rateLimitResult.count ?? 0) >= 5) {
-      return NextResponse.json({ error: "rate-limit" }, { status: 429 });
-    }
-
-    const rateLimitInsert = await database
-      .from("newsletter_rate_limits")
-      .insert({ fingerprint });
-
-    if (rateLimitInsert.error) {
-      console.error("[newsletter/subscribe] rate-limit insert failed", rateLimitInsert.error);
-      return NextResponse.json({ error: "database" }, { status: 500 });
+    // Global admission runs first, bounding unique counter/subscriber growth.
+    if (!await consumeBudget("newsletter-site-day", "site", 200, 86400)
+      || !await consumeBudget("newsletter-ip-hour", requestAddress(request), 5, 3600)
+      || !await consumeBudget("newsletter-email-hour", email, 1, 3600)) {
+      return NextResponse.json({ error: "rate-limit" }, { status: 429, headers: { "Retry-After": "3600", "Cache-Control": "no-store" } });
     }
 
     const existingResult = await database
@@ -148,6 +125,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, state: "confirmation-sent" });
   } catch (error) {
     console.error("[newsletter/subscribe] unexpected error", error);
-    return NextResponse.json({ error: "internal" }, { status: 500 });
+    const oversized = error instanceof Error && error.message === "payload-too-large";
+    return NextResponse.json({ error: oversized ? "payload-too-large" : "unavailable" }, { status: oversized ? 413 : 503 });
   }
 }

@@ -1,13 +1,14 @@
 import "server-only";
 
 import { batchesOf, NEWSLETTER_RECIPIENT_LIMIT } from "@/lib/editorial-scheduling";
-import { escapeHtml, issueToken, newsletterDatabase, sendNewsletterBatch, siteUrl } from "@/lib/newsletter/server";
+import { escapeHtml, issueToken, newsletterDatabase, reserveNewsletterEmails, sendNewsletterBatch, siteUrl } from "@/lib/newsletter/server";
 
 type AuthorRow = { name: string; role_uz: string; role_en: string };
 type NewsRow = { id: string; slug: string; title_uz: string; title_en: string; summary_uz: string; summary_en: string; body_uz: string | null; body_en: string | null; publication_authors: AuthorRow | AuthorRow[] | null };
 type SubscriberRow = { id: string; email: string; preferred_language: "uz" | "en" };
 
 export async function sendCampaign(newsId: string, initiatedBy: string | null) {
+  if (process.env.NEWSLETTER_DISABLED === "1") return { ok:false as const, error:"paused" as const };
   const database = newsletterDatabase();
   const { data: news } = await database.from("content_items").select("id,slug,title_uz,title_en,summary_uz,summary_en,body_uz,body_en,publication_authors(name,role_uz,role_en)").eq("id", newsId).eq("type", "news").eq("status", "published").maybeSingle();
   if (!news) return { ok: false as const, error: "not-published" as const };
@@ -24,11 +25,14 @@ export async function sendCampaign(newsId: string, initiatedBy: string | null) {
 
   let sent = 0;
   let failed = 0;
-  for (const group of batchesOf((subscriberData ?? []) as SubscriberRow[])) {
+  for (const group of batchesOf((subscriberData ?? []) as SubscriberRow[], 20)) {
+    // Reserve before changing unsubscribe tokens; quota failures leave old links valid.
+    try { await reserveNewsletterEmails(group.length); }
+    catch { failed += group.length; continue; }
     const prepared = group.map((subscriber) => ({ subscriber, unsubscribe: issueToken() }));
     await Promise.all(prepared.map(({ subscriber, unsubscribe }) => database.from("newsletter_subscribers").update({ unsubscribe_token_hash: unsubscribe.hash }).eq("id", subscriber.id)));
     const messages = prepared.map(({ subscriber, unsubscribe }) => buildMessage(news as NewsRow, subscriber, unsubscribe.token));
-    const providerIds = await sendNewsletterBatch(messages).catch(() => messages.map(() => null));
+    const providerIds = await sendNewsletterBatch(messages, true).catch(() => messages.map(() => null));
     const deliveries = prepared.map(({ subscriber }, index) => {
       const providerId = providerIds[index] ?? null;
       if (providerId) sent += 1; else failed += 1;
