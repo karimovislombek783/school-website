@@ -2,7 +2,8 @@ export type Lang = "uz" | "en";
 
 export const siteIdentity = {
   legalName: '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi',
-  shortName: "IEG",
+  brandName: "Izzatbek Oliy Ta’lim",
+  shortName: "IOT",
   domain: "izzatbek-edu-group.uz",
   siteUrl: "https://www.izzatbek-edu-group.uz",
   established: "Tasdiqlanmoqda / To be confirmed",
@@ -38,7 +39,7 @@ export const copy = {
     nav: { home: "Bosh sahifa", about: "Maktab haqida", academics: "Ta’lim", teachers: "Jamoa", news: "Nashrlar", achievements: "Yutuqlar", exams: "Imtihonlar", admissions: "Qabul", contact: "Aloqa" },
     home: {
       eyebrow: "Bilim • Mas’uliyat • Taraqqiyot", title: "Har bir o‘quvchi uchun mustahkam ta’lim poydevori",
-      intro: "“IZZATBEK-EDU-GROUP” — Xorazm viloyati, Hazorasp tumanida joylashgan nodavlat ta’lim muassasasi. Maktab I–XI sinflarda boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatadi.",
+      intro: "“Izzatbek Oliy Ta’lim” — Xorazm viloyati, Hazorasp tumanida joylashgan nodavlat ta’lim muassasasi. Maktab I–XI sinflarda boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatadi.",
       primaryAction: "Maktab bilan tanishing", secondaryAction: "Qabul haqida", trustLabel: "Rasmiy ma’lumot",
       trustTitle: "Ochiq va tekshiriladigan maktab profili", trustBody: "Sayt maktabning ta’lim faoliyati, rahbariyati, o‘qituvchilari, yangiliklari va aloqa ma’lumotlarini bir joyda taqdim etadi.",
       pillarsTitle: "Ta’limga yondashuv", pillarsIntro: "Bilim, mas’uliyat va o‘quvchining izchil rivojlanishiga qaratilgan ta’lim muhiti.",
@@ -48,7 +49,7 @@ export const copy = {
     sections: { learnMore: "Batafsil", viewAll: "Barchasini ko‘rish", placeholderPhoto: "Tasdiqlangan maktab fotosurati", verifiedLater: "Maktab tomonidan tasdiqlanadi", draft: "Namuna kontent" },
     pages: {
       exams: { eyebrow: "Imtihonlar", title: "Imtihonlar va ro‘yxatdan o‘tish", intro: "Milliy sertifikat, chet tili, SAT va IELTS uchun sanalar, ro‘yxatdan o‘tish yo‘riqnomalari va rasmiy manbalar." },
-      about: { eyebrow: "Biz haqimizda", title: "Hazoraspdagi nodavlat maktab", intro: "“IZZATBEK-EDU-GROUP” I–XI sinf o‘quvchilariga boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatadi." },
+      about: { eyebrow: "Biz haqimizda", title: "Hazoraspdagi nodavlat maktab", intro: "“Izzatbek Oliy Ta’lim” I–XI sinf o‘quvchilariga boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatadi." },
       academics: { eyebrow: "Ta’lim", title: "I–XI sinflar uchun ta’lim", intro: "Maktab I–XI sinflarda O‘zbekiston milliy o‘quv dasturi asosida ta’lim beradi. O‘quvchilar 2 yoki 3 ta tanlangan asosiy fanga chuqur e’tibor qaratadi. Ayrim kunlarda bitta asosiy fan o‘quv kunining katta qismi yoki deyarli barchasida o‘qitilishi mumkin. Shu bilan birga, boshqa fanlar e’tibordan chetda qolmaydi: tanlangan yo‘nalishlarga qo‘shimcha vaqt ajratilgan holda umumiy ta’limning muvozanati saqlanadi." },
       teachers: { eyebrow: "Jamoa", title: "O‘quvchilarni qo‘llab-quvvatlaydigan mutaxassislar", intro: "O‘qituvchilar ro‘yxati maktab rahbariyati tasdiqlagan ma’lumotlar va fotosuratlar bilan yangilanadi." },
       news: { eyebrow: "Maktab nashrlari", title: "Yangiliklar, fikrlar va maktab hayoti", intro: "Maktab yangiliklari, o‘quvchilar ovozi, akademik maqolalar, sport, madaniyat va hamjamiyat uchun umumiy jurnal." },
@@ -67,7 +68,7 @@ export const copy = {
     nav: { home: "Home", about: "About", academics: "Academics", teachers: "Our team", news: "Publications", achievements: "Achievements", exams: "Exams", admissions: "Admissions", contact: "Contact" },
     home: {
       eyebrow: "Knowledge • Responsibility • Growth", title: "A strong educational foundation for every student",
-      intro: '“IZZATBEK-EDU-GROUP” is a non-state educational institution located in Hazorasp District, Khorezm Region. The school provides primary, basic secondary and secondary education for Grades 1–11.',
+      intro: '“Izzatbek Oliy Ta’lim” is a non-state educational institution located in Hazorasp District, Khorezm Region. The school provides primary, basic secondary and secondary education for Grades 1–11.',
       primaryAction: "Discover our school", secondaryAction: "Admissions information", trustLabel: "Institutional information",
       trustTitle: "A clear and verifiable school profile", trustBody: "The platform brings the school’s academic work, leadership, teachers, news and official contact information together in one trusted place.",
       pillarsTitle: "Our approach to education", pillarsIntro: "A learning environment centred on knowledge, responsibility and consistent student development.",
@@ -77,7 +78,7 @@ export const copy = {
     sections: { learnMore: "Learn more", viewAll: "View all", placeholderPhoto: "Approved school photograph", verifiedLater: "To be verified by the school", draft: "Sample content" },
     pages: {
       exams: { eyebrow: "Exam hub", title: "Exams and registration", intro: "Dates, registration guides and official sources for national subject certificates, foreign language certificates, SAT and IELTS." },
-      about: { eyebrow: "About us", title: "A non-state school in Hazorasp", intro: '“IZZATBEK-EDU-GROUP” provides primary, basic secondary and secondary education for students in Grades 1–11.' },
+      about: { eyebrow: "About us", title: "A non-state school in Hazorasp", intro: '“Izzatbek Oliy Ta’lim” provides primary, basic secondary and secondary education for students in Grades 1–11.' },
       academics: { eyebrow: "Academics", title: "Education for Grades 1–11", intro: "The school provides education for Grades 1–11 in accordance with Uzbekistan’s national curriculum. Students focus intensively on 2 or 3 selected core subjects. On some days, one principal subject may occupy most or nearly all of the school day. Other curriculum areas are not ignored: the programme maintains a balanced general education while giving additional time to each student’s selected subjects." },
       teachers: { eyebrow: "Our team", title: "Professionals who support every learner", intro: "The directory will be updated with information and photographs approved by school leadership." },
       news: { eyebrow: "School publications", title: "News, ideas and life at our school", intro: "A shared journal for school news, student voices, academics, sport, culture and community." },

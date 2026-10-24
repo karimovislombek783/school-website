@@ -24,8 +24,8 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
             <a className="masthead-chip masthead-phone" href={`tel:${siteIdentity.phoneHref}`}><Phone size={17} /><span>{siteIdentity.phone}</span></a>
             <a className="masthead-chip" href={`mailto:${siteIdentity.email}`}><Mail size={17} /><span>{siteIdentity.email}</span></a>
           </div>
-          <Link href={`/${lang}`} className="masthead-emblem" aria-label={`${siteIdentity.legalName} — ${t.nav.home}`}>
-            <span>IEG</span><small>Education</small>
+          <Link href={`/${lang}`} className="masthead-emblem" aria-label={`${siteIdentity.brandName} — ${t.nav.home}`}>
+            <span>{siteIdentity.shortName}</span><small>Oliy Ta’lim</small>
           </Link>
           <div className="masthead-side masthead-right">
             <div className="masthead-socials" aria-label={lang === "uz" ? "Maktabning ijtimoiy tarmoqlari" : "School social media"}>
@@ -39,9 +39,9 @@ export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
       </div>
       <header className="site-header">
         <div className="header-inner">
-          <Link href={`/${lang}`} className="site-brand" aria-label={`${siteIdentity.legalName} — ${t.nav.home}`}>
+          <Link href={`/${lang}`} className="site-brand" aria-label={`${siteIdentity.brandName} — ${t.nav.home}`}>
             <span className="brand-copy">
-              <strong>IZZATBEK-EDU-GROUP</strong>
+              <strong>{siteIdentity.brandName}</strong>
               <small>{siteIdentity.domain}</small>
             </span>
           </Link>
@@ -89,7 +89,8 @@ export function SiteFooter({ lang }: { lang: Lang }) {
     <footer className="site-footer">
       <div className="footer-grid">
         <div>
-          <div className="site-brand footer-brand"><span className="brand-mark">IEG</span><strong>{siteIdentity.legalName}</strong></div>
+          <div className="site-brand footer-brand"><span className="brand-mark">{siteIdentity.shortName}</span><strong>{siteIdentity.brandName}</strong></div>
+          <p className="footer-legal-name">{lang === "uz" ? "Yuridik nom" : "Legal name"}: {siteIdentity.legalName}</p>
           <p>{t.footer.description}</p>
         </div>
         <div>

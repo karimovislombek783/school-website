@@ -6,11 +6,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(siteIdentity.siteUrl),
   title: {
-    default: '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi',
-    template: '%s | "IZZATBEK-EDU-GROUP"',
+    default: siteIdentity.brandName,
+    template: `%s | ${siteIdentity.brandName}`,
   },
   description:
-    '"IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasining rasmiy veb-sayti.',
+    `${siteIdentity.brandName} maktabining rasmiy veb-sayti.`,
   robots: { index: true, follow: true },
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
@@ -22,7 +22,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     "@context": "https://schema.org",
     "@type": "School",
     "@id": `${siteIdentity.siteUrl}/#school`,
-    name: siteIdentity.legalName,
+    name: siteIdentity.brandName,
+    legalName: siteIdentity.legalName,
     alternateName: "IZZATBEK-EDU-GROUP",
     url: siteIdentity.siteUrl,
     image: `${siteIdentity.siteUrl}/images/social-school.jpg`,

@@ -1,6 +1,8 @@
-# Izzatbek Edu Group
+# Izzatbek Oliy Ta’lim
 
-> Official bilingual website of Izzatbek Edu Group, a non-state school for Grades 1–11 in Hazorasp District, Khorezm Region, Uzbekistan.
+> Official bilingual website of Izzatbek Oliy Ta’lim, a non-state school for Grades 1–11 in Hazorasp District, Khorezm Region, Uzbekistan.
+
+Legal name: "IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi.
 
 ## Uzbek pages
 - [Home](https://www.izzatbek-edu-group.uz/uz)
@@ -9,6 +11,7 @@
 - [Teachers](https://www.izzatbek-edu-group.uz/uz/teachers)
 - [Publications](https://www.izzatbek-edu-group.uz/uz/news)
 - [Achievements](https://www.izzatbek-edu-group.uz/uz/achievements)
+- [Exams and registration](https://www.izzatbek-edu-group.uz/uz/exams)
 - [Admissions](https://www.izzatbek-edu-group.uz/uz/admissions)
 - [Contact](https://www.izzatbek-edu-group.uz/uz/contact)
 - [Licence and official information](https://www.izzatbek-edu-group.uz/uz/legal)

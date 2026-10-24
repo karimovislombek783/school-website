@@ -65,13 +65,13 @@ export async function generateMetadata(input: { params: Promise<{ lang: string; 
   const { lang, slug } = await input.params;
   if (!isLang(lang) || !metadata.title) return { robots: { index: false, follow: false } };
   const path = `/${lang}${slug?.length ? `/${slug.join("/")}` : ""}`;
-  const title = typeof metadata.title === "string" ? metadata.title : "Izzatbek Edu Group";
+  const title = typeof metadata.title === "string" ? metadata.title : siteIdentity.brandName;
   const description = metadata.description || copy[lang].home.intro;
   return {
     ...metadata,
-    openGraph: { type: "website", siteName: "Izzatbek Edu Group", title, description, url: path,
+    openGraph: { type: "website", siteName: siteIdentity.brandName, title, description, url: path,
       locale: lang === "uz" ? "uz_UZ" : "en_US", alternateLocale: lang === "uz" ? ["en_US"] : ["uz_UZ"],
-      images: [{ url: "/images/social-school.jpg", width: 1200, height: 630, alt: "Izzatbek Edu Group — Hazorasp, Uzbekistan" }] },
+      images: [{ url: "/images/social-school.jpg", width: 1200, height: 630, alt: `${siteIdentity.brandName} — Hazorasp, Uzbekistan` }] },
     twitter: { card: "summary_large_image", title, description, images: ["/images/social-school.jpg"] },
   };
 }
@@ -138,7 +138,7 @@ function HomePage({ lang, news }: { lang: Lang; news: PublishedContent["news"] }
       </section>
 
       <section className="school-photo-feature home-school-photo">
-        <Image src="/images/school/school-entrance.webp" width={1600} height={1200} sizes="(max-width: 768px) 100vw, 68vw" loading="lazy" alt={lang === "uz" ? "IZZATBEK-EDU-GROUP maktabining asosiy kirish qismi" : "Main entrance of IZZATBEK-EDU-GROUP school"} />
+        <Image src="/images/school/school-entrance.webp" width={1600} height={1200} sizes="(max-width: 768px) 100vw, 68vw" loading="lazy" alt={lang === "uz" ? "Izzatbek Oliy Ta’lim maktabining asosiy kirish qismi" : "Main entrance of Izzatbek Oliy Ta’lim school"} />
         <div><p className="eyebrow">{lang === "uz" ? "Bizning maktab" : "Our school"}</p><h2>{lang === "uz" ? "Hazoraspda ta’lim uchun yaratilgan muhit" : "A learning environment in Hazorasp"}</h2><p>{lang === "uz" ? "Maktabning ta’lim faoliyati olib boriladigan rasmiy manzillaridan biri." : "One of the school’s official locations for educational activity."}</p><Link className="text-link" href={`/${lang}/about`}>{lang === "uz" ? "Maktab haqida" : "About the school"}<ArrowRight size={17} /></Link></div>
       </section>
 
@@ -195,7 +195,7 @@ function AboutContent({ lang }: { lang: Lang }) {
   const values = isUz
     ? [[Target, "Maqsad", "Maktabning tasdiqlangan missiyasi va o‘quvchilar oldidagi mas’uliyati."], [HeartHandshake, "Hamjamiyat", "O‘quvchi, oila va o‘qituvchi o‘rtasidagi hamkorlik."], [Sparkles, "Rivojlanish", "Bilim, xarakter va amaliy ko‘nikmalarni birgalikda rivojlantirish."]]
     : [[Target, "Purpose", "The school’s approved mission and responsibility to its students."], [HeartHandshake, "Community", "Partnership between students, families and teachers."], [Sparkles, "Growth", "Developing knowledge, character and practical skills together."]];
-  return <section className="content-section page-content"><div className="split-panel"><SchoolPhoto src="/images/school/school-building.webp" alt={isUz ? "IZZATBEK-EDU-GROUP maktab binosi" : "IZZATBEK-EDU-GROUP school building"} className="about-building-photo" /><div><p className="eyebrow">{isUz ? "Maktab haqida" : "About the school"}</p><h2>{isUz ? "I–XI sinflar uchun ta’lim" : "Education for Grades 1–11"}</h2><p>{isUz ? '“IZZATBEK-EDU-GROUP” — Hazorasp tumanida faoliyat yurituvchi nodavlat ta’lim muassasasi. Maktab boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatish uchun litsenziyaga ega.' : '“IZZATBEK-EDU-GROUP” is a non-state educational institution operating in Hazorasp District. The school is licensed to provide primary, basic secondary and secondary education.'}</p><div className="director-card"><span>{isUz ? "Direktor" : "Director"}</span><strong>{siteIdentity.director}</strong></div></div></div><LicenceSummary lang={lang} /><div className="facility-photo-grid"><SchoolPhoto src="/images/school/general-classroom.webp" alt={isUz ? "Maktabdagi umumiy o‘quv xonasi" : "A general classroom at the school"} caption={isUz ? "Ta’lim muhiti" : "Learning environment"} /><SchoolPhoto src="/images/school/modern-classroom.webp" alt={isUz ? "Maktabdagi zamonaviy o‘quv xonasi" : "A modern classroom at the school"} caption={isUz ? "O‘quv xonalari" : "Classroom facilities"} /></div><div className="value-grid">{values.map(([Icon, title, body]) => <article key={String(title)}><Icon /><h3>{title as string}</h3><p>{body as string}</p></article>)}</div></section>;
+  return <section className="content-section page-content"><div className="split-panel"><SchoolPhoto src="/images/school/school-building.webp" alt={isUz ? "Izzatbek Oliy Ta’lim maktab binosi" : "Izzatbek Oliy Ta’lim school building"} className="about-building-photo" /><div><p className="eyebrow">{isUz ? "Maktab haqida" : "About the school"}</p><h2>{isUz ? "I–XI sinflar uchun ta’lim" : "Education for Grades 1–11"}</h2><p>{isUz ? '“Izzatbek Oliy Ta’lim” — Hazorasp tumanida faoliyat yurituvchi nodavlat ta’lim muassasasi. Maktab boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatish uchun litsenziyaga ega.' : '“Izzatbek Oliy Ta’lim” is a non-state educational institution operating in Hazorasp District. The school is licensed to provide primary, basic secondary and secondary education.'}</p><div className="director-card"><span>{isUz ? "Direktor" : "Director"}</span><strong>{siteIdentity.director}</strong></div></div></div><LicenceSummary lang={lang} /><div className="facility-photo-grid"><SchoolPhoto src="/images/school/general-classroom.webp" alt={isUz ? "Maktabdagi umumiy o‘quv xonasi" : "A general classroom at the school"} caption={isUz ? "Ta’lim muhiti" : "Learning environment"} /><SchoolPhoto src="/images/school/modern-classroom.webp" alt={isUz ? "Maktabdagi zamonaviy o‘quv xonasi" : "A modern classroom at the school"} caption={isUz ? "O‘quv xonalari" : "Classroom facilities"} /></div><div className="value-grid">{values.map(([Icon, title, body]) => <article key={String(title)}><Icon /><h3>{title as string}</h3><p>{body as string}</p></article>)}</div></section>;
 }
 
 function AcademicsContent({ lang }: { lang: Lang }) {
