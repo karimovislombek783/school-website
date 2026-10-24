@@ -6,7 +6,7 @@ import { Mail, MapPin, Menu, Phone, Send, ShieldCheck, X } from "lucide-react";
 import { copy, Lang, siteIdentity } from "@/lib/site-content";
 import { LanguageSwitch } from "@/components/language-switch";
 
-const navRoutes = ["about", "academics", "teachers", "news", "achievements", "admissions", "contact"] as const;
+const navRoutes = ["about", "academics", "teachers", "news", "achievements", "exams", "admissions", "contact"] as const;
 
 export function SiteHeader({ lang, current }: { lang: Lang; current: string }) {
   const [open, setOpen] = useState(false);
@@ -99,6 +99,7 @@ export function SiteFooter({ lang }: { lang: Lang }) {
         <div>
           <h2>{lang === "uz" ? "Ma’lumot" : "Information"}</h2>
           <a href="#newsletter">{lang === "uz" ? "Email yangiliklariga obuna" : "Subscribe to email news"}</a>
+          <Link href={`/${lang}/exams`}>{t.nav.exams}</Link>
           <Link href={`/${lang}/legal`}>{t.footer.legal}</Link>
           <Link href={`/${lang}/privacy`}>{t.footer.privacy}</Link>
           <Link href={`/${lang}/policies`}>{lang === "uz" ? "Maktab siyosatlari" : "School policies"}</Link>

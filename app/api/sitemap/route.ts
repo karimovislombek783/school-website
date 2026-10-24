@@ -11,7 +11,7 @@ function escapeXml(value: string) {
 
 export async function GET() {
   const origin = siteIdentity.siteUrl;
-  const staticPages = ["", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "policies"];
+  const staticPages = ["", "about", "academics", "teachers", "news", "achievements", "exams", "admissions", "contact", "legal", "privacy", "policies"];
   const content = await loadPublishedContent();
   const dynamic = [
     ...content.teachers.map((item) => `teachers/${item.slug}`),

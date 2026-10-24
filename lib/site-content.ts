@@ -35,7 +35,7 @@ export const copy = {
     languageName: "O‘zbekcha", alternateLanguage: "English",
     development: "Rasmiy maktab sayti",
     developmentNote: "Tasdiqlangan ta’lim va litsenziya ma’lumotlari",
-    nav: { home: "Bosh sahifa", about: "Maktab haqida", academics: "Ta’lim", teachers: "Jamoa", news: "Nashrlar", achievements: "Yutuqlar", admissions: "Qabul", contact: "Aloqa" },
+    nav: { home: "Bosh sahifa", about: "Maktab haqida", academics: "Ta’lim", teachers: "Jamoa", news: "Nashrlar", achievements: "Yutuqlar", exams: "Imtihonlar", admissions: "Qabul", contact: "Aloqa" },
     home: {
       eyebrow: "Bilim • Mas’uliyat • Taraqqiyot", title: "Har bir o‘quvchi uchun mustahkam ta’lim poydevori",
       intro: "“IZZATBEK-EDU-GROUP” — Xorazm viloyati, Hazorasp tumanida joylashgan nodavlat ta’lim muassasasi. Maktab I–XI sinflarda boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatadi.",
@@ -47,6 +47,7 @@ export const copy = {
     },
     sections: { learnMore: "Batafsil", viewAll: "Barchasini ko‘rish", placeholderPhoto: "Tasdiqlangan maktab fotosurati", verifiedLater: "Maktab tomonidan tasdiqlanadi", draft: "Namuna kontent" },
     pages: {
+      exams: { eyebrow: "Imtihonlar", title: "Imtihonlar va ro‘yxatdan o‘tish", intro: "Milliy sertifikat, chet tili, SAT va IELTS uchun sanalar, ro‘yxatdan o‘tish yo‘riqnomalari va rasmiy manbalar." },
       about: { eyebrow: "Biz haqimizda", title: "Hazoraspdagi nodavlat maktab", intro: "“IZZATBEK-EDU-GROUP” I–XI sinf o‘quvchilariga boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatadi." },
       academics: { eyebrow: "Ta’lim", title: "I–XI sinflar uchun ta’lim", intro: "Maktab I–XI sinflarda O‘zbekiston milliy o‘quv dasturi asosida ta’lim beradi. O‘quvchilar 2 yoki 3 ta tanlangan asosiy fanga chuqur e’tibor qaratadi. Ayrim kunlarda bitta asosiy fan o‘quv kunining katta qismi yoki deyarli barchasida o‘qitilishi mumkin. Shu bilan birga, boshqa fanlar e’tibordan chetda qolmaydi: tanlangan yo‘nalishlarga qo‘shimcha vaqt ajratilgan holda umumiy ta’limning muvozanati saqlanadi." },
       teachers: { eyebrow: "Jamoa", title: "O‘quvchilarni qo‘llab-quvvatlaydigan mutaxassislar", intro: "O‘qituvchilar ro‘yxati maktab rahbariyati tasdiqlagan ma’lumotlar va fotosuratlar bilan yangilanadi." },
@@ -63,7 +64,7 @@ export const copy = {
   en: {
     languageName: "English", alternateLanguage: "O‘zbekcha",
     development: "Official school website", developmentNote: "Verified educational and licence information",
-    nav: { home: "Home", about: "About", academics: "Academics", teachers: "Our team", news: "Publications", achievements: "Achievements", admissions: "Admissions", contact: "Contact" },
+    nav: { home: "Home", about: "About", academics: "Academics", teachers: "Our team", news: "Publications", achievements: "Achievements", exams: "Exams", admissions: "Admissions", contact: "Contact" },
     home: {
       eyebrow: "Knowledge • Responsibility • Growth", title: "A strong educational foundation for every student",
       intro: '“IZZATBEK-EDU-GROUP” is a non-state educational institution located in Hazorasp District, Khorezm Region. The school provides primary, basic secondary and secondary education for Grades 1–11.',
@@ -75,6 +76,7 @@ export const copy = {
     },
     sections: { learnMore: "Learn more", viewAll: "View all", placeholderPhoto: "Approved school photograph", verifiedLater: "To be verified by the school", draft: "Sample content" },
     pages: {
+      exams: { eyebrow: "Exam hub", title: "Exams and registration", intro: "Dates, registration guides and official sources for national subject certificates, foreign language certificates, SAT and IELTS." },
       about: { eyebrow: "About us", title: "A non-state school in Hazorasp", intro: '“IZZATBEK-EDU-GROUP” provides primary, basic secondary and secondary education for students in Grades 1–11.' },
       academics: { eyebrow: "Academics", title: "Education for Grades 1–11", intro: "The school provides education for Grades 1–11 in accordance with Uzbekistan’s national curriculum. Students focus intensively on 2 or 3 selected core subjects. On some days, one principal subject may occupy most or nearly all of the school day. Other curriculum areas are not ignored: the programme maintains a balanced general education while giving additional time to each student’s selected subjects." },
       teachers: { eyebrow: "Our team", title: "Professionals who support every learner", intro: "The directory will be updated with information and photographs approved by school leadership." },

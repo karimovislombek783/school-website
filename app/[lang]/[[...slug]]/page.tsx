@@ -8,6 +8,7 @@ import {
   BriefcaseBusiness, Camera, Code2, ExternalLink, FileText, Globe2, GraduationCap, HeartHandshake,
   Mail, MapPin, Phone, Play, Scale, Send, ShieldCheck, Sparkles, Target, Users,
 } from "lucide-react";
+import { ExamHub } from "@/components/exam-hub";
 import { SchoolBreadcrumbs } from "@/components/school-breadcrumbs";
 import { AchievementDirectory, NewsDirectory, TeacherDirectory } from "@/components/content-directory";
 import { NewsPhotoGallery } from "@/components/news-photo-gallery";
@@ -21,7 +22,7 @@ import { publicationCategoryLabel, publicationFormatLabel } from "@/lib/publicat
 // timely without putting every visitor on the database-backed render path.
 export const revalidate = 300;
 
-const validPages = ["home", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "policies"];
+const validPages = ["home", "exams", "about", "academics", "teachers", "news", "achievements", "admissions", "contact", "legal", "privacy", "policies"];
 
 async function pageMetadata({ params }: { params: Promise<{ lang: string; slug?: string[] }> }): Promise<Metadata> {
   const { lang: rawLang, slug } = await params;
@@ -96,7 +97,7 @@ export default async function SchoolPage({ params }: { params: Promise<{ lang: s
       <SiteHeader lang={lang} current={slug?.join("/") ?? page} />
       <div id="main-content" tabIndex={-1}>
         {page !== "home" && <SchoolBreadcrumbs lang={lang} page={page} label={breadcrumbLabel} detail={detailSlug && detailLabel ? { slug: detailSlug, label: detailLabel } : undefined} />}
-        {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} content={content} /> : page === "home" ? <HomePage lang={lang} news={content.news} /> : <InnerPage lang={lang} page={page} content={content} />}
+        {detailSlug ? <DetailPage lang={lang} page={page} slug={detailSlug} content={content} /> : page === "exams" ? <ExamHub lang={lang} initialNow={new Date().toISOString()} /> : page === "home" ? <HomePage lang={lang} news={content.news} /> : <InnerPage lang={lang} page={page} content={content} />}
       </div>
       {page !== "admin" && <NewsletterSignup lang={lang} />}
       <SiteFooter lang={lang} />
@@ -369,7 +370,7 @@ function linkService(value: string) {
 
 export async function generateStaticParams() {
   const staticSlugs = [
-    [], ["about"], ["academics"], ["teachers"], ["news"],
+    [], ["exams"], ["about"], ["academics"], ["teachers"], ["news"],
     ["achievements"], ["admissions"], ["contact"], ["legal"],
     ["privacy"], ["policies"],
   ];
