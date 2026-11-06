@@ -132,8 +132,8 @@ function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }
   </article><DialogContent className="achievement-dialog"><DialogHeader className="achievement-dialog-header">
     <div className="achievement-dialog-heading"><span className="achievement-dialog-type">{shownType}</span><DialogTitle>{studentName}</DialogTitle><DialogDescription>{[categoryLabel, details].filter(Boolean).join(" · ")}</DialogDescription></div>
   </DialogHeader>
-    <div className={`achievement-dialog-facts ${item.subject[lang] ? "has-subject" : ""}`}>
-      <div className="achievement-dialog-fact achievement-dialog-score"><span>{lang === "uz" ? "Natija" : "Result"}</span><strong>{shownResult}</strong></div>
+    <div className={`achievement-dialog-facts ${item.subject[lang] ? "has-subject" : ""}`} style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(150px, 100%), 1fr))" }}>
+      <div className="achievement-dialog-fact achievement-dialog-score"><span>{lang === "uz" ? "Natija" : "Result"}</span><strong style={{ fontSize: shownResult.length > 5 ? "1.4rem" : "1.8rem", lineHeight: 1.2 }}>{shownResult}</strong></div>
       {item.subject[lang] && <div className={`achievement-dialog-fact achievement-dialog-subject ${subjectTone}`}><AchievementSubjectIcon subject={item.subject[lang]} /><div><span>{lang === "uz" ? "Fan" : "Subject"}</span><strong>{item.subject[lang]}</strong></div></div>}
       <div className="achievement-dialog-fact"><span>{lang === "uz" ? "O‘quv yili" : "Academic year"}</span><strong>{item.academicYear}</strong></div>
     </div>
