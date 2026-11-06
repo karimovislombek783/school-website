@@ -706,12 +706,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .achievement-dialog-header [data-slot="dialog-title"] { max-width: 580px; margin: 0 !important; color: white !important; font-family: Georgia, serif; font-size: clamp(1.7rem, 3.8vw, 2.25rem) !important; font-weight: 700; line-height: 1.08 !important; letter-spacing: -.02em; overflow-wrap: anywhere; }
 .achievement-dialog-header [data-slot="dialog-description"] { margin-top: 8px; color: #c5d3e2 !important; font-size: .84rem; font-weight: 600; }
 .achievement-dialog-facts { display: grid; grid-template-columns: minmax(140px, .7fr) minmax(190px, 1fr); gap: 12px; margin: 24px 30px 0; }
-.achievement-dialog-facts.has-subject { grid-template-columns: minmax(110px, .6fr) minmax(220px, 1.5fr) minmax(150px, .9fr); }
+.achievement-dialog-facts.has-subject { grid-template-columns: minmax(150px, 1fr) minmax(170px, 1.2fr) minmax(130px, .9fr); }
 .achievement-dialog-fact { display: grid; min-width: 0; min-height: 88px; align-content: center; gap: 7px; padding: 16px 18px; border: 1px solid #dce5ee; border-radius: 12px; background: #f7f9fc; }
 .achievement-dialog-fact > span, .achievement-dialog-subject span { color: #60738a; font-size: .7rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .achievement-dialog-fact > strong, .achievement-dialog-subject strong { color: var(--navy); font-size: .97rem; line-height: 1.35; overflow-wrap: anywhere; }
 .achievement-dialog-score { background: #edf7fb; border-color: #c7e5ef; }
-.achievement-dialog-score > strong { color: #075f80; font-family: Georgia, serif; font-size: 1.8rem; line-height: 1; }
+.achievement-dialog-score > strong { color: #075f80; font-family: Georgia, serif; font-size: 1.5rem; line-height: 1.2; }
 .achievement-dialog-subject { display: flex; align-items: center; gap: 12px; margin: 0; }
 .achievement-dialog-subject > svg { flex: 0 0 auto; width: 20px; height: 20px; color: var(--blue); }
 .achievement-dialog-subject div { display: grid; min-width: 0; gap: 7px; }
@@ -1283,3 +1283,5 @@ input:focus, select:focus, textarea:focus { border-color: var(--navy); box-shado
 .school-breadcrumbs li{display:flex;gap:12px;align-items:baseline;overflow-wrap:anywhere;}
 .school-breadcrumbs li+li::before{content:"/";opacity:.6;}
 .school-breadcrumbs a{text-decoration:underline;text-underline-offset:3px;}
+
+.achievement-competition-details { color: #526780; font-size: .85rem; line-height: 1.5; margin: 8px 0; }

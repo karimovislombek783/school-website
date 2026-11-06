@@ -50,9 +50,9 @@ export const copy = {
     pages: {
       about: { eyebrow: "Biz haqimizda", title: "Hazoraspdagi nodavlat maktab", intro: "“Izzatbek Oliy Ta’lim” I–XI sinf o‘quvchilariga boshlang‘ich, tayanch o‘rta va o‘rta ta’lim xizmatlarini ko‘rsatadi." },
       academics: { eyebrow: "Ta’lim", title: "I–XI sinflar uchun ta’lim", intro: "Maktab I–XI sinflarda O‘zbekiston milliy o‘quv dasturi asosida ta’lim beradi. O‘quvchilar 2 yoki 3 ta tanlangan asosiy fanga chuqur e’tibor qaratadi. Ayrim kunlarda bitta asosiy fan o‘quv kunining katta qismi yoki deyarli barchasida o‘qitilishi mumkin. Shu bilan birga, boshqa fanlar e’tibordan chetda qolmaydi: tanlangan yo‘nalishlarga qo‘shimcha vaqt ajratilgan holda umumiy ta’limning muvozanati saqlanadi." },
-      teachers: { eyebrow: "Jamoa", title: "O‘quvchilarni qo‘llab-quvvatlaydigan mutaxassislar", intro: "O‘qituvchilar ro‘yxati maktab rahbariyati tasdiqlagan ma’lumotlar va fotosuratlar bilan yangilanadi." },
+      teachers: { eyebrow: "Jamoa", title: "O‘quvchilarni qo‘llab-quvvatlaydigan mutaxassislar", intro: "O‘quvchilarimizni qo‘llab-quvvatlaydigan o‘qituvchilar va maktab rahbariyati bilan tanishing." },
       news: { eyebrow: "Maktab nashrlari", title: "Yangiliklar, fikrlar va maktab hayoti", intro: "Maktab yangiliklari, o‘quvchilar ovozi, akademik maqolalar, sport, madaniyat va hamjamiyat uchun umumiy jurnal." },
-      achievements: { eyebrow: "Yutuqlar", title: "Mehnat va taraqqiyot natijalari", intro: "Maktab, o‘quvchilar va o‘qituvchilarning tasdiqlangan yutuqlari bu yerda e’lon qilinadi." },
+      achievements: { eyebrow: "Yutuqlar", title: "Mehnat va taraqqiyot natijalari", intro: "O‘quvchilarimiz, o‘qituvchilarimiz va maktab hamjamiyatining yutuqlari bilan tanishing." },
       admissions: { eyebrow: "Qabul", title: "Maktabimizga qabul", intro: "Qabul bo‘yicha ma’lumot olish uchun maktab bilan telefon orqali bog‘laning. Maslahat davomida sinflar, mavjud joylar va ta’lim to‘lovi haqida ma’lumot beriladi." },
       contact: { eyebrow: "Aloqa", title: "Savollaringiz bo‘lsa, biz bilan bog‘laning", intro: "Maktabning rasmiy manzili, telefon raqami va elektron pochtasi." },
       legal: { eyebrow: "Rasmiy ma’lumot", title: "Litsenziya va yuridik ma’lumotlar", intro: "Bu sahifa faqat maktab rahbariyati tasdiqlagan rasmiy ma’lumotlarni e’lon qiladi." },
@@ -79,12 +79,12 @@ export const copy = {
     pages: {
       about: { eyebrow: "About us", title: "A non-state school in Hazorasp", intro: '“Izzatbek Oliy Ta’lim” provides primary, basic secondary and secondary education for students in Grades 1–11.' },
       academics: { eyebrow: "Academics", title: "Education for Grades 1–11", intro: "The school provides education for Grades 1–11 in accordance with Uzbekistan’s national curriculum. Students focus intensively on 2 or 3 selected core subjects. On some days, one principal subject may occupy most or nearly all of the school day. Other curriculum areas are not ignored: the programme maintains a balanced general education while giving additional time to each student’s selected subjects." },
-      teachers: { eyebrow: "Our team", title: "Professionals who support every learner", intro: "The directory will be updated with information and photographs approved by school leadership." },
+      teachers: { eyebrow: "Our team", title: "Professionals who support every learner", intro: "Meet the teachers and school leaders who support our students." },
       news: { eyebrow: "School publications", title: "News, ideas and life at our school", intro: "A shared journal for school news, student voices, academics, sport, culture and community." },
-      achievements: { eyebrow: "Achievements", title: "Results built through effort and growth", intro: "Verified achievements of the school, students and teachers will be published here." },
+      achievements: { eyebrow: "Achievements", title: "Results built through effort and growth", intro: "Explore the achievements of our students, teachers and school community." },
       admissions: { eyebrow: "Admissions", title: "Joining our school", intro: "Please contact the school by telephone for admissions information. Grade availability and tuition arrangements are explained during an individual consultation." },
       contact: { eyebrow: "Contact", title: "Speak with our school", intro: "The school’s official address, telephone number and email." },
-      legal: { eyebrow: "Official information", title: "Licence and legal information", intro: "This page will publish only official institutional information approved by school leadership." },
+      legal: { eyebrow: "Official information", title: "Licence and legal information", intro: "Official institutional information and the school’s licence." },
       policies: { eyebrow: "School policies", title: "School policies and expectations", intro: "General expectations for attendance, phone storage, respectful behaviour, academic honesty and our school community." },
       privacy: { eyebrow: "Privacy", title: "Responsible treatment of personal information", intro: "This page explains how information from forms, subscriptions and photography is managed." },
     },
@@ -148,6 +148,10 @@ export type AchievementRecord = {
   status: PublicationStatus;
   date: string;
   category: "international" | "national" | "olympiad";
+  grade?: number;
+  competitionLevel?: string;
+  credentialLabels?: Record<Lang, string>;
+  resultLabels?: Record<Lang, string>;
   credentialType: string;
   result: string;
   subject: Record<Lang, string>;

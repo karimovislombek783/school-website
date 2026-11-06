@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element -- Supabase returns short-lived signed image URLs. */
 "use client";
 
+import { localizeCredential, localizeResult, competitionLevelLabel, canonicalStudentName } from "@/lib/achievement-details";
+
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowRight, Award, BookOpen, CalendarDays, CheckCircle2, Dna, FlaskConical, Landmark, Languages, Medal, Newspaper, Sigma, Trophy, Users } from "lucide-react";
@@ -116,16 +118,19 @@ export function AchievementDirectory({ lang, items }: { lang: Lang; items: Achie
 function AchievementCard({ lang, item }: { lang: Lang; item: AchievementRecord }) {
   const Icon = item.category === "olympiad" ? Trophy : item.category === "national" ? Medal : Award;
   const categoryLabel = item.category === "international" ? (lang === "uz" ? "Xalqaro" : "International") : item.category === "national" ? (lang === "uz" ? "Milliy" : "National") : (lang === "uz" ? "Olimpiada" : "Olympiad");
-  const shownResult = displayResult(item.result);
+  const shownResult = displayResult(item.resultLabels?.[lang] || localizeResult(item.result, lang));
+  const shownType = item.credentialLabels?.[lang] || localizeCredential(item.credentialType, lang);
+  const studentName = canonicalStudentName(item.studentName);
+  const details = item.category === "olympiad" ? [item.grade ? (lang === "uz" ? `${item.grade}-sinf` : `Grade ${item.grade}`) : "", item.competitionLevel ? competitionLevelLabel(item.competitionLevel, lang) : ""].filter(Boolean).join(" · ") : "";
   const subjectTone = item.subject[lang] ? achievementSubjectTone(item.subject[lang]) : "";
   return <Dialog><article className={`achievement-card achievement-${item.category}`}>
-    <div className="achievement-card-top"><span className="achievement-verified"><CheckCircle2 />{lang === "uz" ? "Tasdiqlangan natija" : "Verified result"}</span><span className="achievement-kind">{item.credentialType}</span></div>
+    <div className="achievement-card-top"><span className="achievement-verified"><CheckCircle2 />{lang === "uz" ? "Tasdiqlangan natija" : "Verified result"}</span><span className="achievement-kind">{shownType}</span></div>
     <div className="achievement-score"><Icon aria-hidden="true" /><small>{lang === "uz" ? "Natija" : "Result"}</small><strong>{shownResult}</strong></div>
-    <div className="achievement-card-body"><span>{categoryLabel}</span><h2>{item.studentName}</h2>{item.subject[lang] && <p className={`achievement-subject-badge ${subjectTone}`}><AchievementSubjectIcon subject={item.subject[lang]} />{item.subject[lang]}</p>}<time>{item.academicYear}</time>
+    <div className="achievement-card-body"><span>{categoryLabel}</span><h2>{studentName}</h2>{item.subject[lang] && <p className={`achievement-subject-badge ${subjectTone}`}><AchievementSubjectIcon subject={item.subject[lang]} />{item.subject[lang]}</p>}{details && <p className="achievement-competition-details">{details}</p>}<time>{item.academicYear}</time>
       <DialogTrigger asChild><button type="button" className="achievement-open">{lang === "uz" ? "Batafsil ko‘rish" : "View details"}<ArrowRight /></button></DialogTrigger>
     </div>
   </article><DialogContent className="achievement-dialog"><DialogHeader className="achievement-dialog-header">
-    <div className="achievement-dialog-heading"><span className="achievement-dialog-type">{item.credentialType}</span><DialogTitle>{item.studentName}</DialogTitle><DialogDescription>{categoryLabel}</DialogDescription></div>
+    <div className="achievement-dialog-heading"><span className="achievement-dialog-type">{shownType}</span><DialogTitle>{studentName}</DialogTitle><DialogDescription>{[categoryLabel, details].filter(Boolean).join(" · ")}</DialogDescription></div>
   </DialogHeader>
     <div className={`achievement-dialog-facts ${item.subject[lang] ? "has-subject" : ""}`}>
       <div className="achievement-dialog-fact achievement-dialog-score"><span>{lang === "uz" ? "Natija" : "Result"}</span><strong>{shownResult}</strong></div>

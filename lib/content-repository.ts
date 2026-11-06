@@ -1,3 +1,4 @@
+import { readAchievementDetails, canonicalStudentName, localizeCredential, localizeResult } from "@/lib/achievement-details";
 import "server-only";
 
 import { unstable_cache } from "next/cache";
@@ -90,11 +91,15 @@ async function fetchPublishedContent(): Promise<PublishedContent> {
       status: "published",
       date: row.event_date ?? "",
       category: validAchievementCategory(row.achievement_category),
+      grade: readAchievementDetails(row.body_uz).grade,
+      competitionLevel: readAchievementDetails(row.body_uz).level,
+      credentialLabels: { uz: readAchievementDetails(row.body_uz).typeUz || localizeCredential(row.achievement_type?.trim() || row.title_uz, "uz"), en: readAchievementDetails(row.body_uz).typeEn || localizeCredential(row.achievement_type?.trim() || row.title_uz, "en") },
+      resultLabels: { uz: readAchievementDetails(row.body_uz).resultUz || localizeResult(row.achievement_result?.trim() || row.summary_uz, "uz"), en: readAchievementDetails(row.body_uz).resultEn || localizeResult(row.achievement_result?.trim() || row.summary_uz, "en") },
       credentialType: row.achievement_type?.trim() || row.title_uz,
       result: row.achievement_result?.trim() || row.summary_uz,
       subject: { uz: row.achievement_subject_uz?.trim() ?? "", en: row.achievement_subject_en?.trim() || row.achievement_subject_uz?.trim() || "" },
       academicYear: row.academic_year?.trim() || yearFromDate(row.event_date),
-      studentName: row.achievement_type ? row.title_uz : (row.recipient_uz?.trim() || row.title_uz),
+      studentName: canonicalStudentName(row.achievement_type ? row.title_uz : (row.recipient_uz?.trim() || row.title_uz)),
       summary: { uz: row.summary_uz, en: row.summary_en },
       source: cleanHttpsUrl(row.source_url),
       imageUrl: row.image_url,
