@@ -11,7 +11,6 @@ Legal name: "IZZATBEK-EDU-GROUP" nodavlat ta’lim muassasasi.
 - [Teachers](https://www.izzatbek-edu-group.uz/uz/teachers)
 - [Publications](https://www.izzatbek-edu-group.uz/uz/news)
 - [Achievements](https://www.izzatbek-edu-group.uz/uz/achievements)
-- [Exams and registration](https://www.izzatbek-edu-group.uz/uz/exams)
 - [Admissions](https://www.izzatbek-edu-group.uz/uz/admissions)
 - [Contact](https://www.izzatbek-edu-group.uz/uz/contact)
 - [Licence and official information](https://www.izzatbek-edu-group.uz/uz/legal)
