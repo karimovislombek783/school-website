@@ -260,6 +260,13 @@ function LegalContent({ lang }: { lang: Lang }) {
 function PoliciesContent({ lang }: { lang: Lang }) {
   const isUz = lang === "uz";
   const policies = isUz ? [
+    ["Davomat va o‘z vaqtida kelish","O‘quvchilar darslarga muntazam qatnashishi kerak. O‘quvchi kelmaganida ota-ona yoki qonuniy vakil maktabni xabardor qilishi lozim. Maktab avtobusidan foydalanmaydigan o‘quvchilar dars boshlanishidan oldin yetib kelishi kerak."],
+    ["Telefonlarni saqlash","Dars vaqtida telefondan foydalanish taqiqlanadi. O‘quvchilar darslar boshlanishidan oldin telefonlarini ular uchun ajratilgan maxsus joylarga qo‘yishi kerak."],
+    ["O‘zaro hurmat","O‘quvchilar, xodimlar va oilalar bir-biriga hurmat bilan munosabatda bo‘lishi kerak. Bezorilik, tazyiq, kamsitish va zo‘ravonlikka yo‘l qo‘yilmaydi. Bunday holatlar haqida o‘qituvchi yoki maktab ma’muriyatiga xabar berish lozim."],
+    ["Akademik halollik","O‘quvchilar topshiriqlarni mustaqil bajarishi va zarur hollarda foydalanilgan manbalarni ko‘rsatishi kerak. Ko‘chirish, plagiat va boshqalarning ishini o‘ziniki sifatida taqdim etishga yo‘l qo‘yilmaydi."],
+    ["Xavfsizlik va maktab mulki","O‘quvchilar xodimlarning ko‘rsatmalariga rioya qilishi, jihozlardan mas’uliyat bilan foydalanishi va maktab mulkini asrashi kerak. Xavfsizlikka oid muammolar haqida darhol xabar berish lozim."],
+    ["Oilalar bilan aloqa","Ota-onalar yoki qonuniy vakillar farzandining davomati, o‘qishdagi rivojlanishi va muhim masalalarni muhokama qilish uchun maktabga murojaat qilishi mumkin."],
+    ["Savollar va murojaatlar","O‘quvchilar va oilalar o‘z savol yoki muammolarini o‘qituvchi yoxud maktab ma’muriyatiga bildirishlari mumkin. Murojaatlarga adolat va hurmat bilan yondashiladi."],
     ["Bolalarni himoya qilish", "Bola xavfsizligi birinchi o‘rinda turadi. Xavf yoki noo‘rin xatti-harakat haqidagi xabar darhol maktab rahbariyatiga yuboriladi; favqulodda vaziyatda vakolatli xizmatlarga murojaat qilinadi."],
     ["Fotosurat va rozilik", "Voyaga yetmagan o‘quvchining aniqlanishi mumkin bo‘lgan surati faqat ota-ona yoki qonuniy vakilning tegishli roziligi va maktab tasdig‘i bilan e’lon qilinadi. Rozilik qaytarib olinsa, material imkon qadar tez olib tashlanadi."],
     ["Tahririyat siyosati", "Maqolalar aniqlik, hurmat va maktab hamjamiyatiga foyda mezonlari bo‘yicha tahrir qilinadi. Mualliflik ko‘rsatiladi; shaxsiy hujum, kamsitish, plagiat va maxfiy ma’lumotga yo‘l qo‘yilmaydi."],
@@ -267,6 +274,13 @@ function PoliciesContent({ lang }: { lang: Lang }) {
     ["Accessibility", "Sayt klaviatura navigatsiyasi, mazmunli sarlavhalar, alternativ rasm matni, tushunarli rang kontrasti va mobil qurilmalarda o‘qishni qo‘llab-quvvatlashga intiladi. To‘siq topsangiz, bizga xabar bering."],
     ["Ma’lumotlarni saqlash", "Newsletter ma’lumotlari obuna davomida va qonuniy yoki operatsion zarurat bo‘lgan muddatgacha saqlanadi. Obunani bekor qilgan manzil qayta yuborishni oldini olish uchun cheklangan rad etish yozuvi sifatida saqlanishi mumkin."],
   ] : [
+    ["Attendance and punctuality","Students are expected to attend lessons regularly. Parents or guardians should notify the school when a student is absent. Students who do not use the school bus must arrive before lessons begin."],
+    ["Phone storage","Phones are not allowed during lessons. Before lessons begin, students must place their phones in the designated storage areas."],
+    ["Respectful behaviour","Students, staff and families are expected to treat one another with respect. Bullying, harassment, discrimination and violence are not acceptable. Students should report concerns to a teacher or school administrator."],
+    ["Academic honesty","Students should complete their own work and acknowledge sources when appropriate. Cheating, plagiarism and presenting someone else’s work as their own are not acceptable."],
+    ["Safety and school property","Students should follow staff instructions, use equipment responsibly and take care of school facilities. Safety concerns should be reported promptly."],
+    ["Communication with families","Parents or guardians may contact the school to discuss their child’s attendance, learning progress and significant concerns."],
+    ["Questions and concerns","Students and families may raise questions or concerns with a teacher or school administrator. Concerns are considered fairly and respectfully."],
     ["Child safeguarding", "A child’s safety comes first. Concerns about risk or inappropriate conduct are referred promptly to school leadership and, in an emergency, to the appropriate authorities."],
     ["Photography and consent", "An identifiable image of a minor is published only with appropriate parent or legal-guardian consent and school approval. If consent is withdrawn, the material will be removed as soon as reasonably possible."],
     ["Editorial policy", "Stories are edited for accuracy, respect and value to the school community. Authorship is credited; personal attacks, discrimination, plagiarism and confidential information are not accepted."],
@@ -274,7 +288,7 @@ function PoliciesContent({ lang }: { lang: Lang }) {
     ["Accessibility", "The site aims to support keyboard navigation, meaningful headings, alternative image text, readable contrast and mobile use. Please contact us if you encounter a barrier."],
     ["Data retention", "Newsletter data is retained while a subscription is active and for as long as there is a lawful or operational need. After unsubscribe, a limited suppression record may be retained to prevent further delivery."],
   ];
-  return <section className="content-section page-content"><div className="policy-grid">{policies.map(([title, body]) => <article key={title}><ShieldCheck /><div><h2>{title}</h2><p>{body}</p></div></article>)}</div><div className="policy-note"><strong>{isUz ? "Qo‘llanish doirasi" : "Scope"}</strong><p>{isUz ? "Ushbu qoidalar maktabning veb-sayti va tahririyat faoliyatiga taalluqli. Ular O‘zbekiston qonunchiligi va maktab rahbariyatining tasdiqlangan tartiblarini almashtirmaydi." : "These rules apply to the school website and editorial activity. They do not replace applicable Uzbek law or formally approved school procedures."}</p><small>{isUz ? "Ko‘rib chiqilgan sana: 10.09.2026" : "Reviewed: 10 September 2026"}</small></div></section>;
+  return <section className="content-section page-content"><div className="policy-grid">{policies.map(([title, body]) => <article key={title}><ShieldCheck /><div><h2>{title}</h2><p>{body}</p></div></article>)}</div><div className="policy-note"><strong>{isUz ? "Qo‘llanish doirasi" : "Scope"}</strong><p>{isUz ? "Ushbu sahifa kundalik maktab hayoti, veb-sayt va nashrlarga oid umumiy qoidalarni bayon qiladi. Ular O‘zbekiston qonunchiligi va maktab rahbariyatining tasdiqlangan tartiblarini almashtirmaydi." : "This page outlines general expectations for school life, the website and publications. They do not replace applicable Uzbek law or formally approved school procedures."}</p><small>{isUz ? "Yangilangan sana: 06.11.2026" : "Updated: 6 November 2026"}</small></div></section>;
 }
 
 function PrivacyContent({ lang }: { lang: Lang }) {
