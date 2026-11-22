@@ -137,7 +137,7 @@ function HomePage({ lang, news }: { lang: Lang; news: PublishedContent["news"] }
       </section>
 
       <section className="school-photo-feature home-school-photo">
-        <Image src="/images/school/school-entrance.webp" width={1600} height={1200} sizes="(max-width: 768px) 100vw, 68vw" loading="lazy" alt={lang === "uz" ? "Izzatbek Oliy Ta’lim maktabining asosiy kirish qismi" : "Main entrance of Izzatbek Oliy Ta’lim school"} />
+        <Image src="/images/school/school-entrance-2026.webp" width={1600} height={1200} sizes="(max-width: 768px) 100vw, 68vw" loading="lazy" alt={lang === "uz" ? "Izzatbek Oliy Ta’lim maktabining asosiy kirish qismi" : "Main entrance of Izzatbek Oliy Ta’lim school"} />
         <div><p className="eyebrow">{lang === "uz" ? "Bizning maktab" : "Our school"}</p><h2>{lang === "uz" ? "Hazoraspda ta’lim uchun yaratilgan muhit" : "A learning environment in Hazorasp"}</h2><p>{lang === "uz" ? "Maktabning ta’lim faoliyati olib boriladigan rasmiy manzillaridan biri." : "One of the school’s official locations for educational activity."}</p><Link className="text-link" href={`/${lang}/about`}>{lang === "uz" ? "Maktab haqida" : "About the school"}<ArrowRight size={17} /></Link></div>
       </section>
 
